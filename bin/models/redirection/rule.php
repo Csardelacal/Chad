@@ -1,8 +1,31 @@
-<?php
+<?php namespace redirection;
 
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+use Reference;
+use spitfire\Model;
+use spitfire\storage\database\Schema;
+use StringField;
+use TextField;
+
+/**
+ * A rule should provide the redirection with the necessary means to check whether
+ * a transfer should be redirected. 
+ * 
+ * Since rules can be rather complicated, this will just provide a type variable
+ * that will name a class to delegate this checking too. This way we can provide
+ * plug-in like extension of the rules when needed.
+ * 
+ * @author César de la Cal Bretschneider <cesar@magic3w.com>
  */
-
+class RuleModel extends Model
+{
+	
+	public function definitions(Schema $schema) {
+		$schema->redirection = new Reference(RedirectionModel::class);
+		$schema->type        = new StringField(200);
+		$schema->parameters  = new TextField();
+	}
+	
+	public function test() {
+		//TODO: Create the logic to test the rules.
+	}
+}
