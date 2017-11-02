@@ -1,5 +1,11 @@
 <?php
 
+use auth\SSOCache;
+use auth\Token;
+use spitfire\cache\MemcachedAdapter;
+use spitfire\core\Environment;
+use spitfire\io\session\Session;
+
 /* 
  * The MIT License
  *
@@ -27,10 +33,39 @@
 class BaseController extends Controller
 {
 	
-	private $session;
-	private $token;
+	protected $session;
+	
+	/**
+	 *
+	 * @var Token
+	 */
+	protected $token;
+	protected $sso;
+	protected $user;
 	
 	public function _onload() {
+		$environment   = Environment::get();
+		$memcached     = new MemcachedAdapter();
+		$this->sso     = new SSOCache($environment->get('SSO.endpoint'), $environment->get('SSO.appID'), $environment->get('SSO.appSec'));
+		
+		/**
+		 * Get the session information.
+		 */
+		$this->session = Session::getInstance();
+		$this->token   = $this->session->getUser()? : $this->sso->getSSO()->makeToken($_GET['token']);
+		
+		/*
+		 * Extract the token information for the logged in user. The token may be 
+		 * from another application, in which case we require the user to identify
+		 * themselves.
+		 * 
+		 * @todo The token does not contain application information. Therefore, currently,
+		 * Chad cannot validate it's the source of the token.
+		 */
+		if ($this->token && $this->token instanceof Token) {
+			$this->user = $memcached->get('chad_auth_' . $this->token->getId(), function () { return $this->token->getTokenInfo(); });
+		}
+		
 		
 	}
 	

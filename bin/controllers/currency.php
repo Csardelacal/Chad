@@ -24,52 +24,22 @@
  * THE SOFTWARE.
  */
 
-class TransferController extends BaseController
+class CurrencyController extends BaseController
 {
 	
-	/**
-	 * Creates a transaction with the posted settings. Once the transaction has
-	 * been created, the application should later try to authorize it (if it wasn't)
-	 * or execute it.
-	 */
+	public function index() {
+		
+	}
+	
 	public function create() {
 		
 	}
 	
-	/**
-	 * If the user has not yet authorized a payment, the application will report
-	 * this here. If the payment was previously authorized, by the fact that the 
-	 * did pre-authorize the application to execute changes to their account, this
-	 * endpoint will always return true.
-	 * 
-	 * The authorization requires that the user has the right to have r/w access
-	 * to the source account.
-	 * 
-	 * @param string $txn
-	 */
-	public function authorize($txn) {
+	public function edit($cid) {
 		
 	}
 	
-	/**
-	 * This endpoint allows the remote application to attempt to execute the 
-	 * transaction. If the transaction was not authorized or the account not 
-	 * properly funded, it will fail - allowing the remote application to
-	 * respond appropriately.
-	 * 
-	 * @param string $txn
-	 */
-	public function execute($txn) {
-		
-	}
-	
-	/**
-	 * Allows an application / user to cancel a transaction that was not meant to
-	 * be executed.
-	 * 
-	 * @param string $txn
-	 */
-	public function cancel($txn) {
+	public function delete($cid) {
 		
 	}
 	
