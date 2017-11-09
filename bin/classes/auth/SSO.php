@@ -9,10 +9,13 @@ class SSO
 	private $appId;
 	private $appSecret;
 	
-	public function __construct($endpoint, $appId, $appSecret) {
-		$this->endpoint  = rtrim($endpoint, '/');
-		$this->appId     = $appId;
-		$this->appSecret = $appSecret;
+	public function __construct($credentials) {
+		$reflection = URLReflection::fromURL($credentials);
+		
+		$this->endpoint  = rtrim($reflection->getProtocol() . '://' . $reflection->getServer() . ':' . $reflection->getPort() . $reflection->getPath(), '/');
+		$this->appId     = $reflection->getUser();
+		$this->appSecret = $reflection->getPassword();
+		
 	}
 	
 	/**

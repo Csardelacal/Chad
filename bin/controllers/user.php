@@ -1,11 +1,5 @@
 <?php
 
-use auth\SSOCache;
-use auth\Token;
-use spitfire\cache\MemcachedAdapter;
-use spitfire\core\Environment;
-use spitfire\io\session\Session;
-
 /* 
  * The MIT License
  *
@@ -30,53 +24,25 @@ use spitfire\io\session\Session;
  * THE SOFTWARE.
  */
 
-class BaseController extends Controller
+class UserController extends BaseController
 {
 	
 	/**
-	 *
-	 * @var Session
+	 * The login endpoint allows a user to authenticate themselves against the 
+	 * PHPAuthServer instance backing this software.
 	 */
-	protected $session;
-	
-	/**
-	 *
-	 * @var Token
-	 */
-	protected $token;
-	
-	/**
-	 *
-	 * @var auth\SSO
-	 */
-	protected $sso;
-	protected $user;
-	
-	public function _onload() {
-		$environment   = Environment::get();
-		$memcached     = new MemcachedAdapter();
+	public function login() {
+		$session = $this->session;
+		$sso     = $this->sso;
 		
-		$this->sso     = new SSOCache($environment->get('SSO'));
-		
-		/**
-		 * Get the session information.
-		 */
-		$this->session = Session::getInstance();
-		$this->token   = $this->session->getUser()? : $this->sso->getSSO()->makeToken($_GET['token']);
-		
-		/*
-		 * Extract the token information for the logged in user. The token may be 
-		 * from another application, in which case we require the user to identify
-		 * themselves.
-		 * 
-		 * @todo The token does not contain application information. Therefore, currently,
-		 * Chad cannot validate it's the source of the token.
-		 */
-		if ($this->token && $this->token instanceof Token) {
-			$this->user = $memcached->get('chad_auth_' . $this->token->getId(), function () { return $this->token->getTokenInfo(); });
+		if ($this->token->isAuthenticated()) {
+			return $this->response->setBody('Redirecting...')->getHeaders()->redirect(url('account'));
 		}
 		
+		$token   = $sso->createToken();
+		$session->lock($token);
 		
+		$this->response->setBody('Redirecting...')->getHeaders()->redirect($token->getRedirect(url('user', 'login')->absolute()));
 	}
 	
 }
