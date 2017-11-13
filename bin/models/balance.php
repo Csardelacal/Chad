@@ -14,7 +14,7 @@ use spitfire\storage\database\Schema;
  * with time()-1 which will then be written into a variable and remain constant
  * throughout the request's lifespan.
  * 
- * @property AccountModel $account   Account this entry balances
+ * @property BookModel    $book      Book this entry balances
  * @property int          $amount    Amount the account contains
  * @property int          $timestamp Number of seconds since unix epoch this balance was made.
  * 
@@ -28,7 +28,7 @@ class BalanceModel extends Model
 	 * @param Schema $schema
 	 */
 	public function definitions(Schema $schema) {
-		$schema->account   = new Reference(AccountModel::class);
+		$schema->book      = new Reference(BookModel::class);
 		$schema->amount    = new IntegerField();
 		$schema->timestamp = new IntegerField(true);
 	}

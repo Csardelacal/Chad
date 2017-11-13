@@ -24,6 +24,15 @@ use spitfire\storage\database\Schema;
 class CurrencyModel extends Model
 {
 	
+	const DISPLAY_SEPARATOR_BEFORE = 0x0001;
+	const DISPLAY_SEPARATOR_AFTER  = 0x0002;
+	const DISPLAY_SEPARATOR_MIDDLE = 0x0004;
+	
+	const DISPLAY_DECIMAL_SEPARATOR_COMMA  = 0x0010;
+	const DISPLAY_DECIMAL_SEPARATOR_STOP   = 0x0020;
+	const DISPLAY_THOUSAND_SEPARATOR_COMMA = 0x0100;
+	const DISPLAY_THOUSAND_SEPARATOR_STOP  = 0x0200;
+	
 	/**
 	 * 
 	 * @param Schema $schema

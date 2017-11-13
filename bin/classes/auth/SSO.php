@@ -76,10 +76,14 @@ class SSO
 		return new User($data->id, $data->username, $data->aliases, $data->groups, $data->verified, $data->registered_unix, $data->attributes, $data->avatar);
 	}
 	
-	public function authApp($id, $secret) {		
+	public function authApp($signature, $token = null) {		
+		if ($token instanceof Token) {
+			$token = $token->getId();
+		}
+		
 		$request = new Request(
 			$this->endpoint . '/auth/app.json',
-			Array('appId' => $id, 'appSec' => $secret)
+			array_filter(Array('token' => $token, '$signature' => $signature))
 		);
 		
 		$response = $request->send();

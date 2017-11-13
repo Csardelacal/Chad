@@ -12,10 +12,11 @@ class TransferModel extends Model
 	 */
 	public function definitions(Schema $schema) {
 		/*
-		 * Generate references for the account sending and receiving the funds.
+		 * Generate references for the account's books sending and receiving the 
+		 * funds.
 		 */
-		$schema->source      = new Reference(AccountModel::class);
-		$schema->target      = new Reference(AccountModel::class);
+		$schema->source      = new Reference(BookModel::class);
+		$schema->target      = new Reference(BookModel::class);
 		
 		/*
 		 * Fields for the amounts. Since conversion rates can change on the fly,

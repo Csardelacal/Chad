@@ -1,9 +1,11 @@
 <?php
 
+use auth\SSO;
 use auth\SSOCache;
 use auth\Token;
 use spitfire\cache\MemcachedAdapter;
 use spitfire\core\Environment;
+use spitfire\exceptions\PublicException;
 use spitfire\io\session\Session;
 
 /* 
@@ -45,9 +47,13 @@ class BaseController extends Controller
 	 */
 	protected $token;
 	
+	protected $authapp;
+	
+	protected $preferences;
+	
 	/**
 	 *
-	 * @var auth\SSO
+	 * @var SSO
 	 */
 	protected $sso;
 	protected $user;
@@ -68,15 +74,57 @@ class BaseController extends Controller
 		 * Extract the token information for the logged in user. The token may be 
 		 * from another application, in which case we require the user to identify
 		 * themselves.
-		 * 
-		 * @todo The token does not contain application information. Therefore, currently,
-		 * Chad cannot validate it's the source of the token.
 		 */
 		if ($this->token && $this->token instanceof Token) {
 			$this->user = $memcached->get('chad_auth_' . $this->token->getId(), function () { return $this->token->getTokenInfo(); });
 		}
 		
+		/*
+		 * Sometimes, there's not only a token, but also a signature, indicating 
+		 * that an application may be requesting data in the name of a user.
+		 */
+		if (isset($_GET['signature']) && $this->sso->authApp($_GET['signature'], $this->token)) {
+			$this->authapp = $this->user->app->id;
+		} 
+		elseif ($this->user && $this->user->authenticated && $this->user->app->id != $this->sso->getAppId()) {
+			throw new PublicException('Unprivileged token or signature missmatch', 403);
+		}
 		
+		/*
+		 * If the default currency doesn't exist. We need to create it.
+		 */
+		$c = db()->table('currency')->get('default', true)->fetch();
+		
+		if (!$c) {
+			$c = db()->table('currency')->newRecord();
+			$c->ISO = Environment::get('chad.default.currency.ISO')? : 'USD';
+			$c->symbol = Environment::get('chad.default.currency.symbol')? : '$';
+			$c->name = Environment::get('chad.default.currency.name')? : 'US Dollar';
+			$c->decimals = Environment::get('chad.default.currency.decimals')? : 2;
+			$c->conversion = Environment::get('chad.default.currency.conversion')? : 1;
+			$c->display = Environment::get('chad.default.currency.display')? : (CurrencyModel::DISPLAY_SEPARATOR_BEFORE|CurrencyModel::DISPLAY_DECIMAL_SEPARATOR_STOP|CurrencyModel::DISPLAY_THOUSAND_SEPARATOR_COMMA);
+			$c->default = true;
+			$c->store();
+		}
+		
+		/*
+		 * If the user is registered, then we check whether we have an entry in the
+		 * local user setting table.
+		 */
+		if ($this->user && !db()->table('user')->get('_id', $this->user->user->id)->fetch()) {
+			$r = db()->table('user')->newRecord();
+			
+			$r->_id = $this->user->user->id;
+			$r->currency = $c;
+			$r->display = $c->display;
+			$r->store();
+		}
+		
+		if ($this->user) {
+			$this->preferences = db()->table('user')->get('_id', $this->user->user->id)->fetch();
+		}
+		
+		$this->view->set('preferences', $this->preferences);
 	}
 	
 }

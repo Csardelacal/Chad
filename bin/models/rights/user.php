@@ -1,8 +1,23 @@
-<?php
+<?php namespace rights;
 
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+use BooleanField;
+use Reference;
+use spitfire\Model;
+use spitfire\storage\database\Schema;
 
+class UserModel extends Model
+{
+	
+	
+	/**
+	 * 
+	 * @param Schema $schema
+	 */
+	public function definitions(Schema $schema) {
+		$schema->user    = new Reference('user');
+		$schema->account = new Reference('account');
+		$schema->write   = new BooleanField();
+		$schema->listed  = new BooleanField();
+	}
+
+}

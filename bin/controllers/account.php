@@ -32,6 +32,15 @@ class AccountController extends BaseController
 	
 	public function index() {
 		
+		if ($this->user) {
+			$ugrants  = db()->table('rights\user')->get('user', $this->user->id);
+			$accounts = db()->table('account')->get('ugrants', $ugrants)->fetchAll();
+		}
+		elseif ($this->authapp) {
+			$accounts = collect(); //Accounts are not listabe for apps.
+		}
+		
+		$this->view->set('accounts', $accounts);
 	}
 	
 	public function create() {
