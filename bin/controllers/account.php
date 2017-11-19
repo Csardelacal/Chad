@@ -1,5 +1,7 @@
 <?php
 
+use spitfire\exceptions\HTTPMethodException;
+
 /* 
  * The MIT License
  *
@@ -44,7 +46,42 @@ class AccountController extends BaseController
 	}
 	
 	public function create() {
+		$rights = [];
 		
+		/*
+		 * First, the application needs to check what kind of privileges the user
+		 * has. In the event of the user being an application, they have a different
+		 * set of them.
+		 */
+		if ($this->user) {
+			$rights['create'] = true;
+		}
+		elseif ($this->app) {
+			$auth = $this->sso->authApp($_GET['signature'], $this->token, 'account.create');
+			$rights['create'] = false;
+		}
+		else {
+			
+		}
+		
+		try {
+			/*
+			 * In the event of the request not being posted, we will just abort
+			 * creating an account. Instead we'll direct the user to the account
+			 * creation form.
+			 */
+			if (!$this->request->isPost()) { throw new HTTPMethodException('Was not posted', 1711141027); }
+			
+			
+		} 
+		/*
+		 * If the request was not posted, it means that a user is accessing this 
+		 * via GET and wishes to create an account. If that's the case, we just 
+		 * show them a form, providing the proper options.
+		 */
+		catch (HTTPMethodException $ex) {
+
+		}
 	}
 	
 	public function balance($acctid) {
