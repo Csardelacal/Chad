@@ -40,6 +40,7 @@ class AccountModel extends Model
 		
 		#Set the fields
 		$schema->_id       = new StringField(25);
+		$schema->name      = new StringField(50);
 		$schema->owner     = new Reference('user');
 		$schema->taxID     = new StringField(25); #This allows the system to export accounting data to external agents.
 		$schema->resets    = new IntegerField(true);
@@ -56,6 +57,16 @@ class AccountModel extends Model
 		
 		#This should find a way more fluent way of writing it
 		$schema->index($schema->_id)->setPrimary(true);
+	}
+	
+	public function onbeforesave() {
+		
+		/*
+		 * Create a random ID.
+		 */
+		if ($this->_id === null) {
+			$this->_id = substr(str_replace(['/', '=', '-', '_'], '', base64_encode(random_bytes(100))), 0, 25);
+		}
 	}
 
 }

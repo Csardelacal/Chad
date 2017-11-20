@@ -1,6 +1,7 @@
 <?php
 
 use spitfire\exceptions\HTTPMethodException;
+use spitfire\exceptions\PublicException;
 
 /* 
  * The MIT License
@@ -55,13 +56,23 @@ class AccountController extends BaseController
 		 */
 		if ($this->user) {
 			$rights['create'] = true;
+			$rights['reset']  = false;
 		}
 		elseif ($this->app) {
+			/*
+			 * The authorization app needs to be allowed by the user to manage and
+			 * or create accounts that they then shall own.
+			 * 
+			 * @todo PHPAS should return an object that should allow us to check 
+			 * whether the appropriate context exists and whether the application
+			 * is logged in.
+			 */
 			$auth = $this->sso->authApp($_GET['signature'], $this->token, 'account.create');
-			$rights['create'] = false;
+			$rights['create'] = true;
+			$rights['reset']  = true;
 		}
 		else {
-			
+			throw new PublicException('Not authorized - #1711191310', 403);
 		}
 		
 		try {
@@ -72,7 +83,34 @@ class AccountController extends BaseController
 			 */
 			if (!$this->request->isPost()) { throw new HTTPMethodException('Was not posted', 1711141027); }
 			
+			/*
+			 * Once the data has been transferred to us, we can then check that 
+			 * the data is properly formatted.
+			 */
+			$v = [
+				'owner'  => validate($_POST['owner']),
+				'name'   => validate($_POST['name']),
+				'resets' => validate($_POST['resets']),
+				'tags'   => validate($_POST['tags'])
+			];
 			
+			validate($v);
+			
+			/*
+			 * Create a database record for the account to be stored in.
+			 */
+			$account = db()->table('account')->newRecord();
+			$account->name   = $v['name']->getValue();
+			$account->owner  = $v['owner']->getValue();
+			$account->resets = $v['resets']->getValue();
+			$account->tags   = $v['tags']->getValue();
+			$account->store();
+			
+			/*
+			 * Mark the creation as success. The user can now use the account to
+			 * manage their money.
+			 */
+			$this->view->set('success', true);
 		} 
 		/*
 		 * If the request was not posted, it means that a user is accessing this 
@@ -80,11 +118,11 @@ class AccountController extends BaseController
 		 * show them a form, providing the proper options.
 		 */
 		catch (HTTPMethodException $ex) {
-
+			
 		}
 	}
 	
-	public function balance($acctid) {
+	public function balance($acctid, $currencyid) {
 		
 	}
 	
