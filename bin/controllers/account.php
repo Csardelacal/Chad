@@ -57,19 +57,21 @@ class AccountController extends BaseController
 		if ($this->user) {
 			$rights['create'] = true;
 			$rights['reset']  = false;
+			$rights['tags']   = !!$this->app;
 		}
 		elseif ($this->app) {
 			/*
 			 * The authorization app needs to be allowed by the user to manage and
 			 * or create accounts that they then shall own.
-			 * 
-			 * @todo PHPAS should return an object that should allow us to check 
-			 * whether the appropriate context exists and whether the application
-			 * is logged in.
 			 */
 			$auth = $this->sso->authApp($_GET['signature'], $this->token, 'account.create');
+			
+			if (!$auth->getAuthenticated())     { throw new PublicException('Invalid app', 403); }
+			if (!$auth->getContext()->exists()) { $auth->getContext()->create('Account creation', 'Allows the remote application to create accounts in Chad on your behalf.'); }
+			
 			$rights['create'] = true;
 			$rights['reset']  = true;
+			$rights['tags']   = true;
 		}
 		else {
 			throw new PublicException('Not authorized - #1711191310', 403);
@@ -119,6 +121,12 @@ class AccountController extends BaseController
 		 */
 		catch (HTTPMethodException $ex) {
 			
+		}
+		/*
+		 * Sometimes the issue will be validation failing
+		 */
+		catch (spitfire\validation\ValidationException$ex) {
+			$this->view->set('messages', $ex->getResult());
 		}
 	}
 	

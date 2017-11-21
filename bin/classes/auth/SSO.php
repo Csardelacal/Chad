@@ -76,6 +76,13 @@ class SSO
 		return new User($data->id, $data->username, $data->aliases, $data->groups, $data->verified, $data->registered_unix, $data->attributes, $data->avatar);
 	}
 	
+	/**
+	 * 
+	 * @param string $signature
+	 * @param string $token
+	 * @param string $context
+	 * @return \auth\AppAuthentication
+	 */
 	public function authApp($signature, $token = null, $context = null) {		
 		if ($token instanceof Token) {
 			$token = $token->getId();
@@ -89,7 +96,25 @@ class SSO
 		$response = $request->send();
 		
 		$json = json_decode($response);
-		return $json->authenticated;
+		
+		if ($json->app) {
+			$app = new App($json->remote->id, null, $json->remote->name);
+		}
+		else {
+			$app = null;
+		}
+		
+		if ($json->context) {
+			$ctx = new Context($app, $json->context->name);
+			$ctx->setExists($json->context->undefined);
+		}
+		else {
+			$ctx = null;
+		}
+		
+		$res  = new AppAuthentication($json->authenticated, $json->grant, $app, $ctx, $json->redirect);
+		
+		return $res;
 	}
 	
 	public function sendEmail($userid, $subject, $body) {
