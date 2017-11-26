@@ -83,8 +83,9 @@ class BaseController extends Controller
 		 * Sometimes, there's not only a token, but also a signature, indicating 
 		 * that an application may be requesting data in the name of a user.
 		 */
-		if (isset($_GET['signature']) && $this->sso->authApp($_GET['signature'], $this->token)) {
-			$this->authapp = $this->user->app->id;
+		if (isset($_GET['signature']) && $app = $this->sso->authApp($_GET['signature'], $this->token)) {
+			//TODO: Validate whether the app granting access is the same providing the token
+			$this->authapp = $app->getSrc()->getId();
 		} 
 		elseif ($this->user && $this->user->authenticated && $this->user->app->id != $this->sso->getAppId()) {
 			throw new PublicException('Unprivileged token or signature missmatch', 403);

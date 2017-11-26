@@ -1,6 +1,6 @@
 
 <?php foreach ($accounts as $account): ?>
-<div><?= $account ?></div>
+<div>SAS: <?= $account->name ?></div>
 <?php endforeach; ?>
 
 

@@ -90,14 +90,14 @@ class SSO
 		
 		$request = new Request(
 			$this->endpoint . '/auth/app.json',
-			array_filter(Array('token' => $token, '$signature' => $signature, 'context' => $context))
+			array_filter(Array('token' => $token, 'signature' => $signature, 'context' => $context))
 		);
 		
 		$response = $request->send();
 		
 		$json = json_decode($response);
 		
-		if ($json->app) {
+		if (isset($json->remote)) {
 			$app = new App($json->remote->id, null, $json->remote->name);
 		}
 		else {
@@ -105,14 +105,20 @@ class SSO
 		}
 		
 		if ($json->context) {
-			$ctx = new Context($app, $json->context->name);
-			$ctx->setExists($json->context->undefined);
+			$contexts = [];
+			foreach ($json->context as $jsctx) {
+				$ctx = new Context($this, $app, $jsctx->id);
+				$ctx->setExists(!$jsctx->undefined);
+				$ctx->setGranted($jsctx->granted);
+				$contexts[$jsctx->id] = $ctx;
+			}
 		}
 		else {
-			$ctx = null;
+			$contexts = [];
 		}
 		
-		$res  = new AppAuthentication($json->authenticated, $json->grant, $app, $ctx, $json->redirect);
+		$src  = new App($json->src->id, null, $json->src->name);
+		$res  = new AppAuthentication($json->authenticated, $json->grant, $src, $app, $contexts, $json->redirect);
 		
 		return $res;
 	}

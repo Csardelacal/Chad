@@ -45,4 +45,13 @@ class UserController extends BaseController
 		$this->response->setBody('Redirecting...')->getHeaders()->redirect($token->getRedirect(url('user', 'login')->absolute()));
 	}
 	
+	
+	public function logout() {
+		$session = $this->session;
+		$session->destroy();
+		
+		$this->response->setBody('Redirecting...')->getHeaders()->redirect(url('account'));
+	}
+	
+	
 }

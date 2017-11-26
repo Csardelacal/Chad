@@ -29,15 +29,17 @@ class AppAuthentication
 	
 	private $authenticated;
 	private $grantStatus;
+	private $src;
 	private $remote;
-	private $context;
+	private $contexts;
 	private $redirect;
 	
-	public function __construct($authenticated, $grantStatus, $remote, Context$context, $redirect) {
+	public function __construct($authenticated, $grantStatus, $src, $remote, $context, $redirect) {
 		$this->authenticated = $authenticated;
 		$this->grantStatus = $grantStatus;
+		$this->src = $src;
 		$this->remote = $remote;
-		$this->context = $context;
+		$this->contexts = $context;
 		$this->redirect = $redirect;
 	}
 	
@@ -53,11 +55,24 @@ class AppAuthentication
 		return $this->remote;
 	}
 	
-	public function getContext() {
-		return $this->context;
+	/**
+	 * 
+	 * @return Context
+	 */
+	public function getContext($name) {
+		return $this->contexts[$name];
 	}
 	
-	public function getRedirect() {
+	public function getRedirect($contexts = null) {
+		
+		if ($contexts) {
+			$ref = URLReflection::fromURL($this->redirect);
+			$prs = $ref->getQueryString();
+			$prs['context'] = $contexts;
+			$ref->setQueryString($prs);
+			return $ref->getProtocol() . '://' . $ref->getServer() . $ref->getPath() . '?' . http_build_query($ref->getQueryString());
+		}
+		
 		return $this->redirect;
 	}
 	
@@ -77,7 +92,7 @@ class AppAuthentication
 	}
 	
 	public function setContext($context) {
-		$this->context = $context;
+		$this->contexts = $context;
 		return $this;
 	}
 	
@@ -85,5 +100,17 @@ class AppAuthentication
 		$this->redirect = $redirect;
 		return $this;
 	}
+	
+	/**
+	 * 
+	 * @return App
+	 */
+	public function getSrc() {
+		return $this->src;
+	}
 
+	public function setSrc($src) {
+		$this->src = $src;
+		return $this;
+	}
 }

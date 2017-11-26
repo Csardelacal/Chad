@@ -36,7 +36,7 @@ class AccountController extends BaseController
 	public function index() {
 		
 		if ($this->user) {
-			$ugrants  = db()->table('rights\user')->get('user', $this->user->id);
+			$ugrants  = db()->table('rights\user')->get('user', db()->table('user')->get('_id', $this->user->user->id));
 			$accounts = db()->table('account')->get('ugrants', $ugrants)->fetchAll();
 		}
 		elseif ($this->authapp) {
@@ -54,24 +54,40 @@ class AccountController extends BaseController
 		 * has. In the event of the user being an application, they have a different
 		 * set of them.
 		 */
-		if ($this->user) {
-			$rights['create'] = true;
-			$rights['reset']  = false;
-			$rights['tags']   = !!$this->app;
-		}
-		elseif ($this->app) {
+		if ($this->authapp) {
 			/*
 			 * The authorization app needs to be allowed by the user to manage and
 			 * or create accounts that they then shall own.
 			 */
-			$auth = $this->sso->authApp($_GET['signature'], $this->token, 'account.create');
+			$auth = $this->sso->authApp($_GET['signature'], $this->token, ['account.create', 'account.resets']);
 			
-			if (!$auth->getAuthenticated())     { throw new PublicException('Invalid app', 403); }
-			if (!$auth->getContext()->exists()) { $auth->getContext()->create('Account creation', 'Allows the remote application to create accounts in Chad on your behalf.'); }
+			if (!$auth->getAuthenticated())                     { throw new PublicException('Invalid app', 403); }
+			if (!$auth->getContext('account.create')->exists()) { $auth->getContext('account.create')->create('Account creation', 'Allows the remote application to create accounts in Chad on your behalf.'); }
+			if (!$auth->getContext('account.resets')->exists()) { $auth->getContext('account.resets')->create('Account resetting', 'Allows the remote application to create accounts in Chad that automatically reset.'); }
 			
-			$rights['create'] = true;
-			$rights['reset']  = true;
+			if (!$auth->getContext('account.create')->isGranted()) {
+				return $this->response->setBody('redirect...')->getHeaders()->redirect($auth->getRedirect(['account.create']) . '&returnto=' . rawurlencode(strval(url('account', 'create', ['signature' => $_GET['signature']])->absolute())));
+			}
+			
+			$rights['create'] = $auth->getContext('account.create')->isGranted() == 2;
+			$rights['reset']  = $auth->getContext('account.resets')->isGranted() == 2;
 			$rights['tags']   = true;
+			$rights['grant']  = true;
+			
+			$autogrant = false;
+			
+		}
+		/*
+		 * Without an application backing the user, they receive a limited set of 
+		 * permissions. These should be lifted for administrators.
+		 */
+		elseif ($this->user) {
+			$rights['create'] = true;
+			$rights['reset']  = false;
+			$rights['tags']   = false;
+			$rights['grant']  = false;
+			
+			$autogrant = true;
 		}
 		else {
 			throw new PublicException('Not authorized - #1711191310', 403);
@@ -90,7 +106,7 @@ class AccountController extends BaseController
 			 * the data is properly formatted.
 			 */
 			$v = [
-				'owner'  => validate($_POST['owner']),
+				'owner'  => validate($this->user? $this->user->user->id : $_POST['owner']), 
 				'name'   => validate($_POST['name']),
 				'resets' => validate($_POST['resets']),
 				'tags'   => validate($_POST['tags'])
@@ -103,10 +119,23 @@ class AccountController extends BaseController
 			 */
 			$account = db()->table('account')->newRecord();
 			$account->name   = $v['name']->getValue();
-			$account->owner  = $v['owner']->getValue();
+			$account->owner  = db()->table('user')->get('_id', $v['owner']->getValue())->fetch();
 			$account->resets = $v['resets']->getValue();
 			$account->tags   = $v['tags']->getValue();
 			$account->store();
+			
+			/*
+			 * If a user created the account they wish to be automatically be granted
+			 * access to said account.
+			 */
+			if ($autogrant) {
+				$grant = db()->table('rights\user')->newRecord();
+				$grant->user    = db()->table('user')->get('_id', $v['owner']->getValue())->fetch();
+				$grant->account = $account;
+				$grant->write   = true;
+				$grant->listed  = true;
+				$grant->store();
+			}
 			
 			/*
 			 * Mark the creation as success. The user can now use the account to
@@ -128,6 +157,8 @@ class AccountController extends BaseController
 		catch (spitfire\validation\ValidationException$ex) {
 			$this->view->set('messages', $ex->getResult());
 		}
+		
+		$this->view->set('rights', $rights);
 	}
 	
 	public function balance($acctid, $currencyid) {
