@@ -27,14 +27,25 @@
 class AppAuthentication
 {
 	
+	/**
+	 *
+	 * @var SSO
+	 */
+	private $sso;
 	private $authenticated;
 	private $grantStatus;
 	private $src;
 	private $remote;
+	
+	/**
+	 *
+	 * @var Context[]
+	 */
 	private $contexts;
 	private $redirect;
 	
-	public function __construct($authenticated, $grantStatus, $src, $remote, $context, $redirect) {
+	public function __construct($sso, $authenticated, $grantStatus, $src, $remote, $context, $redirect) {
+		$this->sso = $sso;
 		$this->authenticated = $authenticated;
 		$this->grantStatus = $grantStatus;
 		$this->src = $src;
@@ -64,16 +75,12 @@ class AppAuthentication
 	}
 	
 	public function getRedirect($contexts = null) {
-		
-		if ($contexts) {
-			$ref = URLReflection::fromURL($this->redirect);
-			$prs = $ref->getQueryString();
-			$prs['context'] = $contexts;
-			$ref->setQueryString($prs);
-			return $ref->getProtocol() . '://' . $ref->getServer() . $ref->getPath() . '?' . http_build_query($ref->getQueryString());
+		if ($contexts === null) {
+			$contexts = [];
+			foreach ($this->contexts as $ctx) { $contexts[] = $ctx->getId(); }
 		}
 		
-		return $this->redirect;
+		return $this->sso->getEndpoint() . '/auth/connect?' . http_build_query(['signature' => $this->sso->makeSignature($this->getSrc()->getId(), $contexts)]);
 	}
 	
 	public function setAuthenticated($authenticated) {

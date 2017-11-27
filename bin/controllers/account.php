@@ -66,6 +66,7 @@ class AccountController extends BaseController
 			if (!$auth->getContext('account.resets')->exists()) { $auth->getContext('account.resets')->create('Account resetting', 'Allows the remote application to create accounts in Chad that automatically reset.'); }
 			
 			if (!$auth->getContext('account.create')->isGranted()) {
+				//TODO: This should not redirect, instead it should send a redirect link to the application requesting the data
 				return $this->response->setBody('redirect...')->getHeaders()->redirect($auth->getRedirect(['account.create']) . '&returnto=' . rawurlencode(strval(url('account', 'create', ['signature' => $_GET['signature']])->absolute())));
 			}
 			
@@ -73,8 +74,6 @@ class AccountController extends BaseController
 			$rights['reset']  = $auth->getContext('account.resets')->isGranted() == 2;
 			$rights['tags']   = true;
 			$rights['grant']  = true;
-			
-			$autogrant = false;
 			
 		}
 		/*
@@ -86,8 +85,6 @@ class AccountController extends BaseController
 			$rights['reset']  = false;
 			$rights['tags']   = false;
 			$rights['grant']  = false;
-			
-			$autogrant = true;
 		}
 		else {
 			throw new PublicException('Not authorized - #1711191310', 403);
@@ -126,11 +123,15 @@ class AccountController extends BaseController
 			
 			/*
 			 * If a user created the account they wish to be automatically be granted
-			 * access to said account.
+			 * access to said account. Otherwise they would be permanently locked
+			 * out of it.
+			 * 
+			 * On the other hand, applications may require access to an account they
+			 * created to be restricted to the user.
 			 */
-			if ($autogrant) {
+			if (!$this->authapp) {
 				$grant = db()->table('rights\user')->newRecord();
-				$grant->user    = db()->table('user')->get('_id', $v['owner']->getValue())->fetch();
+				$grant->user    = db()->table('user')->get('_id', $this->user->user->id)->fetch();
 				$grant->account = $account;
 				$grant->write   = true;
 				$grant->listed  = true;

@@ -118,7 +118,7 @@ class SSO
 		}
 		
 		$src  = new App($json->src->id, null, $json->src->name);
-		$res  = new AppAuthentication($json->authenticated, $json->grant, $src, $app, $contexts, $json->redirect);
+		$res  = new AppAuthentication($this, $json->authenticated, $json->grant, $src, $app, $contexts, $json->redirect);
 		
 		return $res;
 	}
@@ -144,11 +144,13 @@ class SSO
 		return $this->appId;
 	}
 	
-	public function makeSignature($target = null) {
-		$salt = str_replace(['+', '/'], '', base64_encode(random_bytes(30)));
-		$hash = hash('sha512', implode('.', array_filter([$this->appId, $target, $this->appSecret, $salt])));
+	public function makeSignature($target = null, $contexts = []) {
+		$contextstr = implode(',', $contexts);
 		
-		return implode(':', array_filter(['sha512', $this->appId, $target, $salt, $hash]));
+		$salt = str_replace(['+', '/'], '', base64_encode(random_bytes(30)));
+		$hash = hash('sha512', implode('.', array_filter([$this->appId, $target, $this->appSecret, $contextstr, $salt])));
+		
+		return implode(':', array_filter(['sha512', $this->appId, $target, $contextstr, $salt, $hash]));
 	}
 	
 	public function getGroupList() {
