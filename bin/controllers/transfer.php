@@ -1,5 +1,7 @@
 <?php
 
+use spitfire\exceptions\PublicException;
+
 /* 
  * The MIT License
  *
@@ -31,9 +33,64 @@ class TransferController extends BaseController
 	 * Creates a transaction with the posted settings. Once the transaction has
 	 * been created, the application should later try to authorize it (if it wasn't)
 	 * or execute it.
+	 * 
+	 * The create() endpoint will immediately report if the transaction was 
+	 * authorized or whether it needs authorization. To do so, the application 
+	 * can either provide a known account ID it wishes to bill or a user id.
+	 * 
+	 * If the application provides no account or user, the application will receive
+	 * a link to authorize the payment which will prompt the user to pick a source
+	 * for the payment.
 	 */
 	public function create() {
 		
+		if ($this->authapp) {
+			$auth = $this->sso->authApp($_GET['signature'], $this->token, ['transfer.create', 'transfer.create.user']);
+			
+			if (!$auth->getAuthenticated()) { throw new PublicException('Invalid application', 403); }
+			
+			/*
+			 * First we check whether the contexts exist for this application. On
+			 * one hand Chad can check whether the application has been banned from
+			 * accessing accounts, on the other whether the user has provided access.
+			 */
+			if (!$auth->getContext('transfer.create')->exists()) { 
+				$auth->getContext('transfer.create')->create('Transfer creation', 'Allows the application to create transfers for accounts it manages'); 
+			}
+			
+			if (!$auth->getContext('transfer.create.user')->exists()) { 
+				$auth->getContext('transfer.create.user')->create('Transfer creation', 'Allows the application to create transfers from your accounts'); 
+			}
+			
+			/*
+			 * Chad is generally lenient with applications that wish to access accounts
+			 * they manage, but if the application was banned on PHPAS' side, then
+			 * we will no longer service the app.
+			 */
+			if ($auth->getContext('transfer.create')->isGranted() == 1) {
+				throw new PublicException('Application has been banned from creating any transactions', 403);
+			}
+			
+			/*
+			 * These should only be tested if the application has a token provided.
+			 * Otherwise it's managing accounts that it has been granted access to.
+			 */
+			if ($this->user && !$auth->getContext('transfer.create.user')->isGranted() == 2) { 
+				//The user still needs to authorize this application to access their accounts at all
+				//This is separate from the authorization of individual transactions
+			}
+		}
+
+		/*
+		 * At this point Chad needs to determine whether the user has enough 
+		 * balance on their account to grant the payment and whether they have
+		 * assigned an account that the application can automatically bill.
+		 * 
+		 * If the user has granted permissions on one of his accounts to the 
+		 * application, it will be able to access them. Then the create() method
+		 * will be preauthorized and instruct the application to directly call
+		 * execute()
+		 */
 	}
 	
 	/**

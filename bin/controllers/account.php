@@ -129,7 +129,15 @@ class AccountController extends BaseController
 			 * On the other hand, applications may require access to an account they
 			 * created to be restricted to the user.
 			 */
-			if (!$this->authapp) {
+			if ($this->authapp) {
+				$grant = db()->table('rights\app')->newRecord();
+				$grant->app     = $this->authapp;
+				$grant->account = $account;
+				$grant->write   = true;
+				$grant->blame   = $this->user->user->id . '@' . $this->authapp;
+				$grant->store();
+			} 
+			else {
 				$grant = db()->table('rights\user')->newRecord();
 				$grant->user    = db()->table('user')->get('_id', $this->user->user->id)->fetch();
 				$grant->account = $account;
@@ -157,6 +165,7 @@ class AccountController extends BaseController
 		 */
 		catch (spitfire\validation\ValidationException$ex) {
 			$this->view->set('messages', $ex->getResult());
+			$this->view->set('success', false);
 		}
 		
 		$this->view->set('rights', $rights);

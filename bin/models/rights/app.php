@@ -46,5 +46,9 @@ class AppModel extends Model
 		$schema->blame   = new \StringField(50);
 		$schema->revoked = new \IntegerField(true);
 	}
+	
+	public function onbeforesave() {
+		if (!$this->created) { $this->created = time(); }
+	}
 
 }
