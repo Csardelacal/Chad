@@ -24,7 +24,29 @@
  * THE SOFTWARE.
  */
 
-class Configuration
+interface ConfigurationInterface
 {
+	
+	/**
+	 * When the data is read from database, this endpoint is read and the provided
+	 * data is then passed to this method
+	 * 
+	 * @param string[] $data
+	 */
+	function load($data);
+	
+	/**
+	 * This method is invoked when the data is ready to be written to the database,
+	 * allowing the configuration object to persist it's data.
+	 */
+	function save();
+	
+	/**
+	 * This method is invoked whenever the user intents to alter the data
+	 * and therefore needs to know what data can be altered in which ways.
+	 * 
+	 * @return Setting[]
+	 */
+	function getOptions();
 	
 }

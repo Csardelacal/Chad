@@ -52,7 +52,7 @@ interface ProviderInterface
 	 * When the application needs to use this payment provider it will call this
 	 * method providing the user configurable data for this payment provider.
 	 * 
-	 * @param \payment\provider\Configuration $config
+	 * @param \payment\provider\ConfigurationInterface $config
 	 */
 	function init(Configuration$config);
 	
