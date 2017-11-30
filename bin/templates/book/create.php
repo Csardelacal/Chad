@@ -1,4 +1,4 @@
-<?php namespace payment\provider;
+<?php
 
 /* 
  * The MIT License
@@ -24,36 +24,4 @@
  * THE SOFTWARE.
  */
 
-interface ConfigurationInterface
-{
-	
-	/**
-	 * When the data is read from database, this endpoint is read and the provided
-	 * data is then passed to this method
-	 * 
-	 * @param string[] $data
-	 */
-	function load($data);
-	
-	/**
-	 * This method is invoked when the data is ready to be written to the database,
-	 * allowing the configuration object to persist it's data.
-	 */
-	function save();
-	
-	/**
-	 * This method is invoked whenever the user intents to alter the data
-	 * and therefore needs to know what data can be altered in which ways.
-	 * 
-	 * @return Setting[]
-	 */
-	function getOptions();
-	
-	/**
-	 * Retrieves the data that the user submitted to the options page.
-	 * 
-	 * @param mixed[] $sent
-	 */
-	function readOptions($sent);
-	
-}
+$this->response->getHeaders()->redirect(url('account', 'balance', $book->account->_id, $book->currency->ISO));

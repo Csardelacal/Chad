@@ -1,4 +1,6 @@
-<?php namespace payment\provider;
+<?php
+
+use spitfire\exceptions\PublicException;
 
 /* 
  * The MIT License
@@ -24,36 +26,28 @@
  * THE SOFTWARE.
  */
 
-interface ConfigurationInterface
+class BookController extends BaseController
 {
 	
-	/**
-	 * When the data is read from database, this endpoint is read and the provided
-	 * data is then passed to this method
-	 * 
-	 * @param string[] $data
-	 */
-	function load($data);
-	
-	/**
-	 * This method is invoked when the data is ready to be written to the database,
-	 * allowing the configuration object to persist it's data.
-	 */
-	function save();
-	
-	/**
-	 * This method is invoked whenever the user intents to alter the data
-	 * and therefore needs to know what data can be altered in which ways.
-	 * 
-	 * @return Setting[]
-	 */
-	function getOptions();
-	
-	/**
-	 * Retrieves the data that the user submitted to the options page.
-	 * 
-	 * @param mixed[] $sent
-	 */
-	function readOptions($sent);
+	public function create($acctid, $currencyISO) {
+		
+		$ugrants  = db()->table('rights\user')->get('user', db()->table('user')->get('_id', $this->user->user->id))->addRestriction('write', true);
+		$account  = db()->table('account')->get('ugrants', $ugrants)->addRestriction('_id', $acctid)->fetch();
+		
+		$currency = db()->table('currency')->get('ISO', $currencyISO)->addRestriction('removed', null, 'IS')->fetch();
+		$book     = $account->getBook($currencyISO);
+		
+		if (!$account)  { throw new PublicException('User has no access to the account', 403); }
+		if (!$currency) { throw new PublicException('Currency not available', 404); }
+		if ($book)      { throw new PublicException('Book already exists', 400); }
+		
+		$record = db()->table('book')->newRecord();
+		$record->account = $account;
+		$record->currency = $currency;
+		$record->balanced = 0;
+		$record->store();
+		
+		$this->view->set('book', $record);
+	}
 	
 }

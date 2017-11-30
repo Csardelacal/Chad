@@ -24,9 +24,9 @@ use spitfire\storage\database\Schema;
 class CurrencyModel extends Model
 {
 	
-	const DISPLAY_SEPARATOR_BEFORE = 0x0001;
-	const DISPLAY_SEPARATOR_AFTER  = 0x0002;
-	const DISPLAY_SEPARATOR_MIDDLE = 0x0004;
+	const DISPLAY_SYMBOL_BEFORE = 0x0001;
+	const DISPLAY_SYMBOL_AFTER  = 0x0002;
+	const DISPLAY_SYMBOL_MIDDLE = 0x0004;
 	
 	const DISPLAY_DECIMAL_SEPARATOR_COMMA  = 0x0010;
 	const DISPLAY_DECIMAL_SEPARATOR_STOP   = 0x0020;
@@ -56,6 +56,15 @@ class CurrencyModel extends Model
 		#auto update them by transferring them to a new account.
 		$schema->removed      = new IntegerField();
 		$schema->deprecatedBy = new Reference(CurrencyModel::class);
+	}
+	
+	public function sf() {
+		$currency = new \spitfire\locale\Currency($this->symbol, $this->ISO, $this->decimals);
+		return $currency;
+	}
+	
+	public function convert($amt, $from) {
+		return $amt / $from->conversion * $this->conversion;
 	}
 
 }

@@ -1,5 +1,6 @@
 <?php
 
+use spitfire\exceptions\HTTPMethodException;
 use spitfire\exceptions\PublicException;
 
 /* 
@@ -80,17 +81,68 @@ class TransferController extends BaseController
 				//This is separate from the authorization of individual transactions
 			}
 		}
+		
+		try {
+			
+			if (!$this->request->isPost()) { throw new HTTPMethodException('Not posted', 1711301043); }
+			
+			/*
+			 * At this point Chad needs to determine whether the user has enough 
+			 * balance on their account to grant the payment and whether they have
+			 * assigned an account that the application can automatically bill.
+			 * 
+			 * If the user has granted permissions on one of his accounts to the 
+			 * application, it will be able to access them. Then the create() method
+			 * will be preauthorized and instruct the application to directly call
+			 * execute()
+			 */
+			if ($this->user && $this->authapp) {
+				/*
+				 * This is a rather tricky query, since it requires the system to 
+				 * find an account the user can write to, and that the application
+				 * can write to.
+				 * 
+				 * Chad won't otherwise authorize the transaction at all.
+				 */
+				$userg = db()->table('rights\user')->get('user', db()->table('user')->get('_id', $this->user->user->id))->addRestriction('write', true);
+				$query = db()->table('account')->get('ugrants', $userg);
+				$grant = db()->table('rights\app')->get('app', $this->authapp)->get('account', $query)->addRestriction('write', true)->fetchAll();
+				
+				if ($grant->isEmpty()) {
+					throw new \chad\exceptions\NoAccountAuthorizedException('The user has no accounts that the app is authorized to bill');
+				}
+				
+				/*
+				 * Loop through the grants and find if the user has enough currency
+				 */
+				foreach ($grant as $g) {
+					$book = $g->account->getBook($currency);
+					if ($book && $book->balance() > $amt) { $billable = $book; }
+				}
+				
+				/*
+				 * If a book has been authorized and is already billable, then we can
+				 * report this back to the application and it can automatically
+				 * execute the transaction.
+				 */
+				if ($billable) {
+					$this->view->set('book', $billable);
+				}
+				else {
+					throw new \chad\exceptions\InsufficientFundsException('Not enough funds on any authorized book', 1711301054);
+				}
+			}
+			elseif ($this->user) {
+				//TODO: Implement
+			}
+			elseif ($this->authapp) {
+				//TODO: Implement
+			}
+		} 
+		catch (HTTPMethodException $ex) {
 
-		/*
-		 * At this point Chad needs to determine whether the user has enough 
-		 * balance on their account to grant the payment and whether they have
-		 * assigned an account that the application can automatically bill.
-		 * 
-		 * If the user has granted permissions on one of his accounts to the 
-		 * application, it will be able to access them. Then the create() method
-		 * will be preauthorized and instruct the application to directly call
-		 * execute()
-		 */
+		}
+
 	}
 	
 	/**

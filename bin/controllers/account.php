@@ -2,6 +2,7 @@
 
 use spitfire\exceptions\HTTPMethodException;
 use spitfire\exceptions\PublicException;
+use spitfire\validation\ValidationException;
 
 /* 
  * The MIT License
@@ -122,6 +123,12 @@ class AccountController extends BaseController
 			$account->store();
 			
 			/*
+			 * Create a default book, considering the standard constraints for the 
+			 * user.
+			 */
+			$account->addBook($this->preferences->currency);
+			
+			/*
 			 * If a user created the account they wish to be automatically be granted
 			 * access to said account. Otherwise they would be permanently locked
 			 * out of it.
@@ -163,7 +170,7 @@ class AccountController extends BaseController
 		/*
 		 * Sometimes the issue will be validation failing
 		 */
-		catch (spitfire\validation\ValidationException$ex) {
+		catch (ValidationException$ex) {
 			$this->view->set('messages', $ex->getResult());
 			$this->view->set('success', false);
 		}
@@ -171,8 +178,39 @@ class AccountController extends BaseController
 		$this->view->set('rights', $rights);
 	}
 	
-	public function balance($acctid, $currencyid) {
+	public function balance($acctid, $currencyid = null) {
+		/*
+		 * Check if the user has been granted access to the account at all. This 
+		 * is critical for determining whether the user should be able to list the
+		 * transactions.
+		 */
+		$ugrants = db()->table('rights\user')->get('user', db()->table('user')->get('_id', $this->user->user->id));
+		$account = db()->table('account')->get('ugrants', $ugrants)->addRestriction('_id', $acctid)->fetch();
 		
+		if (!$account) { throw new PublicException('User has no access to the acocunt'); }
+		
+		/*
+		 * Depending on whether the user has a currency or not selected, we will 
+		 * display an overview of the books that the account contains with the 
+		 * different currencies... Or we will display a record of the account's 
+		 * transactions.
+		 */
+		if ($currencyid) {
+			$book = $account->getBook('USD');
+			
+			$this->view->setFile('account/balance');
+			$this->view->set('book', $book);
+			$this->view->set('history', $book? $book->history($_GET['until']) : collect());
+		}
+		else {
+			$books = $account->getBooks();
+			
+			$this->view->setFile('account/books');
+			$this->view->set('books', $books);
+			$this->view->set('history', null);
+		}
+		
+		$this->view->set('account', $account);
 	}
 	
 	public function close() {

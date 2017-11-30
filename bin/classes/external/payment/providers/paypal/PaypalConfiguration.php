@@ -1,4 +1,7 @@
-<?php namespace payment\provider;
+<?php namespace external\payment\providers\paypal;
+
+use payment\provider\ConfigurationInterface;
+use payment\provider\setting\StringSetting;
 
 /* 
  * The MIT License
@@ -24,36 +27,39 @@
  * THE SOFTWARE.
  */
 
-interface ConfigurationInterface
+class PaypalConfiguration implements ConfigurationInterface
 {
 	
-	/**
-	 * When the data is read from database, this endpoint is read and the provided
-	 * data is then passed to this method
-	 * 
-	 * @param string[] $data
-	 */
-	function load($data);
+	private $client;
+	private $secret;
+	private $mode;
 	
-	/**
-	 * This method is invoked when the data is ready to be written to the database,
-	 * allowing the configuration object to persist it's data.
-	 */
-	function save();
+	public function load($data) {
+		$this->client = $data['client'];
+		$this->secret = $data['secret'];
+		$this->mode   = $data['mode'];
+	}
+
+	public function save() {
+		return [
+			'client' => $this->client,
+			'secret' => $this->secret,
+			'mode'   => $this->mode
+		];
+	}
 	
-	/**
-	 * This method is invoked whenever the user intents to alter the data
-	 * and therefore needs to know what data can be altered in which ways.
-	 * 
-	 * @return Setting[]
-	 */
-	function getOptions();
-	
-	/**
-	 * Retrieves the data that the user submitted to the options page.
-	 * 
-	 * @param mixed[] $sent
-	 */
-	function readOptions($sent);
-	
+	public function getOptions() {
+		return [
+			new StringSetting('client', 'Client ID', ''),
+			new StringSetting('secret', 'Client secret', ''),
+			new StringSetting('mode', 'Paypal mode', 'live')
+		];
+	}
+
+	public function readOptions($sent) {
+		$this->client = $sent['client'];
+		$this->secret = $sent['secret'];
+		$this->mode   = $sent['mode'];
+	}
+
 }

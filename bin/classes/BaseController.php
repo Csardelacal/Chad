@@ -76,7 +76,7 @@ class BaseController extends Controller
 		 * themselves.
 		 */
 		if ($this->token && $this->token instanceof Token) {
-			$this->user = $memcached->get('chad_auth_' . $this->token->getId(), function () { return $this->token->getTokenInfo(); });
+			$this->user = $memcached->get('chad_auth_' . $this->token->getId(), function () { return $this->token->getTokenInfo()->authenticated? $this->token->getTokenInfo() : null; });
 		}
 		
 		/*
@@ -103,7 +103,7 @@ class BaseController extends Controller
 			$c->name = Environment::get('chad.default.currency.name')? : 'US Dollar';
 			$c->decimals = Environment::get('chad.default.currency.decimals')? : 2;
 			$c->conversion = Environment::get('chad.default.currency.conversion')? : 1;
-			$c->display = Environment::get('chad.default.currency.display')? : (CurrencyModel::DISPLAY_SEPARATOR_BEFORE|CurrencyModel::DISPLAY_DECIMAL_SEPARATOR_STOP|CurrencyModel::DISPLAY_THOUSAND_SEPARATOR_COMMA);
+			$c->display = Environment::get('chad.default.currency.display')? : (CurrencyModel::DISPLAY_SYMBOL_BEFORE|CurrencyModel::DISPLAY_DECIMAL_SEPARATOR_STOP|CurrencyModel::DISPLAY_THOUSAND_SEPARATOR_COMMA);
 			$c->default = true;
 			$c->store();
 		}
@@ -123,6 +123,9 @@ class BaseController extends Controller
 		
 		if ($this->user) {
 			$this->preferences = db()->table('user')->get('_id', $this->user->user->id)->fetch();
+			
+			$currencyLocalizer = $this->preferences->localizer();
+			$this->view->set('currencyLocalizer', $currencyLocalizer);
 		}
 		
 		$this->view->set('preferences', $this->preferences);

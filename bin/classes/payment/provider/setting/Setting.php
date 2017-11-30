@@ -1,4 +1,4 @@
-<?php namespace payment\provider;
+<?php namespace payment\provider\setting;
 
 /* 
  * The MIT License
@@ -24,36 +24,56 @@
  * THE SOFTWARE.
  */
 
-interface ConfigurationInterface
+abstract class Setting implements \spitfire\validation\ValidatorInterface
 {
 	
-	/**
-	 * When the data is read from database, this endpoint is read and the provided
-	 * data is then passed to this method
-	 * 
-	 * @param string[] $data
-	 */
-	function load($data);
+	private $name;
+	private $label;
+	private $value;
+	private $default;
 	
-	/**
-	 * This method is invoked when the data is ready to be written to the database,
-	 * allowing the configuration object to persist it's data.
-	 */
-	function save();
+	public function __construct($name, $label, $default) {
+		$this->name = $name;
+		$this->label = $label;
+		$this->default = $default;
+	}
 	
-	/**
-	 * This method is invoked whenever the user intents to alter the data
-	 * and therefore needs to know what data can be altered in which ways.
-	 * 
-	 * @return Setting[]
-	 */
-	function getOptions();
+	public function getName() {
+		return $this->name;
+	}
 	
-	/**
-	 * Retrieves the data that the user submitted to the options page.
-	 * 
-	 * @param mixed[] $sent
-	 */
-	function readOptions($sent);
+	public function getValue() {
+		return $this->value;
+	}
+	
+	public function getDefault() {
+		return $this->default;
+	}
+	
+	public function setName($name) {
+		$this->name = $name;
+		return $this;
+	}
+	
+	public function setValue($value) {
+		$this->value = $value;
+		return $this;
+	}
+	
+	public function setDefault($default) {
+		$this->default = $default;
+		return $this;
+	}
+	
+	public function getLabel() {
+		return $this->label;
+	}
+	
+	public function setLabel($label) {
+		$this->label = $label;
+		return $this;
+	}
+	
+	abstract public function getFormComponent();
 	
 }

@@ -38,7 +38,35 @@ class BookModel extends Model
 		$schema->currency->setPrimary(true);
 		
 		#This should find a way more fluent way of writing it
-		$schema->index($schema->_id, $schema->currency)->setPrimary(true);
+		$schema->index($schema->account, $schema->currency)->setPrimary(true);
+	}
+	
+	public function balance() {
+		$db = $this->getTable()->getDb();
+		
+		$query = $db->table('balance')->get('book', $this);
+		$query->setOrder('timestamp', 'DESC');
+		$record = $query->fetch();
+		
+		$balance = $record? $record->amount : 0;
+		
+		$incomingq = $db->table('transfer')->get('executed', $balance->timestamp, '>');
+		$incomingq->addRestriction('target', $this);
+		$incoming  = $incomingq->fetchAll();
+		
+		foreach ($incoming as $txn) {
+			$balance+= $txn->received;
+		}
+		
+		$outgoingq = $db->table('transfer')->get('executed', $balance->timestamp, '>');
+		$outgoingq->addRestriction('target', $this);
+		$outgoing  = $outgoingq->fetchAll();
+		
+		foreach ($outgoing as $txn) {
+			$balance-= $txn->amount;
+		}
+		
+		return $balance;
 	}
 
 }

@@ -13,6 +13,7 @@
 					
 					<div class="spacer" style="height: 20px"></div>
 					
+					<div class="menu-entry"><a href="<?= url('account', 'index')  ?>">My accounts</a></div>
 					<div class="menu-entry"><a href="<?= url('account', 'create') ?>">Create account</a></div>
 				</div>
 			</div>
@@ -23,5 +24,6 @@
 		</div>
 		
 		<script src="<?= spitfire\core\http\URL::asset('js/ui-layout.js') ?>" type="text/javascript"></script>
+		<script src="<?= spitfire\core\http\URL::asset('js/dials.js') ?>" type="text/javascript"></script>
 	</body>
 </html>

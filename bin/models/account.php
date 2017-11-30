@@ -68,5 +68,53 @@ class AccountModel extends Model
 			$this->_id = substr(str_replace(['/', '=', '-', '_'], '', base64_encode(random_bytes(100))), 0, 25);
 		}
 	}
+	
+	public function getBook($currency) {
+		$db = $this->getTable()->getDb();
+		$c  = $currency instanceof CurrencyModel? $c : $db->table('currency')->get('ISO', $currency)->fetch();
+		
+		if (!$c) { throw new spitfire\exceptions\PrivateException('No such currency', 1711301114); }
+		
+		$q  = $db->table('book')->get('account', $this)->addRestriction('currency', $c);
+		return $q->fetch();
+	}
+	
+	public function getBooks() {
+		$db = $this->getTable()->getDb();
+		
+		$q  = $db->table('book')->get('account', $this);
+		return $q->fetchAll();
+	}
+	
+	public function addBook($currency) {
+		$db = $this->getTable()->getDb();
+		
+		if (!$currency instanceof CurrencyModel) { 
+			$currency = $db->table('currency')->get('ISO', $currency)->addRestriction('removed', null, 'IS')->fetch(); 
+		}
+		
+		if ($this->getBook($currency->ISO)) {
+			throw new spitfire\exceptions\PrivateException('Book already exists', 1711302039);
+		}
+		
+		$book = $db->table('book')->newRecord();
+		$book->account = $this;
+		$book->currency = $currency;
+		$book->balanced = 0;
+		$book->store();
+		
+		return $book;
+	}
+	
+	public function estimatedBalance($currency) {
+		$books = $this->getBooks();
+		$balance = 0;
+		
+		foreach ($books as $book) {
+			$balance += $currency->convert($book->balance(), $book->currency);
+		}
+		
+		return $balance;
+	}
 
 }

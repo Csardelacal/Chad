@@ -171,4 +171,11 @@ class Paypal implements ProviderInterface
 		return; //Paypal does not need extra set up
 	}
 
+	public function getLogo($size = 128) {
+		return null;
+	}
+
+	public function makeConfiguration() {
+	}
+
 }

@@ -1,4 +1,7 @@
-<?php namespace payment\provider;
+<?php namespace payment\provider\setting;
+
+use spitfire\validation\ValidationRule;
+use spitfire\validation\Validator;
 
 /* 
  * The MIT License
@@ -24,36 +27,46 @@
  * THE SOFTWARE.
  */
 
-interface ConfigurationInterface
+class StringSetting extends Setting
 {
 	
-	/**
-	 * When the data is read from database, this endpoint is read and the provided
-	 * data is then passed to this method
-	 * 
-	 * @param string[] $data
-	 */
-	function load($data);
+	private $validation;
 	
-	/**
-	 * This method is invoked when the data is ready to be written to the database,
-	 * allowing the configuration object to persist it's data.
-	 */
-	function save();
+	public function __construct($name, $label, $default) {
+		parent::__construct($name, $label, $default);
+		$this->validation = new Validator();
+	}
+
+	public function getFormComponent() {
+		return sprintf(
+			'<label for="%s">%s</label><input type="text" name="%s" value="%s" id="%s">',
+			'fc-' . $this->getName(),
+			$this->getLabel(),
+			$this->getName(),
+			$this->getValue()? : $this->getDefault(),
+			'fc-' . $this->getName()
+		);
+	}
 	
-	/**
-	 * This method is invoked whenever the user intents to alter the data
-	 * and therefore needs to know what data can be altered in which ways.
-	 * 
-	 * @return Setting[]
-	 */
-	function getOptions();
+	public function addRule(ValidationRule $rule) {
+		return $this->validation->addRule($rule);
+	}
 	
-	/**
-	 * Retrieves the data that the user submitted to the options page.
-	 * 
-	 * @param mixed[] $sent
-	 */
-	function readOptions($sent);
+	public function getMessages() {
+		return $this->validation->getMessages();
+	}
 	
+	public function isOk() {
+		return $this->validation->isOk();
+	}
+	
+	public function validate() {
+		return $this->validation->validate();
+	}
+	
+	public function setValue($value) {
+		$this->validation->setValue($value);
+		return parent::setValue($value);
+	}
+
 }

@@ -102,4 +102,17 @@ interface ProviderInterface
 	 */
 	function getStatus($id);
 	
+	/**
+	 * 
+	 * @return ConfigurationInterface
+	 */
+	function makeConfiguration();
+	
+	/**
+	 * 
+	 * @param int $size
+	 * @return string The location of the logo file
+	 */
+	function getLogo($size = 128);
+	
 }
