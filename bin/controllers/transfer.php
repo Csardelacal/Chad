@@ -1,7 +1,12 @@
 <?php
 
+use chad\exceptions\InsufficientFundsException;
+use chad\exceptions\NoAccountAuthorizedException;
+use chad\exceptions\TxnRequiresAuthException;
 use spitfire\exceptions\HTTPMethodException;
 use spitfire\exceptions\PublicException;
+use spitfire\validation\ValidationError;
+use spitfire\validation\ValidationException;
 
 /* 
  * The MIT License
@@ -87,6 +92,22 @@ class TransferController extends BaseController
 			if (!$this->request->isPost()) { throw new HTTPMethodException('Not posted', 1711301043); }
 			
 			/*
+			 * The target account must always be unequivocally defined. It is not 
+			 * acceptable to provide a username or anything alike.
+			 */
+			$posted = [
+				validate($_POST['tgt']?? null)->minLength(20, 'Target must be a valid account ID'),
+				validate($_POST['amt']?? null)->minLength(1, 'Amount is mandatory'),
+				validate($_POST['description']?? null)->minLength(1, 'Description is mandatory')
+			];
+			
+			validate($posted);
+			
+			$tgt = db()->table('account')->get('_id', $_POST['tgt'])->fetch();
+			$amt = $posted['amt']->getValue();
+			$description = $posted['description']->getValue();
+			
+			/*
 			 * At this point Chad needs to determine whether the user has enough 
 			 * balance on their account to grant the payment and whether they have
 			 * assigned an account that the application can automatically bill.
@@ -109,7 +130,7 @@ class TransferController extends BaseController
 				$grant = db()->table('rights\app')->get('app', $this->authapp)->get('account', $query)->addRestriction('write', true)->fetchAll();
 				
 				if ($grant->isEmpty()) {
-					throw new \chad\exceptions\NoAccountAuthorizedException('The user has no accounts that the app is authorized to bill');
+					throw new NoAccountAuthorizedException('The user has no accounts that the app is authorized to bill');
 				}
 				
 				/*
@@ -126,21 +147,98 @@ class TransferController extends BaseController
 				 * execute the transaction.
 				 */
 				if ($billable) {
-					$this->view->set('book', $billable);
+					$src = $billable;
 				}
 				else {
-					throw new \chad\exceptions\InsufficientFundsException('Not enough funds on any authorized book', 1711301054);
+					throw new InsufficientFundsException('Not enough funds on any authorized book', 1711301054);
 				}
 			}
 			elseif ($this->user) {
-				//TODO: Implement
+				
+				if (!isset($_POST['src'])) { 
+					throw new ValidationException('Missing source account', 1712011720, [new ValidationError('No source account defined')]); 
+				}
+				
+				/*
+				 * When a user reaches this endpoint they will already have had to 
+				 * select an account to bill. In this case the system will check whether
+				 * the user is allowed to perform the operation and check that the 
+				 * intent is legitimate.
+				 */
+				$query = db()->table('account')->get('_id', $_POST['src']);
+				
+				$userg = db()->table('rights\user')->get('user', db()->table('user')
+					->addRestriction('_id', $this->user->user->id))
+					->addRestriction('write', true)
+					->addRestriction('account', $query)
+					->fetch();
+				
+				if (!$userg) {
+					throw new PublicException('Not authorized', 403);
+				}
+				
+				//TODO: Generate and verify the signature
+				
+				$src = $query->fetch();
+				
 			}
 			elseif ($this->authapp) {
-				//TODO: Implement
+				
+				/*
+				 * When billing an account without a user, the application needs to
+				 * properly provide an account ID. Using the system without a unique
+				 * account ID does not work in this case.
+				 */
+				if (!isset($_POST['src'])) { 
+					throw new ValidationException('Missing source account', 1712011720, [new ValidationError('No source account defined')]); 
+				}
+				
+				$query = db()->table('account')->get('_id', $_POST['src']);
+				$grant = db()->table('rights\app')->get('app', $this->authapp)->get('account', $query)->addRestriction('write', true)->fetch();
+				
+				if (!$grant) {
+					throw new NoAccountAuthorizedException('The user has no accounts that the app is authorized to bill');
+				}
+				
+				$src = $query->fetch();
+				$tgt = db()->table('account')->get('_id', $_POST['tgt'])->fetch();
 			}
-		} 
+			
+			$transfer = db()->table('transfer')->newRecord();
+			$transfer->source      = $src;
+			$transfer->target      = $tgt;
+			$transfer->amount      = $amt;
+			$transfer->received    = $tgt->currency->convert($amt, $src->currency);
+			$transfer->description = $description;
+			$transfer->tags        = $tags;
+			$transfer->created     = time();
+			$transfer->due         = null;
+			$transfer->executed    = null;
+			$transfer->store();
+			
+			$this->view->set('txnid', $transfer->_id);
+			$this->view->set('transfer', $transfer);
+			
+		}
+		catch (TxnRequiresAuthException$ex) {
+			$transfer = db()->table('transfer')->newRecord();
+			$transfer->source      = null;
+			$transfer->target      = $tgt;
+			$transfer->amount      = $amt;
+			$transfer->received    = $tgt->currency->convert($amt, $src->currency);
+			$transfer->description = $description;
+			$transfer->tags        = $tags;
+			$transfer->created     = time();
+			$transfer->due         = null;
+			$transfer->executed    = null;
+			$transfer->store();
+			
+			$this->view->set('txnid', $transfer->_id);
+			$this->view->set('transfer', $transfer);
+			$this->view->set('redirect', strval(url('transfer', 'authorize', $transfer->_id)->absolute()));
+		}
 		catch (HTTPMethodException $ex) {
-
+			//Ignore this, just show the appropriate template 
 		}
 
 	}

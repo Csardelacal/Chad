@@ -64,7 +64,7 @@ class CurrencyModel extends Model
 	}
 	
 	public function convert($amt, $from) {
-		return $amt / $from->conversion * $this->conversion;
+		return floor($amt / $from->conversion * $this->conversion);
 	}
 
 }
