@@ -59,7 +59,7 @@ class BookModel extends Model
 		}
 		
 		$outgoingq = $db->table('transfer')->get('executed', $balance->timestamp, '>');
-		$outgoingq->addRestriction('target', $this);
+		$outgoingq->addRestriction('source', $this);
 		$outgoing  = $outgoingq->fetchAll();
 		
 		foreach ($outgoing as $txn) {
