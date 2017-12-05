@@ -1,7 +1,7 @@
 <?php namespace external\payment\providers\paypal;
 
 use Exception;
-use payment\provider\Configuration;
+use payment\provider\ConfigurationInterface;
 use payment\provider\PaymentAuthorization;
 use payment\provider\ProviderInterface;
 use payment\provider\Redirection;
@@ -44,6 +44,10 @@ use spitfire\exceptions\PublicException;
 class Paypal implements ProviderInterface
 {
 	
+	/**
+	 *
+	 * @var PaypalConfiguration
+	 */
 	private $config;
 	
 	public function __construct() {
@@ -59,6 +63,10 @@ class Paypal implements ProviderInterface
 	}
 	
 	public function authorize(PaymentAuthorization $context) {
+		
+		if (isset($context->getFormData()['PayerID'])) {
+			return true;
+		}
 		
 		$amt = $context->getAmt() / pow(10, $context->getCurrency()->decimals);
 		$currency = $context->getCurrency()->ISO;
@@ -84,17 +92,17 @@ class Paypal implements ProviderInterface
 		
 		#Start the transaction
 		$transaction = new Transaction();
-		$transaction->setAmount($amt)
+		$transaction->setAmount($amount)
 				  ->setItemList($itemList)
 				  ->setDescription('Chad Payment')
 				  ->setInvoiceNumber(uniqid());
 		
 		$redirectUrls = new RedirectUrls();
-		$redirectUrls->setReturnUrl($context->getSuccessURL())
-				  ->setCancelUrl($context->getFailureURL());
+		$redirectUrls->setReturnUrl(strval($context->getSuccessURL()))
+				  ->setCancelUrl(strval($context->getFailureURL()));
 		
-		$apicontext = new ApiContext(new OAuthTokenCredential($this->id, $this->secret));
-		$apicontext->setConfig(Array('mode' => $this->mode));
+		$apicontext = new ApiContext(new OAuthTokenCredential($this->config->getClient(), $this->config->getSecret()));
+		$apicontext->setConfig(Array('mode' => $this->config->getMode()));
 		
 		
 		
@@ -136,11 +144,10 @@ class Paypal implements ProviderInterface
 
 	public function execute(PaymentAuthorization $auth, $id, $amt) {
 		
+		$apicontext = new ApiContext(new OAuthTokenCredential($this->config->getClient(), $this->config->getSecret()));
+		$apicontext->setConfig(Array('mode' => $this->config->getMode()));
 		
-		$apicontext = new ApiContext(new OAuthTokenCredential($this->id, $this->secret));
-		$apicontext->setConfig(Array('mode' => $this->mode));
-		
-		$paymentId = $id;
+		$paymentId = $auth->getFormData()['paymentId'];
 		$payment = Payment::get($paymentId, $apicontext);
 		
 		$execution = new \PayPal\Api\PaymentExecution();
@@ -159,7 +166,7 @@ class Paypal implements ProviderInterface
 		return false; //TODO: Implement
 	}
 
-	public function init(Configuration $config) {
+	public function init(ConfigurationInterface $config) {
 		$this->config = $config;
 	}
 
@@ -176,6 +183,7 @@ class Paypal implements ProviderInterface
 	}
 
 	public function makeConfiguration() {
+		return new PaypalConfiguration();
 	}
 
 }

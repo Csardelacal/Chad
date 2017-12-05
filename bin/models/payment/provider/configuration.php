@@ -1,7 +1,7 @@
-<?php namespace external\payment\providers\paypal;
+<?php namespace payment\provider;
 
-use payment\provider\ConfigurationInterface;
-use payment\provider\setting\StringSetting;
+use spitfire\Model;
+use spitfire\storage\database\Schema;
 
 /* 
  * The MIT License
@@ -27,51 +27,13 @@ use payment\provider\setting\StringSetting;
  * THE SOFTWARE.
  */
 
-class PaypalConfiguration implements ConfigurationInterface
+class ConfigurationModel extends Model
 {
-	
-	private $client;
-	private $secret;
-	private $mode;
-	
-	public function load($data) {
-		$this->client = $data['client'];
-		$this->secret = $data['secret'];
-		$this->mode   = $data['mode'];
-	}
-
-	public function save() {
-		return [
-			'client' => $this->client,
-			'secret' => $this->secret,
-			'mode'   => $this->mode
-		];
-	}
-	
-	public function getOptions() {
-		return [
-			new StringSetting('client', 'Client ID', ''),
-			new StringSetting('secret', 'Client secret', ''),
-			new StringSetting('mode', 'Paypal mode', 'live')
-		];
-	}
-
-	public function readOptions($sent) {
-		$this->client = $sent['client'];
-		$this->secret = $sent['secret'];
-		$this->mode   = $sent['mode'];
-	}
-	
-	public function getClient() {
-		return $this->client;
-	}
-	
-	public function getSecret() {
-		return $this->secret;
-	}
-	
-	public function getMode() {
-		return $this->mode;
+		
+	public function definitions(Schema $schema) {
+		$schema->provider = new \StringField(255);
+		$schema->setting  = new \StringField(50);
+		$schema->value    = new \TextField();
 	}
 
 }

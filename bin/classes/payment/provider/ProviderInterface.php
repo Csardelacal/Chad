@@ -54,7 +54,7 @@ interface ProviderInterface
 	 * 
 	 * @param \payment\provider\ConfigurationInterface $config
 	 */
-	function init(Configuration$config);
+	function init(ConfigurationInterface$config);
 	
 	/**
 	 * This endpoint creates a payment. The software will keep track of the transfer

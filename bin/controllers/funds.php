@@ -1,0 +1,108 @@
+<?php
+
+use spitfire\exceptions\HTTPMethodException;
+use spitfire\exceptions\PublicException;
+use spitfire\validation\ValidationException;
+
+/* 
+ * The MIT License
+ *
+ * Copyright 2017 César de la Cal Bretschneider <cesar@magic3w.com>.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+class FundsController extends BaseController
+{
+	
+	
+	public function add($acctid, $currencyISO = null, $amtParam = null, $pp = false) {
+		
+		/*
+		 * Prepare the provider list
+		 */
+		$providers = payment\provider\PaymentProviderPool::getInstance()->configure(); // Prepares the providers by loading their configuration
+		$currency  = $currencyISO? db()->table('currency')->get('ISO', $currencyISO)->fetch() : db()->table('currency')->get('default', true)->fetch();
+		
+		try {
+			/*
+			 * First thing we need to do is check whether the request was posted,
+			 * if this is not the case, we need to show the user the source select 
+			 * screen.
+			 */
+			if (!$this->request->isPost() && !$pp) { throw new HTTPMethodException('Not POSTed', 1712051108); }
+			
+			$account  = db()->table('account')->get('_id', $acctid)->fetch();
+			$currency = db()->table('currency')->get('ISO', _def($_POST['currency'], $currencyISO))->fetch();
+			$amt      = _def($_POST['amt'], $amtParam);
+			
+			if ($amt < 0)   { throw new ValidationException('Invalid amount', 1712051113); }
+			if (!$currency) { throw new PublicException('No currency found', 404); }
+			
+			try {
+				$book = $account->getBook($currency);
+			}
+			catch (\Exception$e) {
+				$book = $account->addBook($currency);
+			}
+			
+			/* @var $provider \payment\provider\ProviderInterface */
+			$provider = $providers->filter(function ($e) use ($pp) {
+				return !!(_def($_POST['provider'], str_replace(':', '\\', $pp)) === get_class($e));
+			})->rewind();
+			
+			$context = new payment\provider\PaymentAuthorization();
+			$context->setAmt($amt);
+			$context->setCurrency($currency);
+			$context->setSuccessURL(url('funds', 'add', $account->_id, $currency->ISO, $amt, 'exec')->absolute());
+			$context->setFailureURL(url('funds', 'failed', $account->_id, $currency->ISO, $amt)->absolute());
+			$context->setFormData($_REQUEST);
+			
+			$return = $provider->authorize($context);
+			
+			if ($return instanceof \payment\provider\Redirection) {
+				$this->response->setBody('redirecting...')->getHeaders()->redirect($return->getTarget());
+				return;
+			}
+			
+			if ($provider->execute($context, time(), $amt)) {
+				$transfer = db()->table('transfer')->newRecord();
+				$transfer->source = null;
+				$transfer->target = $book;
+				$transfer->amount = $amt;
+				$transfer->received = $amt;
+				$transfer->description = get_class($provider);
+				$transfer->created  = time();
+				$transfer->executed = time();
+				$transfer->store();
+			}
+			
+			$this->response->setBody('Redirecting...')->getHeaders()->redirect(url('account'));
+		} 
+		catch (HTTPMethodException $ex) {
+			/*
+			 * Do nothing, just show the appropriate screen
+			 */
+		}
+		
+		$this->view->set('currency', $currency);
+		$this->view->set('providers', $providers);
+	}
+	
+}

@@ -71,7 +71,7 @@ class AccountModel extends Model
 	
 	public function getBook($currency) {
 		$db = $this->getTable()->getDb();
-		$c  = $currency instanceof CurrencyModel? $c : $db->table('currency')->get('ISO', $currency)->fetch();
+		$c  = $currency instanceof CurrencyModel? $currency : $db->table('currency')->get('ISO', $currency)->fetch();
 		
 		if (!$c) { throw new spitfire\exceptions\PrivateException('No such currency', 1711301114); }
 		

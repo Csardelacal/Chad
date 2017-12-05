@@ -1,7 +1,7 @@
-<?php namespace external\payment\providers\paypal;
+<?php namespace payment\provider;
 
-use payment\provider\ConfigurationInterface;
-use payment\provider\setting\StringSetting;
+use spitfire\core\Collection;
+use spitfire\exceptions\PrivateException;
 
 /* 
  * The MIT License
@@ -27,51 +27,42 @@ use payment\provider\setting\StringSetting;
  * THE SOFTWARE.
  */
 
-class PaypalConfiguration implements ConfigurationInterface
+class PaymentProviderPool extends Collection
 {
 	
-	private $client;
-	private $secret;
-	private $mode;
+	private static $instance = null;
 	
-	public function load($data) {
-		$this->client = $data['client'];
-		$this->secret = $data['secret'];
-		$this->mode   = $data['mode'];
-	}
-
-	public function save() {
-		return [
-			'client' => $this->client,
-			'secret' => $this->secret,
-			'mode'   => $this->mode
-		];
+	public function push($element) {
+		
+		if (!$element instanceof ProviderInterface) {
+			throw new PrivateException('Invalid payment provider', 1712051119);
+		}
+		
+		return parent::push($element);
 	}
 	
-	public function getOptions() {
-		return [
-			new StringSetting('client', 'Client ID', ''),
-			new StringSetting('secret', 'Client secret', ''),
-			new StringSetting('mode', 'Paypal mode', 'live')
-		];
-	}
-
-	public function readOptions($sent) {
-		$this->client = $sent['client'];
-		$this->secret = $sent['secret'];
-		$this->mode   = $sent['mode'];
-	}
-	
-	public function getClient() {
-		return $this->client;
-	}
-	
-	public function getSecret() {
-		return $this->secret;
+	public function configure() {
+		$db = db();
+		
+		return $this->each(function (ProviderInterface$e) use ($db) {
+			$config = $db->table('payment\provider\configuration')->get('provider', get_class($e))->fetchAll();
+			$computed = [];
+			
+			foreach ($config as $c) {
+				$computed[$c->setting] = $c->value;
+			}
+			
+			$push = $e->makeConfiguration();
+			$push->load($computed);
+			$e->init($push);
+			
+			return $e;
+		});
 	}
 	
-	public function getMode() {
-		return $this->mode;
+	public static function getInstance() {
+		if (self::$instance) { return self::$instance; }
+		else { return self::$instance = new PaymentProviderPool(); }
 	}
-
+	
 }

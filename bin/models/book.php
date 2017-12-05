@@ -50,7 +50,7 @@ class BookModel extends Model
 		
 		$balance = $record? $record->amount : 0;
 		
-		$incomingq = $db->table('transfer')->get('executed', $balance->timestamp, '>');
+		$incomingq = $db->table('transfer')->get('executed', $balance ? $balance->timestamp : 0, '>');
 		$incomingq->addRestriction('target', $this);
 		$incoming  = $incomingq->fetchAll();
 		
@@ -58,7 +58,7 @@ class BookModel extends Model
 			$balance+= $txn->received;
 		}
 		
-		$outgoingq = $db->table('transfer')->get('executed', $balance->timestamp, '>');
+		$outgoingq = $db->table('transfer')->get('executed', $balance ? $balance->timestamp : 0, '>');
 		$outgoingq->addRestriction('source', $this);
 		$outgoing  = $outgoingq->fetchAll();
 		
