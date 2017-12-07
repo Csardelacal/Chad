@@ -32,7 +32,7 @@ class FundsController extends BaseController
 {
 	
 	
-	public function add($acctid, $currencyISO = null, $amtParam = null, $pp = false) {
+	public function add($acctid, $currencyISO = null, $amtParam = null, $pp = false, $returnto = false) {
 		
 		/*
 		 * Prepare the provider list
@@ -70,7 +70,7 @@ class FundsController extends BaseController
 			$context = new payment\provider\PaymentAuthorization();
 			$context->setAmt($amt);
 			$context->setCurrency($currency);
-			$context->setSuccessURL(url('funds', 'add', $account->_id, $currency->ISO, $amt, 'exec')->absolute());
+			$context->setSuccessURL(url('funds', 'add', $account->_id, $currency->ISO, $amt, str_replace('\\', ':', get_class($provider)), urlencode(base64_encode($_GET['returnto']?? null)))->absolute());
 			$context->setFailureURL(url('funds', 'failed', $account->_id, $currency->ISO, $amt)->absolute());
 			$context->setFormData($_REQUEST);
 			
@@ -93,6 +93,10 @@ class FundsController extends BaseController
 				$transfer->store();
 			}
 			
+			if ($returnto) {
+				$this->response->setBody('Redirecting...')->getHeaders()->redirect(base64_decode(urldecode($returnto)));
+				return;
+			}
 			$this->response->setBody('Redirecting...')->getHeaders()->redirect(url('account'));
 		} 
 		catch (HTTPMethodException $ex) {

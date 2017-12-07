@@ -51,6 +51,15 @@ class TransferController extends BaseController
 	 */
 	public function create() {
 		
+		/*
+		 * This is a minor fix for the user interface that the system requires.
+		 * Since the user provides the currency for the transfer from a select box,
+		 * the system needs to append it to the target
+		 */
+		if (isset($_POST['currency'])) {
+			$_POST['tgt'].= ':' . $_POST['currency'];
+		}
+		
 		if ($this->authapp) {
 			$auth = $this->sso->authApp($_GET['signature'], $this->token, ['transfer.create', 'transfer.create.user']);
 			
@@ -94,11 +103,11 @@ class TransferController extends BaseController
 		 * sections of the code, it feels more natural to put it outside the try
 		 */
 		$posted = [
-			validate($_POST['tgt']?? null)->minLength(20, 'Target must be a valid account ID'),
-			validate($_POST['amt']?? null)->minLength(1, 'Amount is mandatory'),
-			validate($_POST['description']?? null)->minLength(1, 'Description is mandatory'),
+			'tgt' => validate($_POST['tgt']?? null)->minLength(20, 'Target must be a valid account ID'),
+			'amt' => validate($_POST['amt']?? null)->minLength(1, 'Amount is mandatory'),
+			'description' => validate($_POST['description']?? null)->minLength(1, 'Description is mandatory'),
 			#Tags are only accepted for applications, so they only can be set by apps
-			validate($_POST['tags']?? null)->minLength($this->authapp? 255 : 0, 'Tags too long')
+			'tags' => validate($_POST['tags']?? null)->minLength($this->authapp? 255 : 0, 'Tags too long')
 		];
 		
 		list($account, $currency) = explode(':', $_POST['tgt']);
@@ -106,7 +115,7 @@ class TransferController extends BaseController
 			->get('account', db()->table('account')->get('_id', $account))
 			->addRestriction('currency', db()->table('currency')->get('ISO', $currency))
 			->fetch();
-				
+		
 		$amt = $posted['amt']->getValue();
 		$description = $posted['description']->getValue();
 		$tags = $posted['tags'];
@@ -143,7 +152,7 @@ class TransferController extends BaseController
 				 */
 				$userg = db()->table('rights\user')->get('user', db()->table('user')->get('_id', $this->user->user->id))->addRestriction('write', true);
 				$query = db()->table('account')->get('ugrants', $userg);
-				$grant = db()->table('rights\app')->get('app', $this->authapp)->get('account', $query)->addRestriction('write', true)->fetchAll();
+				$grant = db()->table('rights\app')->get('app', $this->authapp)->addRestriction('account', $query)->addRestriction('write', true)->fetchAll();
 				
 				if ($grant->isEmpty()) {
 					throw new NoAccountAuthorizedException('The user has no accounts that the app is authorized to bill');
@@ -185,7 +194,7 @@ class TransferController extends BaseController
 				$query = db()->table('account')->get('_id', $srcaccount);
 				
 				$userg = db()->table('rights\user')->get('user', db()->table('user')
-					->addRestriction('_id', $this->user->user->id))
+					->get('_id', $this->user->user->id))
 					->addRestriction('write', true)
 					->addRestriction('account', $query)
 					->fetch();
@@ -197,7 +206,14 @@ class TransferController extends BaseController
 				//TODO: Generate and verify the signature
 				//TODO: Check if the token was authorized by and for Chad alone
 				
-				$src = $query->fetch();
+				$src = $query->fetch()->getBook($srccurrency);
+				
+				/*
+				 * Humans tend to enter the amounts as floats. Just like the currency
+				 * is usually presented to them. To avoid any issues, the system will 
+				 * automatically correct the amount.
+				 */
+				$amt = $amt * pow(10, $tgt->currency->decimals);
 				
 			}
 			elseif ($this->authapp) {
@@ -213,7 +229,7 @@ class TransferController extends BaseController
 				
 				list($srcaccount, $srccurrency) = explode(':', $_POST['src']);
 				$query = db()->table('account')->get('_id', $srcaccount);
-				$grant = db()->table('rights\app')->get('app', $this->authapp)->get('account', $query)->addRestriction('write', true)->fetch();
+				$grant = db()->table('rights\app')->get('app', $this->authapp)->addRestriction('account', $query)->addRestriction('write', true)->fetch();
 				
 				if (!$grant) {
 					throw new PublicException('Account unauthorized', 403);
@@ -239,6 +255,7 @@ class TransferController extends BaseController
 			
 			$this->view->set('txnid', $transfer->_id);
 			$this->view->set('transfer', $transfer);
+			return;
 			
 		}
 		catch (TxnRequiresAuthException$ex) {
@@ -261,7 +278,17 @@ class TransferController extends BaseController
 		catch (HTTPMethodException $ex) {
 			//Ignore this, just show the appropriate template 
 		}
+		
+		if ($this->user && !$this->authapp) {
 
+			$userg = db()->table('rights\user')
+				->get('user', db()->table('user')->get('_id', $this->user->user->id))
+				->addRestriction('write', true)
+				->addRestriction('listed', true)
+				->fetchAll();
+			
+			$this->view->set('sources', $userg);
+		}
 	}
 	
 	/**
@@ -275,9 +302,20 @@ class TransferController extends BaseController
 	 * 
 	 * @param string $txn
 	 */
-	public function authorize($txn) {
+	public function authorize($txn, $sig = null) {
 		
 		$transfer = db()->table('transfer')->get('_id', $txn)->fetch();
+		
+		if ($sig) {
+			list($rand, $hash) = explode(':', $sig);
+			if (hash('sha512', implode(':', [$txn, $rand, $this->token->getId()])) !== $hash) { throw new spitfire\exceptions\PrivateException('Invalid signature'); } 
+			$sigcheck = true;
+		}
+		else {
+			$rand = str_replace(['+', '/', '='], '', base64_encode(random_bytes(20)));
+			$sig  = implode(':', [$rand, hash('sha512', implode(':', [$txn, $rand, $this->token->getId()]))]);
+			$this->view->set('sig', $sig);
+		}
 		
 		//TODO: Check if the token is local or provided via GET
 		if (!$transfer) { throw new PublicException('No transaction found', 404); }
@@ -301,15 +339,16 @@ class TransferController extends BaseController
 			 * Check the permissions on the account. Whether the user can write.
 			 */
 			$granted = db()->table('rights\user')->get('user', db()->table('user')
-				->addRestriction('_id', $this->user->user->id))
+				->get('_id', $this->user->user->id))
 				->addRestriction('write', true)
 				->addRestriction('account', $source->account)
 				->fetch();
 			
 			if (!$granted) { throw new PublicException('You have no access on this account', 403); }
+			if (!isset($sigcheck) || !$sigcheck) { throw new spitfire\exceptions\PrivateException('Failed signature'); }
 			
 			$transfer->source = $source;
-			$transfer->amount = $source->convert($transfer->received, $transfer->target->currency);
+			$transfer->amount = $source->currency->convert($transfer->received, $transfer->target->currency);
 			$transfer->store();
 			
 			/*
@@ -326,7 +365,8 @@ class TransferController extends BaseController
 				return;
 			}
 			else {
-				throw new PublicException('Invalid redirect defined', 400);
+				$this->response->setBody('Redirecting...')->getHeaders()->redirect(url('account'));
+				return;
 			}
 			
 		} 
@@ -335,9 +375,9 @@ class TransferController extends BaseController
 		if ($transfer->source) {
 			
 			$granted = db()->table('rights\user')->get('user', db()->table('user')
-				->addRestriction('_id', $this->user->user->id))
+				->get('_id', $this->user->user->id))
 				->addRestriction('write', true)
-				->addRestriction('account', $transfer->source)
+				->addRestriction('account', $transfer->source->account)
 				->fetch();
 			
 			if (!$granted) { throw new PublicException('You have no access on this account', 403); }
@@ -347,15 +387,16 @@ class TransferController extends BaseController
 		else {
 			
 			$granted = db()->table('rights\user')->get('user', db()->table('user')
-				->addRestriction('_id', $this->user->user->id))
+				->get('_id', $this->user->user->id))
 				->addRestriction('write', true);
 			
-			$accounts = db()->table('account')->get('userg', $granted)->fetchAll();
+			$accounts = db()->table('account')->get('ugrants', $granted)->fetchAll();
 			
 			$this->view->set('source', $accounts);
 		}
 		
 		$this->view->set('transfer', $transfer);
+		$this->view->set('recipient', $this->sso->getUser($transfer->target->account->owner->_id));
 	}
 	
 	/**
@@ -370,9 +411,11 @@ class TransferController extends BaseController
 		
 		$transfer = db()->table('transfer')->get('_id', $txn)->fetch();
 		
-		if ($transfer->source && $transfer->target) {
+		if ($transfer->source && $transfer->target && !$transfer->cancelled) {
 			$transfer->executed = time();
 			$transfer->store();
+			
+			//TODO: Transfer needs to propagate through redirections here.
 		}
 	}
 	
@@ -390,7 +433,8 @@ class TransferController extends BaseController
 			throw new PublicException('Transaction is completed. Cannot be cancelled', 403);
 		}
 		
-		$transfer->delete();
+		$transfer->cancelled = time();
+		$this->view->set('transfer', $transfer);
 	}
 	
 }

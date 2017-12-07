@@ -13,7 +13,7 @@
 		<div class="span2">
 			<div><strong><?= $account->name ?></strong><span style="color: #777; font-size: .8em" title="This is your account ID">::<?= $account->_id ?></span></div>
 			<div class="spacer" style="height: 5px"></div>
-			<div><span style="color: #777; font-size: .8em" title="This value may included converted currencies">Approx. <?= $currencyLocalizer->format($account->estimatedBalance($preferences->currency), $preferences->currency->sf()) ?></span></div>
+			<div><span style="color: #777; font-size: .8em" title="This value may included converted currencies">Approx. <?= $currencyLocalizer->format($account->estimatedBalance($preferences->currency) / pow(10, $preferences->currency->decimals), $preferences->currency->sf()) ?></span></div>
 		</div>
 		<div class="span1 dials">
 			<ul>
