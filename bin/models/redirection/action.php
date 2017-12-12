@@ -26,5 +26,53 @@ class ActionModel extends Model
 		$schema->target      = new Reference('account');
 		$schema->amt         = new StringField(50);
 	}
+	
+	public function redirect($transfer, $leftover) {
+		$pull   = $this->redirection->account->_id == $transfer->source->account->_id;
+		
+		$source = $pull? $this->target->getBook($transfer->target->currency) : $transfer->target;
+		$target = $pull? $transfer->source : $this->target->getBook($transfer->target->currency);
+		
+		$dec    = pow(10, $source->currency->decimals);
+		$amount = floor($this->calculate($leftover / $dec, $source->currency->ISO) * $dec);
+		
+		$db     = $transfer->getTable()->getDb();
+		
+		$redir  = $db->table('transfer')->newRecord();
+		$redir->source      = $source;
+		$redir->target      = $target;
+		$redir->amount      = $amount;
+		$redir->received    = $amount;
+		$redir->description = substr('Redirected: ' . $transfer->description, 0, 200);
+		$redir->tags        = $transfer->tags;
+		$redir->previous    = $transfer;
+		$redir->created     = time();
+		$redir->executed    = time();
+		$redir->store();
+		
+		$pull? $source->account->notify($redir) : $target->account->notify($redir);
+		
+		return $redir;
+	}
+	
+	public function calculate($amount, $currency) {
+		
+		$rules    = explode(',', $this->amt);
+		$fallback = reset($rules);
+		
+		foreach ($rules as $rule) {
+			if (!preg_match('/^([0-9\.\,]+)\s*([a-zA-Z\%]*)\s*$/', $rule, $matches)){ continue; }
+			$modifier = $matches[1];
+			$ISOCode  = $matches[2];
+			
+			if ($ISOCode === '%')           { return $amount * $modifier / 100; }
+			elseif ($ISOCode === $currency) { return $modifier; }
+			elseif (empty($ISOCode))        { return $modifier; }
+		}
+		
+		//TODO: Implement
+		return $fallback;
+		
+	}
 
 }

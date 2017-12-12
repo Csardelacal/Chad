@@ -32,13 +32,13 @@ class FundsController extends BaseController
 {
 	
 	
-	public function add($acctid, $currencyISO = null, $amtParam = null, $pp = false, $returnto = false) {
+	public function add($acctid, $currencyISO = null, $amtParam = null) {
 		
 		/*
 		 * Prepare the provider list
 		 */
 		$providers = payment\provider\PaymentProviderPool::getInstance()->configure(); // Prepares the providers by loading their configuration
-		$currency  = $currencyISO? db()->table('currency')->get('ISO', $currencyISO)->fetch() : db()->table('currency')->get('default', true)->fetch();
+		$currency  = $currencyISO? db()->table('currency')->get('ISO', _def($_POST['currency'], $currencyISO))->fetch() : db()->table('currency')->get('default', true)->fetch();
 		
 		try {
 			/*
@@ -46,58 +46,31 @@ class FundsController extends BaseController
 			 * if this is not the case, we need to show the user the source select 
 			 * screen.
 			 */
-			if (!$this->request->isPost() && !$pp) { throw new HTTPMethodException('Not POSTed', 1712051108); }
+			if (!$this->request->isPost()) { throw new HTTPMethodException('Not POSTed', 1712051108); }
 			
 			$account  = db()->table('account')->get('_id', $acctid)->fetch();
-			$currency = db()->table('currency')->get('ISO', _def($_POST['currency'], $currencyISO))->fetch();
 			$amt      = _def($_POST['amt'], $amtParam);
+			
+			
+			/* @var $provider \payment\provider\ProviderInterface */
+			$provider = $providers->filter(function ($e) {
+				return !!(_def($_POST['provider'], null) === get_class($e));
+			})->rewind();
 			
 			if ($amt < 0)   { throw new ValidationException('Invalid amount', 1712051113); }
 			if (!$currency) { throw new PublicException('No currency found', 404); }
+			if (!$provider) { throw new PublicException('No provider found', 404); }
 			
-			try {
-				$book = $account->getBook($currency);
-			}
-			catch (\Exception$e) {
-				$book = $account->addBook($currency);
-			}
+			$record = db()->table('payment\provider\externalfunds')->newRecord();
+			$record->source   = get_class($provider);
+			$record->amt      = $amt;
+			$record->account  = $account;
+			$record->currency = $currency;
+			$record->returnto = _def($_GET['returnto'], strval(url('account')->absolute()));
+			$record->store();
 			
-			/* @var $provider \payment\provider\ProviderInterface */
-			$provider = $providers->filter(function ($e) use ($pp) {
-				return !!(_def($_POST['provider'], str_replace(':', '\\', $pp)) === get_class($e));
-			})->rewind();
-			
-			$context = new payment\provider\PaymentAuthorization();
-			$context->setAmt($amt);
-			$context->setCurrency($currency);
-			$context->setSuccessURL(url('funds', 'add', $account->_id, $currency->ISO, $amt, str_replace('\\', ':', get_class($provider)), urlencode(base64_encode($_GET['returnto']?? null)))->absolute());
-			$context->setFailureURL(url('funds', 'failed', $account->_id, $currency->ISO, $amt)->absolute());
-			$context->setFormData($_REQUEST);
-			
-			$return = $provider->authorize($context);
-			
-			if ($return instanceof \payment\provider\Redirection) {
-				$this->response->setBody('redirecting...')->getHeaders()->redirect($return->getTarget());
-				return;
-			}
-			
-			if ($provider->execute($context, time(), $amt)) {
-				$transfer = db()->table('transfer')->newRecord();
-				$transfer->source = null;
-				$transfer->target = $book;
-				$transfer->amount = $amt;
-				$transfer->received = $amt;
-				$transfer->description = get_class($provider);
-				$transfer->created  = time();
-				$transfer->executed = time();
-				$transfer->store();
-			}
-			
-			if ($returnto) {
-				$this->response->setBody('Redirecting...')->getHeaders()->redirect(base64_decode(urldecode($returnto)));
-				return;
-			}
-			$this->response->setBody('Redirecting...')->getHeaders()->redirect(url('account'));
+			$this->response->setBody('Redirecting...')->getHeaders()->redirect(url('funds', 'execute', $record->_id));
+			return;
 		} 
 		catch (HTTPMethodException $ex) {
 			/*
@@ -107,6 +80,75 @@ class FundsController extends BaseController
 		
 		$this->view->set('currency', $currency);
 		$this->view->set('providers', $providers);
+	}
+	
+	public function execute($fid) {
+		
+		/*
+		 * Prepare the provider list
+		 */
+		$providers = payment\provider\PaymentProviderPool::getInstance()->configure(); // Prepares the providers by loading their configuration
+		
+		$job       = db()->table('payment\provider\externalfunds')->get('_id', $fid)->fetch();
+		$account   = $job->account;
+		$amt       = $job->amt;
+		$currency  = $job->currency;
+		
+		/*
+		 * Get the appropriate book to add the funds to
+		 */
+		try                  { $book = $account->getBook($currency); }
+		catch (\Exception$e) { $book = $account->addBook($currency); }
+			
+		/* @var $provider \payment\provider\ProviderInterface */
+		$provider = $providers->filter(function ($e) use ($job) {
+			return !!($job->source === get_class($e));
+		})->rewind();
+		
+		/*
+		 * Create the context to manage the payment authorization.
+		 */
+		$context = new payment\provider\PaymentAuthorization();
+		$context->setAmt($amt);
+		$context->setCurrency($currency);
+		$context->setSuccessURL(url('funds', 'execute', $fid)->absolute());
+		$context->setFailureURL(url('funds', 'failed', $fid)->absolute());
+		$context->setFormData($_REQUEST);
+		
+		/*
+		 * Try and authorize the payment, pulling funds from the external source
+		 */
+		$return = $provider->authorize($context);
+		
+		/*
+		 * If the payment requires further authorization, we redirect the user to 
+		 * the url the payment provider directed us.
+		 */
+		if ($return instanceof \payment\provider\Redirection) {
+			$this->response->setBody('redirecting...')->getHeaders()->redirect($return->getTarget());
+			return;
+		}
+		
+		/*
+		 * Once the payment provider has authorized the payment, we direct the 
+		 * user to the URL that we were indicated by the source app.
+		 */
+		if ($provider->execute($context, time(), $amt)) {
+			$transfer = db()->table('transfer')->newRecord();
+			$transfer->source = null;
+			$transfer->target = $book;
+			$transfer->amount = $amt;
+			$transfer->received = $amt;
+			$transfer->description = get_class($provider);
+			$transfer->created  = time();
+			$transfer->executed = time();
+			$transfer->store();
+			$transfer->notify();
+		}
+		
+		$this->response->setBody('Redirecting...')->getHeaders()->redirect($job->returnto);
+		return;
+		
 	}
 	
 }

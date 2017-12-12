@@ -36,8 +36,8 @@ class GroupModel extends Model
 	 * @param Schema $schema
 	 */
 	public function definitions(Schema $schema) {
-		$schema->group   = new \StringField(50); #The group id of the remote application
-		$schema->tag     = new \StringField(50); #Allows the app to tell which accounts belong to it
+		$schema->group   = new \StringField(50); #The group id of the user
+		$schema->tag     = new \StringField(50); #Allows the app to tell which accounts belong to the group
 		$schema->account = new \Reference('account');
 		$schema->write   = new \BooleanField();
 		$schema->created = new \IntegerField(true);

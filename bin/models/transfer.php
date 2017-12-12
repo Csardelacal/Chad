@@ -1,5 +1,7 @@
 <?php
 
+use db\TagField;
+use redirection\RedirectionModel;
 use spitfire\Model;
 use spitfire\storage\database\Schema;
 
@@ -37,7 +39,7 @@ class TransferModel extends Model
 		 * transfer.
 		 */
 		$schema->description = new StringField(200);
-		$schema->tags        = new StringField(200);
+		$schema->tags        = new TagField(200);
 		
 		/*
 		 * Timestamps for the payment. Please note that a transfer is only balanced
@@ -51,6 +53,17 @@ class TransferModel extends Model
 		$schema->due         = new IntegerField(true);
 		$schema->executed    = new IntegerField(true);
 		$schema->cancelled   = new IntegerField(true);
+		
+		$schema->previous    = new Reference('transfer');
+	}
+	
+	public function notify() {
+		/*
+		 * Redirections listen here. Once the data has been stored, we can trigger
+		 * a redirection and make things happen.
+		 */
+		$this->target->account->notify($this);
+		$this->source->account->notify($this);
 	}
 
 }

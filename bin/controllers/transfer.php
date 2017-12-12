@@ -3,8 +3,8 @@
 use chad\exceptions\InsufficientFundsException;
 use chad\exceptions\NoAccountAuthorizedException;
 use chad\exceptions\TxnRequiresAuthException;
-use spitfire\core\http\URL;
 use spitfire\exceptions\HTTPMethodException;
+use spitfire\exceptions\PrivateException;
 use spitfire\exceptions\PublicException;
 use spitfire\validation\ValidationError;
 use spitfire\validation\ValidationException;
@@ -123,6 +123,8 @@ class TransferController extends BaseController
 		try {
 			
 			if (!$this->request->isPost()) { throw new HTTPMethodException('Not posted', 1711301043); }
+			
+			if (!$tgt) { throw new PublicException('No target defined', 400);}
 			
 			/*
 			 * The target account must always be unequivocally defined. It is not 
@@ -273,7 +275,7 @@ class TransferController extends BaseController
 			
 			$this->view->set('txnid', $transfer->_id);
 			$this->view->set('transfer', $transfer);
-			$this->view->set('redirect', strval(url('transfer', 'authorize', $transfer->_id)->absolute()));
+			$this->view->set('redirect', strval(url('transfer', 'authorize', $transfer->_id, ['returnto' => _def($_GET['returnto'], '')])->absolute()));
 		}
 		catch (HTTPMethodException $ex) {
 			//Ignore this, just show the appropriate template 
@@ -308,7 +310,7 @@ class TransferController extends BaseController
 		
 		if ($sig) {
 			list($rand, $hash) = explode(':', $sig);
-			if (hash('sha512', implode(':', [$txn, $rand, $this->token->getId()])) !== $hash) { throw new spitfire\exceptions\PrivateException('Invalid signature'); } 
+			if (hash('sha512', implode(':', [$txn, $rand, $this->token->getId()])) !== $hash) { throw new PrivateException('Invalid signature'); } 
 			$sigcheck = true;
 		}
 		else {
@@ -345,7 +347,7 @@ class TransferController extends BaseController
 				->fetch();
 			
 			if (!$granted) { throw new PublicException('You have no access on this account', 403); }
-			if (!isset($sigcheck) || !$sigcheck) { throw new spitfire\exceptions\PrivateException('Failed signature'); }
+			if (!isset($sigcheck) || !$sigcheck) { throw new PrivateException('Failed signature'); }
 			
 			$transfer->source = $source;
 			$transfer->amount = $source->currency->convert($transfer->received, $transfer->target->currency);
@@ -356,7 +358,7 @@ class TransferController extends BaseController
 			 * redirect the user to the appropriate page to add funds to the account
 			 */
 			if ($source->balance() < $transfer->amount) {
-				$this->response->setBody('Redirecting...')->getHeaders()->redirect(url('funds', 'add', $source->account->_id, $source->currency->ISO, $transfer->amount, ['returnto' => strval(URL::current()->absolute())]));
+				$this->response->setBody('Redirecting...')->getHeaders()->redirect(url('funds', 'add', $source->account->_id, $source->currency->ISO, $transfer->amount, ['returnto' => strval(url('transfer', 'authorize', $transfer->_id, ['returnto' => _def($_GET['returnto'], '')]))]));
 				return;
 			}
 			
@@ -414,8 +416,7 @@ class TransferController extends BaseController
 		if ($transfer->source && $transfer->target && !$transfer->cancelled) {
 			$transfer->executed = time();
 			$transfer->store();
-			
-			//TODO: Transfer needs to propagate through redirections here.
+			$transfer->notify();
 		}
 	}
 	

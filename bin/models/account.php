@@ -1,6 +1,9 @@
 <?php
 
+use db\TagField;
 use redirection\RedirectionModel;
+use rights\UserModel;
+use spitfire\exceptions\PrivateException;
 use spitfire\Model;
 use spitfire\storage\database\Schema;
 
@@ -43,14 +46,15 @@ class AccountModel extends Model
 		$schema->name      = new StringField(50);
 		$schema->owner     = new Reference('user');
 		$schema->taxID     = new StringField(25); #This allows the system to export accounting data to external agents.
-		$schema->resets    = new IntegerField(true);
-		$schema->tags      = new TextField();
+		$schema->resets    = new IntegerField(true); #Resets the balance of the account to 0 at the given interval
+		$schema->resetDate = new IntegerField(true); #If this is anything but 0, resetting will happen at the nth day of the period (hours for days)
+		$schema->tags      = new TagField();
 		
 		$schema->books     = new ChildrenField(BookModel::class, 'account');
 		$schema->redirects = new ChildrenField(RedirectionModel::class, 'account');
 		
 		#For the permissions system
-		$schema->ugrants   = new ChildrenField(rights\UserModel::class, 'account');
+		$schema->ugrants   = new ChildrenField(UserModel::class, 'account');
 		
 		#Set the id and currency as primary, this is deprecated, but needs to be done for now
 		$schema->_id->setPrimary(true);
@@ -67,13 +71,17 @@ class AccountModel extends Model
 		if ($this->_id === null) {
 			$this->_id = substr(str_replace(['/', '=', '-', '_'], '', base64_encode(random_bytes(100))), 0, 25);
 		}
+		
+		if ($this->resets === null) {
+			$this->resets = self::RESETS_NONE;
+		}
 	}
 	
 	public function getBook($currency) {
 		$db = $this->getTable()->getDb();
 		$c  = $currency instanceof CurrencyModel? $currency : $db->table('currency')->get('ISO', $currency)->fetch();
 		
-		if (!$c) { throw new spitfire\exceptions\PrivateException('No such currency', 1711301114); }
+		if (!$c) { throw new PrivateException('No such currency', 1711301114); }
 		
 		$q  = $db->table('book')->get('account', $this)->addRestriction('currency', $c);
 		return $q->fetch();
@@ -94,7 +102,7 @@ class AccountModel extends Model
 		}
 		
 		if ($this->getBook($currency->ISO)) {
-			throw new spitfire\exceptions\PrivateException('Book already exists', 1711302039);
+			throw new PrivateException('Book already exists', 1711302039);
 		}
 		
 		$book = $db->table('book')->newRecord();
@@ -115,6 +123,19 @@ class AccountModel extends Model
 		}
 		
 		return $balance;
+	}
+	
+	public function notify($transfer) {
+		
+		/*
+		 * Redirections listen here. Once the data has been stored, we can trigger
+		 * a redirection and make things happen.
+		 */
+		RedirectionModel::get($this)->reduce(function ($carry, $e) use($transfer) {
+			if (!$carry && $e->test($transfer)) { $e->redirect($transfer); return true; }
+			else                            { return false; }
+		}, false);
+		
 	}
 
 }

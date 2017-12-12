@@ -33,5 +33,28 @@ class RedirectionModel extends Model
 		$schema->rules       = new ChildrenField('redirection\rule', 'redirection');
 		$schema->actions     = new ChildrenField('redirection\action', 'redirection');
 	}
+	
+	
+	public function test($transfer) {
+		$rules = collect($this->rules->toArray());
+		
+		return $rules->reduce(function ($carry, $e) use ($transfer) {
+			return $carry && $e->test($transfer);
+		}, true);
+	}
+	
+	
+	public function redirect($transfer) {
+		$rules  = collect($this->actions->toArray());
+		$amount = $this->account->_id == $transfer->target->account->_id? $transfer->received : $transfer->amount;
+		
+		$rules->each(function ($e) use ($transfer, &$amount) {
+			$amount -= $e->redirect($transfer, $amount)->received;
+		});
+	}
+	
+	public static function get($account) {
+		return db()->table('redirection\redirection')->get('account', $account)->fetchAll();
+	}
 
 }

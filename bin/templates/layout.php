@@ -25,5 +25,6 @@
 		
 		<script src="<?= spitfire\core\http\URL::asset('js/ui-layout.js') ?>" type="text/javascript"></script>
 		<script src="<?= spitfire\core\http\URL::asset('js/dials.js') ?>" type="text/javascript"></script>
+		<script src="<?= url('cron')->setExtension('js') ?>" type="text/javascript"></script>
 	</body>
 </html>

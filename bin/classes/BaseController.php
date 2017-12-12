@@ -76,7 +76,7 @@ class BaseController extends Controller
 		 * themselves.
 		 */
 		if ($this->token && $this->token instanceof Token) {
-			$this->user = $memcached->get('chad_auth_' . $this->token->getId(), function () { return $this->token->getTokenInfo()->authenticated? $this->token->getTokenInfo() : null; });
+			$this->user    = $memcached->get('chad_auth_' . $this->token->getId(), function () { return $this->token->getTokenInfo()->authenticated? $this->token->getTokenInfo() : null; });
 		}
 		
 		/*
