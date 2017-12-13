@@ -134,8 +134,31 @@ class FundsController extends BaseController
 		 * user to the URL that we were indicated by the source app.
 		 */
 		if ($provider->execute($context, time(), $amt)) {
+			
+			$source   = db()->table('payment\provider\source')->get('provider', get_class($provider))->fetch();
+			
+			if ($source) {
+				$srcaccount = $source->account;
+			}
+			else {
+				$srcaccount = db()->table('account')->newRecord();
+				$srcaccount->name      = get_class($provider);
+				$srcaccount->owner     = null;
+				$srcaccount->taxID     = null;
+				$srcaccount->resets    = AccountModel::RESETS_MONTHLY | AccountModel::RESETS_ABSOLUTE;
+				$srcaccount->resetDate = 1;
+				$srcaccount->store();
+				
+				$source  = db()->table('payment\provider\source')->newRecord();
+				$source->provider = get_class($provider);
+				$source->account  = $srcaccount;
+				$source->store();
+			}
+			
+			$srcbook = $srcaccount->getBook($book->currency)? : $srcaccount->addBook($book->currency);
+			
 			$transfer = db()->table('transfer')->newRecord();
-			$transfer->source = null;
+			$transfer->source = $srcbook;
 			$transfer->target = $book;
 			$transfer->amount = $amt;
 			$transfer->received = $amt;

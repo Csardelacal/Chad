@@ -50,6 +50,7 @@ class TransferModel extends Model
 		 * fail a payment and leave it as overdue.
 		 */
 		$schema->created     = new IntegerField(true);
+		$schema->authorized  = new IntegerField(true);
 		$schema->due         = new IntegerField(true);
 		$schema->executed    = new IntegerField(true);
 		$schema->cancelled   = new IntegerField(true);

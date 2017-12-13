@@ -1,6 +1,5 @@
 <?php
 
-use redirection\RedirectionModel;
 use spitfire\Model;
 use spitfire\storage\database\Schema;
 
@@ -11,13 +10,9 @@ use spitfire\storage\database\Schema;
  * 
  * @property string        $account  The id used to identify this account. This ID is only PART of the primary key
  * @property CurrencyModel $currency The currency for this account
- * @property UserModel     $owner    The user that this account belongs to. This does not imply access.
- * @property string        $taxID    Allows to name an account with a code pertaining to tax information
  * @property int           $reset    Date of the last reset
  * @property int           $balanced In order for the system to regularly balance an account, we need it to know when it was last balanced.
- * @property string        $tags     Tags do allow application and group permissions to target big amounts of accounts at once
  * 
- * @property RedirectionModel $redirects A collection of redirects for this account.
  * 
  * @author César de la Cal Bretschneider <cesar@magic3w.com>
  */
@@ -25,13 +20,38 @@ class BookModel extends Model
 {
 	
 	public function definitions(Schema $schema) {
-		#This is due to a bug in SF - should be fixed soon and then this can be removed
 		unset($schema->_id);
 		
-		#Set the fields
+		/*
+		 * The primary key for a book is a combination of account and currency.
+		 * This allows an account to hold several balances for different currencies.
+		 */
 		$schema->account   = new Reference('account');
 		$schema->currency  = new Reference('currency');
 		
+		/*
+		 * The minimum allows the application to define whether and how much is 
+		 * the balance this account needs to hold before it starts blocking transfers.
+		 * 
+		 * This property is only used for external authorizations and will not 
+		 * prevent system balancing or bureaucrats to override the limit and 
+		 * push the account below the defined minimum.
+		 */
+		$schema->minimum   = new IntegerField();
+		
+		/*
+		 * Housekeeping flags. These are intended for the system to know when a 
+		 * book needs to be rebalanced (to prevent the system from dragging along
+		 * old records) and when the account expects to be reset.
+		 * 
+		 * Please note, that the account reset mechanism does not guarantee that
+		 * the account will be reset "on time". It will, though, always reset the
+		 * proper times. 
+		 * 
+		 * For example, an account resetting on the 1st may be reset on the 2nd if
+		 * the system is extremely busy. But, when resetting on the 2nd, all transfers
+		 * after that date will be ignored.
+		 */
 		$schema->balanced  = new IntegerField(true);
 		$schema->reset     = new IntegerField(true);
 		$schema->nextReset = new IntegerField(true);
@@ -119,5 +139,13 @@ class BookModel extends Model
 		}
 		
 	}
-
+	
+	public static function getById($bookid) {
+		list($acct, $ISO) = explode(':', $bookid);
+		
+		$currency = db()->table('currency')->get('ISO', $ISO);
+		$_return  = db()->table('book')->get('account__id', $acct)->where('currency', $currency)->fetch();
+		
+		return $_return;
+	}
 }

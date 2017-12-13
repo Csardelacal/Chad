@@ -109,6 +109,7 @@ class AccountModel extends Model
 		$book->account = $this;
 		$book->currency = $currency;
 		$book->balanced = 0;
+		$book->minimum  = 0;
 		$book->store();
 		
 		return $book;
@@ -133,7 +134,7 @@ class AccountModel extends Model
 		 */
 		RedirectionModel::get($this)->reduce(function ($carry, $e) use($transfer) {
 			if (!$carry && $e->test($transfer)) { $e->redirect($transfer); return true; }
-			else                            { return false; }
+			else                                { return false; }
 		}, false);
 		
 	}

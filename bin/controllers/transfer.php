@@ -52,6 +52,17 @@ class TransferController extends BaseController
 	public function create() {
 		
 		/*
+		 * Create the transfer at start-up. This transfer will not be stored until
+		 * the system is sure that the data provided to it is legit. Meanwhile this
+		 * is a placeholder.
+		 */
+		$transfer = db()->table('transfer')->newRecord();
+		
+		$transfer->created     = time();
+		$transfer->due         = null;
+		$transfer->executed    = null;
+		
+		/*
 		 * This is a minor fix for the user interface that the system requires.
 		 * Since the user provides the currency for the transfer from a select box,
 		 * the system needs to append it to the target
@@ -60,6 +71,11 @@ class TransferController extends BaseController
 			$_POST['tgt'].= ':' . $_POST['currency'];
 		}
 		
+		/*
+		 * When a user is represented by an application, then we perform a series
+		 * of additional checks to prevent application from abusing a token to 
+		 * impersonate a user.
+		 */
 		if ($this->authapp) {
 			$auth = $this->sso->authApp($_GET['signature'], $this->token, ['transfer.create', 'transfer.create.user']);
 			
@@ -94,45 +110,63 @@ class TransferController extends BaseController
 			if ($this->user && !$auth->getContext('transfer.create.user')->isGranted() == 2) { 
 				//The user still needs to authorize this application to access their accounts at all
 				//This is separate from the authorization of individual transactions
+				$this->view->set('status', 'denied');
+				$this->view->set('redirect', $auth->getRedirect(['transfer.create.user']));
+				return;
 			}
 		}
-		
-		/*
-		 * Sequentially, having this block outside the POST only section feels...
-		 * off. But due to the fact that this variables are used in the catch
-		 * sections of the code, it feels more natural to put it outside the try
-		 */
-		$posted = [
-			'tgt' => validate($_POST['tgt']?? null)->minLength(20, 'Target must be a valid account ID'),
-			'amt' => validate($_POST['amt']?? null)->minLength(1, 'Amount is mandatory'),
-			'description' => validate($_POST['description']?? null)->minLength(1, 'Description is mandatory'),
-			#Tags are only accepted for applications, so they only can be set by apps
-			'tags' => validate($_POST['tags']?? null)->minLength($this->authapp? 255 : 0, 'Tags too long')
-		];
-		
-		list($account, $currency) = explode(':', $_POST['tgt']);
-		$tgt = db()->table('book')
-			->get('account', db()->table('account')->get('_id', $account))
-			->addRestriction('currency', db()->table('currency')->get('ISO', $currency))
-			->fetch();
-		
-		$amt = $posted['amt']->getValue();
-		$description = $posted['description']->getValue();
-		$tags = $posted['tags'];
 		
 		try {
 			
 			if (!$this->request->isPost()) { throw new HTTPMethodException('Not posted', 1711301043); }
 			
-			if (!$tgt) { throw new PublicException('No target defined', 400);}
+			/*
+			 * I moved this block back into the POST section of the script. PHP seems
+			 * to hate the idea that I'm managing data inside the try and the catch block.
+			 */
+			$posted = [
+				'tgt' => validate($_POST['tgt']?? null)->addRule(new chad\validation\BookIdValidationRule(db())),
+				'src' => validate($_POST['src']?? null)->addRule(new chad\validation\BookIdValidationRule(db(), true)),
+				'amt' => validate($_POST['amt']?? null)->minLength(1, 'Amount is mandatory'),
+				'description' => validate($_POST['description']?? null)->minLength(1, 'Description is mandatory'),
+				#Tags are only accepted for applications, so they only can be set by apps
+				'tags' => validate($_POST['tags']?? null)->maxLength($this->authapp? 255 : 0, 'Tags too long')
+			];
+
+			validate($posted)->validate();
+			
+			
+			$transfer->target      = BookModel::getById($posted['tgt']->getValue());
+			$transfer->description = $posted['description']->getValue();
+			$transfer->tags        = $posted['tags']->getValue();
 			
 			/*
-			 * The target account must always be unequivocally defined. It is not 
-			 * acceptable to provide a username or anything alike.
+			 * Some applications, and specially users. Will prefer to use organic 
+			 * amounts for their payments.
+			 * 
+			 * Humans tend to enter the amounts as floats. Just like the currency
+			 * is usually presented to them. To avoid any issues, the system will 
+			 * automatically correct the amount.
 			 */
+			$transfer->received = $posted['amt']->getValue() * (isset($_POST['decimals'])? pow(10, $transfer->target->currency->decimals) : 1);
 			
-			validate($posted);
+			/*
+			 * Check if there is a source defined.
+			 */
+			if (!$posted['src']->getValue()) { 
+				throw new NoAccountAuthorizedException('Missing source account', 1712011720); 
+			}
+
+			/*
+			 * When a user reaches this endpoint they will already have had to 
+			 * select an account to bill. In this case the system will check whether
+			 * the user is allowed to perform the operation and check that the 
+			 * intent is legitimate.
+			 */
+			$transfer->source = BookModel::getById($posted['src']->getValue());
+			$transfer->amount = $transfer->source->currency->convert($transfer->received, $transfer->source->currency);
 			
+			$lock     = new \rights\AccountLock($transfer->source);
 			
 			/*
 			 * At this point Chad needs to determine whether the user has enough 
@@ -144,115 +178,19 @@ class TransferController extends BaseController
 			 * will be preauthorized and instruct the application to directly call
 			 * execute()
 			 */
-			if ($this->user && $this->authapp) {
-				/*
-				 * This is a rather tricky query, since it requires the system to 
-				 * find an account the user can write to, and that the application
-				 * can write to.
-				 * 
-				 * Chad won't otherwise authorize the transaction at all.
-				 */
-				$userg = db()->table('rights\user')->get('user', db()->table('user')->get('_id', $this->user->user->id))->addRestriction('write', true);
-				$query = db()->table('account')->get('ugrants', $userg);
-				$grant = db()->table('rights\app')->get('app', $this->authapp)->addRestriction('account', $query)->addRestriction('write', true)->fetchAll();
-				
-				if ($grant->isEmpty()) {
-					throw new NoAccountAuthorizedException('The user has no accounts that the app is authorized to bill');
-				}
-				
-				/*
-				 * Loop through the grants and find if the user has enough currency
-				 */
-				foreach ($grant as $g) {
-					$books = $g->account->getBook($currency);
-					if ($book && $tgt->convert($book->balance(), $currency) > $amt) { $billable = $book; }
-				}
-				
-				/*
-				 * If a book has been authorized and is already billable, then we can
-				 * report this back to the application and it can automatically
-				 * execute the transaction.
-				 */
-				if ($billable) {
-					$src = $billable;
-				}
-				else {
-					throw new InsufficientFundsException('Not enough funds on any authorized book', 1711301054);
-				}
-			}
-			elseif ($this->user) {
-				
-				if (!isset($_POST['src'])) { 
-					throw new ValidationException('Missing source account', 1712011720, [new ValidationError('No source account defined')]); 
-				}
-				
-				/*
-				 * When a user reaches this endpoint they will already have had to 
-				 * select an account to bill. In this case the system will check whether
-				 * the user is allowed to perform the operation and check that the 
-				 * intent is legitimate.
-				 */
-				list($srcaccount, $srccurrency) = explode(':', $_POST['src']);
-				$query = db()->table('account')->get('_id', $srcaccount);
-				
-				$userg = db()->table('rights\user')->get('user', db()->table('user')
-					->get('_id', $this->user->user->id))
-					->addRestriction('write', true)
-					->addRestriction('account', $query)
-					->fetch();
-				
-				if (!$userg) {
-					throw new PublicException('Not authorized', 403);
-				}
-				
-				//TODO: Generate and verify the signature
-				//TODO: Check if the token was authorized by and for Chad alone
-				
-				$src = $query->fetch()->getBook($srccurrency);
-				
-				/*
-				 * Humans tend to enter the amounts as floats. Just like the currency
-				 * is usually presented to them. To avoid any issues, the system will 
-				 * automatically correct the amount.
-				 */
-				$amt = $amt * pow(10, $tgt->currency->decimals);
-				
-			}
-			elseif ($this->authapp) {
-				
-				/*
-				 * When billing an account without a user, the application needs to
-				 * properly provide an account ID. Using the system without a unique
-				 * account ID does not work in this case.
-				 */
-				if (!isset($_POST['src'])) { 
-					throw new ValidationException('Missing source account', 1712011720, [new ValidationError('No source account defined')]); 
-				}
-				
-				list($srcaccount, $srccurrency) = explode(':', $_POST['src']);
-				$query = db()->table('account')->get('_id', $srcaccount);
-				$grant = db()->table('rights\app')->get('app', $this->authapp)->addRestriction('account', $query)->addRestriction('write', true)->fetch();
-				
-				if (!$grant) {
-					throw new PublicException('Account unauthorized', 403);
-				}
-				
-				$src = $query->fetch();
-			}
-			else {
-				throw new PublicException('This endpoint requires authentication', 403);
+			if (!$lock->unlock($this->user->user->id, $this->authapp)) {
+				throw new NoAccountAuthorizedException('Not authorized on the given account');
 			}
 			
-			$transfer = db()->table('transfer')->newRecord();
-			$transfer->source      = $src;
-			$transfer->target      = $tgt;
-			$transfer->amount      = $src->currency->convert($amt, $tgt->currency);
-			$transfer->received    = $amt;
-			$transfer->description = $description;
-			$transfer->tags        = $tags;
-			$transfer->created     = time();
-			$transfer->due         = null;
-			$transfer->executed    = null;
+			/*
+			 * If the user is logged in and not represented by an app, we need to 
+			 * check whether the user is communicating directly with Chad or being
+			 * Man-in-the-middle'd
+			 */
+			if ($this->user && !$this->authapp) {
+				//TODO: Check
+			}
+			
 			$transfer->store();
 			
 			$this->view->set('txnid', $transfer->_id);
@@ -261,16 +199,11 @@ class TransferController extends BaseController
 			
 		}
 		catch (TxnRequiresAuthException$ex) {
-			$transfer = db()->table('transfer')->newRecord();
-			$transfer->source      = null;
-			$transfer->target      = $tgt;
-			$transfer->amount      = null;
-			$transfer->received    = $amt;
-			$transfer->description = $description;
-			$transfer->tags        = $tags;
-			$transfer->created     = time();
-			$transfer->due         = null;
-			$transfer->executed    = null;
+			
+			/*
+			 * The transfer can be created, although we cannot give it a source, 
+			 * and therefore the application needs to have it authorized first.
+			 */
 			$transfer->store();
 			
 			$this->view->set('txnid', $transfer->_id);

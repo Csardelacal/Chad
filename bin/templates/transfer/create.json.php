@@ -1,7 +1,7 @@
 <?php
 
 $payload = [
-	 'id' => $transfer->_id
+	'id' => $transfer->_id
 ];
 
 if (isset($redirect)) {
@@ -9,6 +9,6 @@ if (isset($redirect)) {
 }
 
 echo json_encode([
-	'status'  => 'OK',
+	'status'  => isset($status)? $status : 'OK',
 	'payload' => $payload
 ]);

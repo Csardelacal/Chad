@@ -74,13 +74,16 @@ class AppAuthentication
 		return $this->contexts[$name];
 	}
 	
-	public function getRedirect($contexts = null) {
+	public function getRedirect($contexts = null, $redirect = null) {
 		if ($contexts === null) {
 			$contexts = [];
 			foreach ($this->contexts as $ctx) { $contexts[] = $ctx->getId(); }
 		}
 		
-		return $this->sso->getEndpoint() . '/auth/connect?' . http_build_query(['signature' => $this->sso->makeSignature($this->getSrc()->getId(), $contexts)]);
+		return $this->sso->getEndpoint() . '/auth/connect?' . http_build_query([
+			'signature' => $this->sso->makeSignature($this->getSrc()->getId(), $contexts),
+			'returnto'  => $redirect
+		]);
 	}
 	
 	public function setAuthenticated($authenticated) {
