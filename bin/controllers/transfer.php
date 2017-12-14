@@ -1,13 +1,12 @@
 <?php
 
-use chad\exceptions\InsufficientFundsException;
 use chad\exceptions\NoAccountAuthorizedException;
 use chad\exceptions\TxnRequiresAuthException;
+use chad\validation\BookIdValidationRule;
+use rights\AccountLock;
 use spitfire\exceptions\HTTPMethodException;
 use spitfire\exceptions\PrivateException;
 use spitfire\exceptions\PublicException;
-use spitfire\validation\ValidationError;
-use spitfire\validation\ValidationException;
 
 /* 
  * The MIT License
@@ -111,7 +110,7 @@ class TransferController extends BaseController
 				//The user still needs to authorize this application to access their accounts at all
 				//This is separate from the authorization of individual transactions
 				$this->view->set('status', 'denied');
-				$this->view->set('redirect', $auth->getRedirect(['transfer.create.user']));
+				$this->view->set('redirect', $auth->getRedirect(['transfer.create.user'], $_POST['retryurl']?? null));
 				return;
 			}
 		}
@@ -125,8 +124,8 @@ class TransferController extends BaseController
 			 * to hate the idea that I'm managing data inside the try and the catch block.
 			 */
 			$posted = [
-				'tgt' => validate($_POST['tgt']?? null)->addRule(new chad\validation\BookIdValidationRule(db())),
-				'src' => validate($_POST['src']?? null)->addRule(new chad\validation\BookIdValidationRule(db(), true)),
+				'tgt' => validate($_POST['tgt']?? null)->addRule(new BookIdValidationRule(db())),
+				'src' => validate($_POST['src']?? null)->addRule(new BookIdValidationRule(db(), true)),
 				'amt' => validate($_POST['amt']?? null)->minLength(1, 'Amount is mandatory'),
 				'description' => validate($_POST['description']?? null)->minLength(1, 'Description is mandatory'),
 				#Tags are only accepted for applications, so they only can be set by apps
@@ -166,7 +165,7 @@ class TransferController extends BaseController
 			$transfer->source = BookModel::getById($posted['src']->getValue());
 			$transfer->amount = $transfer->source->currency->convert($transfer->received, $transfer->source->currency);
 			
-			$lock     = new \rights\AccountLock($transfer->source);
+			$lock     = new AccountLock($transfer->source);
 			
 			/*
 			 * At this point Chad needs to determine whether the user has enough 
@@ -187,8 +186,8 @@ class TransferController extends BaseController
 			 * check whether the user is communicating directly with Chad or being
 			 * Man-in-the-middle'd
 			 */
-			if ($this->user && !$this->authapp) {
-				//TODO: Check
+			if ($this->user && !$this->authapp && $this->user->app->id != $this->sso->getAppId()) {
+				throw new PublicException('Token authorized by an invalid application', 403);
 			}
 			
 			$transfer->store();
@@ -214,6 +213,10 @@ class TransferController extends BaseController
 			//Ignore this, just show the appropriate template 
 		}
 		
+		/*
+		 * If there is a user defined, then we extract the accounts the user has
+		 * access to and then provide them to the user.
+		 */
 		if ($this->user && !$this->authapp) {
 
 			$userg = db()->table('rights\user')
@@ -295,6 +298,13 @@ class TransferController extends BaseController
 				return;
 			}
 			
+			/*
+			 * Once the transfer has been authorized, the system records the 
+			 * authorization.
+			 */
+			$transfer->authorized = time();
+			$transfer->store();
+			
 			if (isset($_GET['returnto']) && filter_var($_GET['returnto'], FILTER_VALIDATE_URL)) {
 				$this->response->setBody('Redirecting...')->getHeaders()->redirect($_GET['returnto']);
 				return;
@@ -346,7 +356,7 @@ class TransferController extends BaseController
 		
 		$transfer = db()->table('transfer')->get('_id', $txn)->fetch();
 		
-		if ($transfer->source && $transfer->target && !$transfer->cancelled) {
+		if ($transfer->source && $transfer->target && !$transfer->cancelled && $transfer->authorized) {
 			$transfer->executed = time();
 			$transfer->store();
 			$transfer->notify();
