@@ -67,14 +67,12 @@ class AccountController extends BaseController
 			if (!$auth->getContext('account.resets')->exists()) { $auth->getContext('account.resets')->create('Account resetting', 'Allows the remote application to create accounts in Chad that automatically reset.'); }
 			
 			if (!$auth->getContext('account.create')->isGranted()) {
-				//TODO: This should not redirect, instead it should send a redirect link to the application requesting the data
-				return $this->response->setBody('redirect...')->getHeaders()->redirect($auth->getRedirect(['account.create']) . '&returnto=' . rawurlencode(strval(url('account', 'create', ['signature' => $_GET['signature']])->absolute())));
+				return $this->view->set('redirect', $auth->getRedirect(['account.create'], $_GET['retryurl']?? null));
 			}
 			
 			$rights['create'] = $auth->getContext('account.create')->isGranted() == 2;
 			$rights['reset']  = $auth->getContext('account.resets')->isGranted() == 2;
 			$rights['tags']   = true;
-			$rights['grant']  = true;
 			
 		}
 		/*
@@ -85,7 +83,6 @@ class AccountController extends BaseController
 			$rights['create'] = true;
 			$rights['reset']  = false;
 			$rights['tags']   = false;
-			$rights['grant']  = false;
 		}
 		else {
 			throw new PublicException('Not authorized - #1711191310', 403);
@@ -158,6 +155,7 @@ class AccountController extends BaseController
 			 * manage their money.
 			 */
 			$this->view->set('success', true);
+			$this->view->set('account', $account);
 		} 
 		/*
 		 * If the request was not posted, it means that a user is accessing this 
