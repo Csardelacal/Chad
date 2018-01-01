@@ -28,7 +28,7 @@ class TestController extends BaseController
 {
 	
 	public function test() {
-		die($this->sso->makeSignature('1067076433'));
+		die($this->sso->makeSignature(null, '1067076433'));
 	}
 	
 }

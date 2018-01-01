@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 
-class TagField extends \StringField
+class TagField extends \TextField
 {
 	
 	public function getAdapter(\spitfire\Model $model) {

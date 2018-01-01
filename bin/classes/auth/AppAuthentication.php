@@ -81,7 +81,7 @@ class AppAuthentication
 		}
 		
 		return $this->sso->getEndpoint() . '/auth/connect?' . http_build_query([
-			'signature' => $this->sso->makeSignature($this->getSrc()->getId(), $contexts),
+			'signature' => $this->sso->makeSignature($this->getSrc()->getId(), $this->sso->getAppId(), $contexts),
 			'returnto'  => $returnurl
 		]);
 	}
