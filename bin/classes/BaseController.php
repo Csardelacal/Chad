@@ -126,6 +126,10 @@ class BaseController extends Controller
 			
 			$currencyLocalizer = $this->preferences->localizer();
 			$this->view->set('currencyLocalizer', $currencyLocalizer);
+			$this->view->set('currency', $this->preferences->currency);
+		}
+		else {
+			$this->view->set('currency', $c);
 		}
 		
 		$this->view->set('preferences', $this->preferences);

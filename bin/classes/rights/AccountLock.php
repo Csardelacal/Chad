@@ -66,7 +66,9 @@ class AccountLock
 			$appQ = $db->table('rights\app')->get('app', $app);
 			$appQ->addRestriction('write', true);
 			
-			$accountQ->addRestriction($db->table('rights\app')->getSchema()->getField('app'), $appQ);
+			$accountQ->addRestriction('agrants', $appQ);
 		}
+		
+		return !!$accountQ->fetch();
 	}
 }

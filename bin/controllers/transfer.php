@@ -132,7 +132,7 @@ class TransferController extends BaseController
 				'tags' => validate($_POST['tags']?? null)->maxLength($this->authapp? 255 : 0, 'Tags too long')
 			];
 
-			validate($posted)->validate();
+			validate($posted);
 			
 			
 			$transfer->target      = BookModel::getById($posted['tgt']->getValue());
@@ -165,7 +165,7 @@ class TransferController extends BaseController
 			$transfer->source = BookModel::getById($posted['src']->getValue());
 			$transfer->amount = $transfer->source->currency->convert($transfer->received, $transfer->source->currency);
 			
-			$lock     = new AccountLock($transfer->source);
+			$lock     = new AccountLock($transfer->source->account);
 			
 			/*
 			 * At this point Chad needs to determine whether the user has enough 
@@ -190,12 +190,18 @@ class TransferController extends BaseController
 				throw new PublicException('Token authorized by an invalid application', 403);
 			}
 			
+			$transfer->authorized = time();
 			$transfer->store();
 			
 			$this->view->set('txnid', $transfer->_id);
 			$this->view->set('transfer', $transfer);
 			return;
 			
+		}
+		catch (spitfire\validation\ValidationException$e) {
+			$messages = $e->getResult();
+			foreach ($messages as $message) { echo $message; }
+			die();
 		}
 		catch (TxnRequiresAuthException$ex) {
 			
@@ -360,6 +366,8 @@ class TransferController extends BaseController
 			$transfer->executed = time();
 			$transfer->store();
 			$transfer->notify();
+			
+			$this->view->set('transfer', $transfer);
 		}
 	}
 	

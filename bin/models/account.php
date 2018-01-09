@@ -2,6 +2,7 @@
 
 use db\TagField;
 use redirection\RedirectionModel;
+use rights\AppModel;
 use rights\UserModel;
 use spitfire\exceptions\PrivateException;
 use spitfire\Model;
@@ -55,6 +56,7 @@ class AccountModel extends Model
 		
 		#For the permissions system
 		$schema->ugrants   = new ChildrenField(UserModel::class, 'account');
+		$schema->agrants   = new ChildrenField(AppModel::class, 'account');
 		
 		#Set the id and currency as primary, this is deprecated, but needs to be done for now
 		$schema->_id->setPrimary(true);

@@ -177,15 +177,28 @@ class AccountController extends BaseController
 	}
 	
 	public function balance($acctid, $currencyid = null) {
+		
+		if (!$this->user && !$this->authapp) {
+			throw new PublicException('Unauthorized', 401);
+		}
 		/*
 		 * Check if the user has been granted access to the account at all. This 
 		 * is critical for determining whether the user should be able to list the
 		 * transactions.
 		 */
-		$ugrants = db()->table('rights\user')->get('user', db()->table('user')->get('_id', $this->user->user->id));
-		$account = db()->table('account')->get('ugrants', $ugrants)->addRestriction('_id', $acctid)->fetch();
-		
-		if (!$account) { throw new PublicException('User has no access to the acocunt'); }
+		if ($this->user) {
+			$ugrants = db()->table('rights\user')->get('user', db()->table('user')->get('_id', $this->user->user->id));
+			$account = db()->table('account')->get('ugrants', $ugrants)->addRestriction('_id', $acctid)->fetch();
+
+			if (!$account) { throw new PublicException('User has no access to the account', 403); }
+		}
+		else {
+			$agrants = db()->table('rights\app')->get('app', $this->authapp);
+			$account = db()->table('account')->get('agrants', $agrants)->addRestriction('_id', $acctid)->fetch();
+			
+			
+			if (!$account) { throw new PublicException('App has no access to the account', 403); }
+		}
 		
 		/*
 		 * Depending on whether the user has a currency or not selected, we will 
@@ -194,7 +207,7 @@ class AccountController extends BaseController
 		 * transactions.
 		 */
 		if ($currencyid) {
-			$book = $account->getBook('USD');
+			$book = $account->getBook($currencyid);
 			
 			$this->view->setFile('account/balance');
 			$this->view->set('book', $book);

@@ -51,7 +51,7 @@ class BookIdValidationRule implements ValidationRule
 		 * Sometimes the validation rule
 		 */
 		if ($this->acceptNull && $value === null) {
-			return true;
+			return false;
 		}
 		
 		$record = BookModel::getById($value);
@@ -63,7 +63,7 @@ class BookIdValidationRule implements ValidationRule
 			);
 		}
 		
-		return true;
+		return false;
 	}
 
 }
