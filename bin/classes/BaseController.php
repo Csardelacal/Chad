@@ -132,6 +132,7 @@ class BaseController extends Controller
 			$this->view->set('currency', $c);
 		}
 		
+		$this->view->set('sso', $this->sso);
 		$this->view->set('preferences', $this->preferences);
 	}
 	

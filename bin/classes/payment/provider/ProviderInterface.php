@@ -113,6 +113,6 @@ interface ProviderInterface
 	 * @param int $size
 	 * @return string The location of the logo file
 	 */
-	function getLogo($size = 128);
+	function getLogo();
 	
 }

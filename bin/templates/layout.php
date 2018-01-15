@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		
+		<?php if (isset(${'page.title'})): ?> 
+		<title><?= ${'page.title'} ?></title>
+		<?php else: ?> 
+		<title>Chad - Account management</title>
+		<?php endif; ?> 
+		
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<link rel="stylesheet" type="text/css" href="<?= spitfire\core\http\URL::asset('css/app.css') ?>">
 		<link rel="stylesheet" type="text/css" href="<?= spitfire\core\http\URL::asset('css/ui-layout.css') ?>">

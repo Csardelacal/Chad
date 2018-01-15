@@ -51,6 +51,10 @@ class FundsController extends BaseController
 			$account  = db()->table('account')->get('_id', $acctid)->fetch();
 			$amt      = _def($_POST['amt'], $amtParam);
 			
+			if (isset($_POST['decimals']) && $_POST['decimals'] === 'natural') {
+				$amt = $amt * pow(10, $currency->decimals);
+			}
+			
 			
 			/* @var $provider \payment\provider\ProviderInterface */
 			$provider = $providers->filter(function ($e) {
@@ -58,6 +62,7 @@ class FundsController extends BaseController
 			})->rewind();
 			
 			if ($amt < 0)   { throw new ValidationException('Invalid amount', 1712051113); }
+			if (!$amt)      { throw new PublicException('No amount provided', 400); }
 			if (!$currency) { throw new PublicException('No currency found', 404); }
 			if (!$provider) { throw new PublicException('No provider found', 404); }
 			
@@ -78,6 +83,7 @@ class FundsController extends BaseController
 			 */
 		}
 		
+		$this->view->set('amt', $amt);
 		$this->view->set('currency', $currency);
 		$this->view->set('providers', $providers);
 	}

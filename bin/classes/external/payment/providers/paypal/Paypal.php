@@ -178,8 +178,8 @@ class Paypal implements ProviderInterface
 		return; //Paypal does not need extra set up
 	}
 
-	public function getLogo($size = 128) {
-		return null;
+	public function getLogo() {
+		return new \payment\provider\PaymentLogo(rtrim(dirname(__FILE__), '\/') . '/paypal-logo.jpg');
 	}
 
 	public function makeConfiguration() {

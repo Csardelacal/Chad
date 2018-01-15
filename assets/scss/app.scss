@@ -565,6 +565,23 @@ footer {
 	}
 }
 
+.payment-provider {
+	width: 25%;
+	
+	input[type=radio] {
+		display: none;
+	}
+	
+	img {
+		border: solid 2px #CCC;
+		border-radius: 5px;
+		max-width: 100%;
+	}
+	
+	input[type=radio]:checked + img {
+		border: solid 2px #55C;
+	}
+}
 
 @media all and (min-width: 960px) {
 	@import '_scaffolding';

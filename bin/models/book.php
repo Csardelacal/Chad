@@ -105,6 +105,23 @@ class BookModel extends Model
 		return $balance;
 	}
 	
+	public function history($until = null) {
+		$db    = $this->getTable()->getDb();
+		$until = $until? : time();
+		
+		$query = $db->table('transfer')->getAll();
+		$query->addRestriction('executed', $until, '<=');
+		
+		$group = $query->group();
+		$group->addRestriction('target', $this);
+		$group->addRestriction('source', $this);
+		
+		$query->setResultsPerPage(30);
+		$query->setOrder('created', 'DESC');
+		
+		return $query->fetchAll();
+	}
+	
 	public function nextReset() {
 		
 		if ($this->account->resets === AccountModel::RESETS_NONE) {
