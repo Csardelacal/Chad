@@ -1,33 +1,7 @@
 
 
 .navbar {
-	padding: 8px ;
-	text-align: center;
-
-	&::after {
-		display: none;
-	}
-
-	.logo {
-		display: block;
-		width: 100%;
-		float: none;
-		font-size: 1.05em;
-		margin-bottom: 10px !important;
-
-		&, ~ :not(.desktop-only) {
-			padding: 0 4px !important;
-			height: initial !important;
-		}
-
-		~ :not(.desktop-only) {
-			font-size: .9em;
-		}
-	}
-}
-
-.navbar {
-	background: #FEFEFE;
+	background: #327fc7;
 	vertical-align: top;
 	text-align: right;
 	box-shadow: 0 2px 2px #DDD;
@@ -46,9 +20,8 @@
 
 	a {
 		text-decoration: none;
-		color: #333;
-
-		&:hover { text-shadow: 0 0 4px #DDD }
+		color: #FFF;
+		font-weight: bold;
 	}
 	
 	.logo {

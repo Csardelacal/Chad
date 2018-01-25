@@ -14,7 +14,8 @@ $spacer_width: 20px / $row_max_width * 100%;
 $max_column_count: 10;
 
 div[class^="span"] {
-	float: left;
+	display: inline-block;
+	overflow-x: hidden;
 	margin-left: $spacer_width;
 	min-height: 1px;
 	box-sizing: border-box;
@@ -30,11 +31,6 @@ div[class^="row"] {
 	margin: 0 auto;
 	width: $row_max_width;
 	
-	&:after {
-		content: "";
-		display: table;
-		clear: both;
-	}
 	
 	&.fluid {
 		width: 100%;

@@ -1,19 +1,7 @@
 (function () {
 	
-	var fallbackToggle = function () {
-		var f = document.body.appendChild(document.createElement('span'))
-		f.style.position   = 'fixed';
-		f.style.top        = '0';
-		f.style.left       = '0';
-		f.style.padding    = '10px 15px';
-		f.style.background = '#2a912e';
-		return f;
-	}
-	
-	var sbc = document.querySelector('.contains-sidebar');
-	var sb  = sbc.querySelector('.sidebar');
-	var p   = sbc.parentNode;
-	var tb  = document.querySelectorAll('.toggle-button-target').length? document.querySelectorAll('.toggle-button-target') : [fallbackToggle()]; //Toggle button
+	var containerHTML = document.querySelector('.contains-sidebar');
+	var sidebarHTML   = containerHTML.querySelector('.sidebar');
 
 	/*
 	 * Scroll listener for the sidebar______________________________________
@@ -23,55 +11,114 @@
 	 */
 	 var wh  = window.innerHeight;
 	 var ww  = window.innerWidth;
-
-	 var sl  = function () { 
-		var square        = sbc.getBoundingClientRect();
-		var parent        = sbc.parentNode.getBoundingClientRect();
-		sb.style.height   = ww < 960? wh + 'px' : Math.min(wh, parent.bottom) - (square.top > 0? square.top : 0) + 'px';
-		sbc.style.height  = ww < 960? wh + 'px' : Math.min(wh, parent.bottom) - (square.top > 0? square.top : 0) + 'px';
-		sb.style.position = square.top > 0 || ww < 960? 'absolute' : 'fixed';
-		sb.style.width    = ww > 960? square.width + 'px' : '75%';
-	 };
-
-	 document.addEventListener('scroll', sl, false);
-	 sl();
-
+	 
 	 /*
-	  * Customize the toggle button
+	  * This function quickly allows the application to check whether it should 
+	  * consider the browser it is running in as a mobile viewport.
+	  * 
+	  * @returns {Boolean}
 	  */
-	for (var i = 0; i < tb.length; i++) {
-		var button = tb[i].appendChild(document.createElement('span'));
-		button.classList.add('toggle-button');
-	}
+	 var mobile = function () {
+		 return ww < 960;
+	 };
+	 
+	 /*
+	  * This helper allows the application to define listeners that will prevent
+	  * the application from hogging system resources when a lot of events are 
+	  * fired.
+	  * 
+	  * @param {type} fn
+	  * @returns {Function}
+	  */
+	 var debounce = function (fn, interval) {
+		var timeout = undefined;
 
-	 var rl  = function () {
+		return function () {
+			if (timeout) { return; }
+			var args = arguments;
+			
+			timeout = setTimeout(function () {
+				fn.apply(window, args);
+				timeout = undefined;
+			}, interval || 50);
+		};
+	 };
+	 
+	 /**
+	  * On Scroll, our sidebar is resized automatically to fill the screen within
+	  * the boundaries of the container.
+	  * 
+	  * @returns {undefined}
+	  */
+	var scrollListener  = function () { 
+		/*
+		 * Collect the constraints from the parent element to consider where the 
+		 * application is required to redraw the child.
+		 * 
+		 * @type type
+		 */
+		var constraints = containerHTML.parentNode.getBoundingClientRect();
+		var height = mobile()? wh + 'px' : Math.min(wh, constraints.bottom) - Math.max(constraints.top, 0) + 'px';
+		
+		/*
+		 * This flag determines whether the scrolled element is past the viewport
+		 * and therefore we need to "detach" the sidebar so it will follow along
+		 * with the scrolling user.
+		 * 
+		 * @type Boolean
+		 */
+		var detached = constraints.top < 0;
+		
+		containerHTML.style.height = height;
+		sidebarHTML.style.height   = height;
+		sidebarHTML.style.width    = mobile()? '75%' : containerHTML.scrollWidth + 'px';
+		
+		containerHTML.style.top    = mobile() || detached?   '0px' : Math.max(0, 0 - constraints.top) + 'px';
+		sidebarHTML.style.position = mobile() || detached? 'fixed' : 'static';
+	};
+
+	document.addEventListener('scroll', debounce(scrollListener, 25), false);
+	scrollListener();
+
+	 var resizeListener  = function () {
 		//Reset the size for window width and height that we collected
 		wh  = window.innerHeight;
 		ww  = window.innerWidth;
-
+		
+		//List the toggle buttons
+		var tb = document.querySelectorAll('.target-button');
+		
 		//For mobile devices we toggle to collapsable mode
-		if (ww < 960) {
-			sbc.classList.add('collapsable', 'collapsed');
+		if (ww < 960 + 200) {
+			containerHTML.classList.add('collapsed');
 			for (var i = 0; i < tb.length; i++) { tb[i].firstChild.classList.remove('hidden'); }
 			//Show the toggle button
-		} else {
-			sbc.classList.remove('collapsable', 'collapsed');
-			for (var i = 0; i < tb.length; i++) { tb[i].firstChild.classList.add('hidden'); }
+		} 
+		else {
+			containerHTML.classList.remove('collapsed');
+			
+			for (var i = 0; i < tb.length; i++) { 
+				var method = containerHTML.classList.contains('collapsable')? 'remove' : 'add';
+				tb[i].classList[method]('hidden'); 
+			}
 		}
-
-		sl();
+		
+		/**
+		 * We ping the scroll listener to redraw the the UI for it too.
+		 */
+		scrollListener();
 	 };
 
-	 window.addEventListener('resize', rl, false);
-	 rl();
+	 window.addEventListener('resize', debounce(resizeListener), false);
+	 resizeListener();
 
 	/*
 	 * Defer the listener for the toggles to the document.
 	 */
-	document.addEventListener('click', function(e) { e.target.classList.contains('toggle-button') && sbc.classList.toggle('collapsed'); }, false);
+	document.addEventListener('click', function(e) { e.target.classList.contains('toggle-button') && containerHTML.classList.toggle('collapsed'); }, false);
 
-	sbc.addEventListener('click', function() { sbc.classList.add('collapsed'); }, false);
-	sb.addEventListener('click', function(e) { e.stopPropagation(); }, false);
+	containerHTML.addEventListener('click', function() { containerHTML.classList.add('collapsed'); }, false);
+	sidebarHTML.addEventListener('click', function(e) { e.stopPropagation(); }, false);
 
 }());
 

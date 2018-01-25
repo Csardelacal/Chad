@@ -1,4 +1,17 @@
+<?php
 
+/*
+ * In the special event of the user requesting a HTML based funds report, we
+ * don't request the user to select the only currency, but instead redirect them
+ * directly.
+ */
+
+if ($books->count() === 1) {
+	return $this->response->setBody('Redirecting...')
+		->getHeaders()->redirect(url('account', 'balance', $account->_id, $books[0]->currency->ISO));
+}
+
+?>
 
 <div class="topbar sticky">
 	<span class="toggle-button-target" style="background: #2a912e; padding: 12px; margin: 0 10px 0 -10px; vertical-align: middle"><span class="toggle-button hidden"></span></span>

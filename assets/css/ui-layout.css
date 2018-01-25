@@ -16,31 +16,11 @@ body {
   text-transform: uppercase;
   padding: 0px 10px; }
 
-.contains-sidebar {
-  width: 25%;
-  float: left;
-  position: relative;
-  z-index: 99999; }
-  .contains-sidebar.collapsable {
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    position: fixed;
-    overflow: hidden;
-    transition: .3s opacity .2s ease-in, width .2s ease-in; }
-    .contains-sidebar.collapsable.collapsed {
-      width: 0%;
-      opacity: 0;
-      transition: opacity .2s ease-in, .3s width .2s ease-in; }
-      .contains-sidebar.collapsable.collapsed .sidebar {
-        left: -25%;
-        transition: left .2s ease-in; }
-
 .sidebar {
   overflow: hidden;
   position: absolute;
   top: 0;
+  height: 100%;
   transition: .3s left .2s ease-in; }
   .sidebar .menu-title {
     color: #2a912e;
@@ -59,17 +39,18 @@ body {
   overflow: auto; }
 
 .content {
-  float: left;
-  width: 75%; }
+  position: relative;
+  margin-left: 200px;
+  transition: margin .3s ease; }
 
 .toggle-button {
   display: inline-block;
   position: relative;
   vertical-align: middle;
-  width: 20px;
-  height: 30px;
+  width: 18px;
+  height: 18px;
   padding: 0px;
-  background: linear-gradient(0deg, transparent 6px, #FFF 6px, #FFF 9px, transparent 9px); }
+  background: linear-gradient(0deg, transparent 1px, #FFF 1px, #FFF 4px, transparent 4px); }
 
 body > .toggle-button {
   position: absolute;
@@ -81,7 +62,7 @@ body > .toggle-button {
   content: '';
   position: absolute;
   left: 0px;
-  top: 13px;
+  top: 7px;
   height: 3px;
   width: 100%;
   background: #FFF; }
@@ -90,7 +71,7 @@ body > .toggle-button {
   content: '';
   position: absolute;
   left: 0px;
-  top: 5px;
+  top: 0px;
   height: 3px;
   width: 100%;
   background: #FFF; }
@@ -109,17 +90,43 @@ body > .toggle-button {
   height: 50px; }
 
 @media all and (min-width: 960px) {
-  .toggle-button-target {
-    display: none; } }
+  .contains-sidebar {
+    width: 200px;
+    float: left;
+    position: relative;
+    z-index: 99999;
+    transition: .2s opacity .2s ease-in, .2s width .2s ease-in; }
+    .contains-sidebar.collapsed {
+      width: 0%;
+      opacity: 0; }
+      .contains-sidebar.collapsed .sidebar {
+        left: -200px;
+        transition: left .2s ease-in; }
+      .contains-sidebar.collapsed + .content {
+        margin-left: 0; } }
 @media all and (max-width: 960px) {
   .content {
-    width: 100%; }
+    margin-left: 0; }
 
   .sidebar {
     background: #FFF;
     left: 0; }
 
   .contains-sidebar {
-    background: rgba(0, 0, 0, 0.3); } }
+    z-index: 99999;
+    background: rgba(0, 0, 0, 0.3);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    overflow: hidden;
+    transition: .3s opacity .2s ease-in, width .2s ease-in; }
+    .contains-sidebar.collapsed {
+      width: 0%;
+      opacity: 0; }
+      .contains-sidebar.collapsed .sidebar {
+        left: -25%;
+        transition: left .2s ease-in; } }
 
 /*# sourceMappingURL=ui-layout.css.map */

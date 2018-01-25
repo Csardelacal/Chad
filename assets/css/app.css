@@ -426,7 +426,8 @@ footer {
       Author     : cesar
   */
   div[class^="span"] {
-    float: left;
+    display: inline-block;
+    overflow-x: hidden;
     margin-left: 2.08333%;
     min-height: 1px;
     box-sizing: border-box;
@@ -438,10 +439,6 @@ footer {
     display: block;
     margin: 0 auto;
     width: 960px; }
-    div[class^="row"]:after {
-      content: "";
-      display: table;
-      clear: both; }
     div[class^="row"].fluid {
       width: 100%; }
 
@@ -786,24 +783,7 @@ input[type=checkbox].styled {
       left: 60%; }
 
 .navbar {
-  padding: 8px;
-  text-align: center; }
-  .navbar::after {
-    display: none; }
-  .navbar .logo {
-    display: block;
-    width: 100%;
-    float: none;
-    font-size: 1.05em;
-    margin-bottom: 10px !important; }
-    .navbar .logo, .navbar .logo ~ :not(.desktop-only) {
-      padding: 0 4px !important;
-      height: initial !important; }
-    .navbar .logo ~ :not(.desktop-only) {
-      font-size: .9em; }
-
-.navbar {
-  background: #FEFEFE;
+  background: #327fc7;
   vertical-align: top;
   text-align: right;
   box-shadow: 0 2px 2px #DDD;
@@ -816,9 +796,8 @@ input[type=checkbox].styled {
     line-height: 25px; }
   .navbar a {
     text-decoration: none;
-    color: #333; }
-    .navbar a:hover {
-      text-shadow: 0 0 4px #DDD; }
+    color: #FFF;
+    font-weight: bold; }
   .navbar .logo {
     display: inline-block;
     float: left;
