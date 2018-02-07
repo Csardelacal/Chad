@@ -7,6 +7,7 @@ use spitfire\cache\MemcachedAdapter;
 use spitfire\core\Environment;
 use spitfire\exceptions\PublicException;
 use spitfire\io\session\Session;
+use spitfire\storage\database\RestrictionGroup;
 
 /* 
  * The MIT License
@@ -122,14 +123,29 @@ class BaseController extends Controller
 		}
 		
 		if ($this->user) {
-			$this->preferences = db()->table('user')->get('_id', $this->user->user->id)->fetch();
 			
+			/*
+			 * Get the user's privileges across the system
+			 */
+			$query = db()->table('rights\bureaucrat')->get('revoked', null, 'IS')->group()
+				->group(RestrictionGroup::TYPE_AND)->where('uid', $this->user->user->id)->where('type', 'user')->endGroup();
+			
+			foreach ($this->user->groups as $id => $name) {
+				$query->group(RestrictionGroup::TYPE_AND)->where('uid', $id)->where('type', 'group')->endGroup();
+			}
+			
+			$privileges = $query->endGroup()->fetchAll();
+			
+			$this->preferences = db()->table('user')->get('_id', $this->user->user->id)->fetch();
+			$this->privileges  = rights\BureaucratPrivileges::import($privileges);
 			$currencyLocalizer = $this->preferences->localizer();
 			$this->view->set('currencyLocalizer', $currencyLocalizer);
 			$this->view->set('currency', $this->preferences->currency);
+			$this->view->set('privileges', $this->privileges);
 		}
 		else {
 			$this->view->set('currency', $c);
+			$this->view->set('privileges', null);
 		}
 		
 		$this->view->set('authUser', $this->user);

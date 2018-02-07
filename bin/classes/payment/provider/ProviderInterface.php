@@ -110,6 +110,12 @@ interface ProviderInterface
 	
 	/**
 	 * 
+	 * @return string The name of the provider
+	 */
+	function getName();
+	
+	/**
+	 * 
 	 * @param int $size
 	 * @return string The location of the logo file
 	 */

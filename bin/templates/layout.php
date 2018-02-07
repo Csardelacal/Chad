@@ -30,6 +30,14 @@
 					
 					<div class="menu-entry"><a href="<?= url('account', 'index')  ?>">My accounts</a></div>
 					<div class="menu-entry"><a href="<?= url('account', 'create') ?>">Create account</a></div>
+					
+					<div class="spacer" style="height: 20px"></div>
+					
+					<?php if ($privileges && $privileges->isAdmin()): ?>
+					<div class="topbar" style="color: #999; padding-left: 10px">Administration</div>
+					<div class="menu-entry"><a href="<?= url('redirection', 'index')  ?>">Redirections</a></div>
+					<div class="menu-entry"><a href="<?= url('provider', 'index')  ?>">Payment providers</a></div>
+					<?php endif; ?>
 				</div>
 			</div>
 			<div class="content">

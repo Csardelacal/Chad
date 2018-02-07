@@ -50,9 +50,9 @@ class PaypalConfiguration implements ConfigurationInterface
 	
 	public function getOptions() {
 		return [
-			new StringSetting('client', 'Client ID', ''),
-			new StringSetting('secret', 'Client secret', ''),
-			new StringSetting('mode', 'Paypal mode', 'live')
+			new StringSetting('client', 'Client ID', '', $this->client),
+			new StringSetting('secret', 'Client secret', '', $this->secret),
+			new StringSetting('mode', 'Paypal mode', 'live', $this->mode)
 		];
 	}
 

@@ -34,11 +34,13 @@ class FundsController extends BaseController
 	
 	public function add($acctid, $currencyISO = null, $amtParam = null) {
 		
+		
 		/*
 		 * Prepare the provider list
 		 */
 		$providers = payment\provider\PaymentProviderPool::getInstance()->configure(); // Prepares the providers by loading their configuration
 		$currency  = $currencyISO? db()->table('currency')->get('ISO', _def($_POST['currency'], $currencyISO))->fetch() : db()->table('currency')->get('default', true)->fetch();
+		$account   = db()->table('account')->get('_id', _def($_POST['account'], $acctid))->fetch();
 		
 		try {
 			/*
@@ -48,7 +50,6 @@ class FundsController extends BaseController
 			 */
 			if (!$this->request->isPost()) { throw new HTTPMethodException('Not POSTed', 1712051108); }
 			
-			$account  = db()->table('account')->get('_id', $acctid)->fetch();
 			$amt      = _def($_POST['amt'], $amtParam);
 			
 			if (isset($_POST['decimals']) && $_POST['decimals'] === 'natural') {
@@ -84,6 +85,7 @@ class FundsController extends BaseController
 		}
 		
 		$this->view->set('amt', $amt);
+		$this->view->set('account', $account);
 		$this->view->set('currency', $currency);
 		$this->view->set('providers', $providers);
 	}
@@ -139,7 +141,7 @@ class FundsController extends BaseController
 		 * Once the payment provider has authorized the payment, we direct the 
 		 * user to the URL that we were indicated by the source app.
 		 */
-		if ($provider->execute($context, time(), $amt)) {
+		if ($provider->execute($context, $job->_id, $amt)) {
 			
 			$source   = db()->table('payment\provider\source')->get('provider', get_class($provider))->fetch();
 			

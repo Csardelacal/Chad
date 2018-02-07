@@ -181,6 +181,10 @@ class Paypal implements ProviderInterface
 	public function getLogo() {
 		return new \payment\provider\PaymentLogo(rtrim(dirname(__FILE__), '\/') . '/paypal-logo.jpg');
 	}
+	
+	public function getName() {
+		return 'Paypal';
+	}
 
 	public function makeConfiguration() {
 		return new PaypalConfiguration();

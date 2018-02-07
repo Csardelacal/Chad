@@ -32,8 +32,8 @@ class StringSetting extends Setting
 	
 	private $validation;
 	
-	public function __construct($name, $label, $default) {
-		parent::__construct($name, $label, $default);
+	public function __construct($name, $label, $default, $value) {
+		parent::__construct($name, $label, $default, $value);
 		$this->validation = new Validator();
 	}
 

@@ -1,9 +1,9 @@
-<?php namespace payment\provider\setting;
+<?php
 
 /* 
  * The MIT License
  *
- * Copyright 2017 César de la Cal Bretschneider <cesar@magic3w.com>.
+ * Copyright 2018 César de la Cal Bretschneider <cesar@magic3w.com>.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,57 +24,16 @@
  * THE SOFTWARE.
  */
 
-abstract class Setting implements \spitfire\validation\ValidatorInterface
+class RedirectionController extends BaseController
 {
 	
-	private $name;
-	private $label;
-	private $value;
-	private $default;
-	
-	public function __construct($name, $label, $default, $value = null) {
-		$this->name = $name;
-		$this->label = $label;
-		$this->default = $default;
-		$this->value   = $value;
+	public function index() {
+		if (!$this->privileges->isAdmin()) { throw new spitfire\exceptions\PublicException('Not permitted', 403); }
+		
+		$redirections = db()->table('redirection\redirection')->getAll()->fetchAll();
+		
+		$this->view->set('redirections', $redirections);
+		
 	}
-	
-	public function getName() {
-		return $this->name;
-	}
-	
-	public function getValue() {
-		return $this->value;
-	}
-	
-	public function getDefault() {
-		return $this->default;
-	}
-	
-	public function setName($name) {
-		$this->name = $name;
-		return $this;
-	}
-	
-	public function setValue($value) {
-		$this->value = $value;
-		return $this;
-	}
-	
-	public function setDefault($default) {
-		$this->default = $default;
-		return $this;
-	}
-	
-	public function getLabel() {
-		return $this->label;
-	}
-	
-	public function setLabel($label) {
-		$this->label = $label;
-		return $this;
-	}
-	
-	abstract public function getFormComponent();
 	
 }

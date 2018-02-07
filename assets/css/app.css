@@ -404,16 +404,14 @@ footer {
   .validation-errors .extended-message {
     font-size: .9em; }
 
-.payment-provider {
-  width: 25%; }
-  .payment-provider input[type=radio] {
-    display: none; }
-  .payment-provider img {
-    border: solid 2px #CCC;
-    border-radius: 5px;
-    max-width: 100%; }
-  .payment-provider input[type=radio]:checked + img {
-    border: solid 2px #55C; }
+.payment-provider input[type=radio] {
+  display: none; }
+.payment-provider img {
+  border: solid 2px #CCC;
+  border-radius: 5px;
+  max-width: 100%; }
+.payment-provider input[type=radio]:checked + img {
+  border: solid 2px #55C; }
 
 @media all and (min-width: 960px) {
   /*
