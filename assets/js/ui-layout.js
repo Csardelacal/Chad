@@ -71,7 +71,7 @@
 		
 		containerHTML.style.height = height;
 		sidebarHTML.style.height   = height;
-		sidebarHTML.style.width    = mobile()? '75%' : containerHTML.scrollWidth + 'px';
+		sidebarHTML.style.width    = mobile()? '240px' : containerHTML.scrollWidth + 'px';
 		
 		containerHTML.style.top    = mobile() || detached?   '0px' : Math.max(0, 0 - constraints.top) + 'px';
 		sidebarHTML.style.position = mobile() || detached? 'fixed' : 'static';
