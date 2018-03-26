@@ -13,7 +13,7 @@ if (!$authUser) {
 
 ?>
 
-<div class="topbar sticky">
+<div class="heading topbar sticky">
 	Your accounts
 </div>
 

@@ -1,6 +1,6 @@
 
 
-<div class="topbar sticky">
+<div class="heading topbar sticky">
 	Redirections
 </div>
 

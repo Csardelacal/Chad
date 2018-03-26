@@ -1,5 +1,5 @@
 
-<div class="topbar sticky">
+<div class="heading topbar sticky">
 	Create new account
 </div>
 

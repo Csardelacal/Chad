@@ -58,7 +58,17 @@
 		 * @type type
 		 */
 		var constraints = containerHTML.parentNode.getBoundingClientRect();
-		var height = mobile()? wh + 'px' : Math.min(wh, constraints.bottom) - Math.max(constraints.top, 0) + 'px';
+		
+		/*
+		 * There's a special scenario, in which the system may have enough space 
+		 * to extend the sidebar to the next sibling's starting point.
+		 * 
+		 * @type .document@call;querySelector.parentNode.nextSibling
+		 */
+		var nextSibling = containerHTML.parentNode.nextElementSibling;
+		var limit       = nextSibling? Math.max(nextSibling.getBoundingClientRect().top, constraints.bottom) : wh;
+		
+		var height = mobile()? wh : Math.min(wh, limit) - Math.max(constraints.top, 0);
 		
 		/*
 		 * This flag determines whether the scrolled element is past the viewport
@@ -69,8 +79,8 @@
 		 */
 		var detached = constraints.top < 0;
 		
-		containerHTML.style.height = height;
-		sidebarHTML.style.height   = height;
+		containerHTML.style.height = Math.max(height, constraints.height) + 'px';
+		sidebarHTML.style.height   = height + 'px';
 		sidebarHTML.style.width    = mobile()? '240px' : containerHTML.scrollWidth + 'px';
 		
 		containerHTML.style.top    = mobile() || detached?   '0px' : Math.max(0, 0 - constraints.top) + 'px';
@@ -91,11 +101,13 @@
 		//For mobile devices we toggle to collapsable mode
 		if (ww < 960 + 200) {
 			containerHTML.classList.add('collapsed');
+			containerHTML.classList.remove('visible');
 			for (var i = 0; i < tb.length; i++) { tb[i].firstChild.classList.remove('hidden'); }
 			//Show the toggle button
 		} 
 		else {
 			containerHTML.classList.remove('collapsed');
+			containerHTML.classList.add('visible');
 			
 			for (var i = 0; i < tb.length; i++) { 
 				var method = containerHTML.classList.contains('collapsable')? 'remove' : 'add';
@@ -115,9 +127,13 @@
 	/*
 	 * Defer the listener for the toggles to the document.
 	 */
-	document.addEventListener('click', function(e) { e.target.classList.contains('toggle-button') && containerHTML.classList.toggle('collapsed'); }, false);
+	document.addEventListener('click', function(e) { 
+		if (!e.target.classList.contains('toggle-button')) { return; }
+		containerHTML.classList.toggle('collapsed');
+		containerHTML.classList.toggle('visible');
+	}, false);
 
-	containerHTML.addEventListener('click', function() { containerHTML.classList.add('collapsed'); }, false);
+	containerHTML.addEventListener('click', function() { containerHTML.classList.add('collapsed'); containerHTML.classList.remove('visible'); }, false);
 	sidebarHTML.addEventListener('click', function(e) { e.stopPropagation(); }, false);
 
 }());

@@ -7,14 +7,17 @@ body {
 * {
   box-sizing: border-box; }
 
-.topbar {
+.heading {
   height: 50px;
   line-height: 50px;
   background: #F3F3F3;
-  color: #2a912e;
-  border-bottom: solid 2px #2a912e;
   text-transform: uppercase;
   padding: 0px 10px; }
+  .heading.topbar {
+    color: #FFF;
+    border-bottom: none;
+    background: #50ab53;
+    font-weight: bold; }
 
 .sidebar {
   overflow: hidden;
@@ -28,7 +31,7 @@ body {
     color: #2a912e;
     padding: 10px; }
   .sidebar .menu-entry {
-    padding: 5px 10px;
+    padding: 5px 0px 5px 15px;
     font-size: .8em;
     color: #666; }
   .sidebar a {
@@ -42,7 +45,13 @@ body {
 
 .content {
   position: relative;
-  transition: .2s margin .3s ease-in,  .2s padding .3s ease-in; }
+  transition: .2s margin .3s ease-in,  .2s padding .3s ease-in;
+  	/* 12.03.2018
+      * This was introduced to prevent browsers (namely Safari) from not redrawing
+      * the children properly when resizing the UI. For some reason, when the parent
+      * is changed in size, not all children behave as expected.
+  	 */
+  overflow-x: hidden; }
 
 .toggle-button {
   display: inline-block;
@@ -51,34 +60,36 @@ body {
   width: 18px;
   height: 18px;
   padding: 0px;
-  background: linear-gradient(0deg, transparent 1px, #FFF 1px, #FFF 4px, transparent 4px); }
+  background: linear-gradient(180deg, transparent 7px, #FFF 7px, #FFF 10px, transparent 10px);
+  border-radius: 50%; }
+  .toggle-button:before {
+    content: '';
+    position: absolute;
+    left: 0px;
+    top: 14px;
+    height: 3px;
+    width: 100%;
+    background: #FFF; }
+  .toggle-button:after {
+    content: '';
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    height: 3px;
+    width: 100%;
+    background: #FFF; }
+  .toggle-button.hidden {
+    display: none; }
+  .toggle-button.dark {
+    background: linear-gradient(180deg, transparent 7px, #242424 7px, #242424 10px, transparent 10px); }
+    .toggle-button.dark:after, .toggle-button.dark:before {
+      background: #242424; }
 
 body > .toggle-button {
   position: absolute;
   top: 0;
   left: 0;
   margin: 10px 20px; }
-
-.toggle-button:before {
-  content: '';
-  position: absolute;
-  left: 0px;
-  top: 7px;
-  height: 3px;
-  width: 100%;
-  background: #FFF; }
-
-.toggle-button:after {
-  content: '';
-  position: absolute;
-  left: 0px;
-  top: 0px;
-  height: 3px;
-  width: 100%;
-  background: #FFF; }
-
-.toggle-button.hidden {
-  display: none; }
 
 .bottom {
   background: #eee;
@@ -102,17 +113,15 @@ body > .toggle-button {
     .contains-sidebar.collapsed {
       width: 0px;
       opacity: 0; }
-      .contains-sidebar.collapsed .sidebar {
-        left: -200px; }
       .contains-sidebar.collapsed + .content {
-        margin-left: -10px;
-        padding-left: 10px; }
+        margin-left: -0px;
+        padding-left: 0px; }
 
   .content {
     display: inline-block;
     width: 100%;
-    margin-left: -220px;
-    padding-left: 220px;
+    margin-left: -200px;
+    padding-left: 200px;
     vertical-align: top; } }
 @media all and (max-width: 960px) {
   .content {
@@ -120,22 +129,28 @@ body > .toggle-button {
 
   .sidebar {
     background: #FFF;
-    left: 0px; }
+    left: -240px; }
 
   .contains-sidebar {
     z-index: 99999;
     background: rgba(0, 0, 0, 0.3);
     top: 0;
     left: 0;
-    width: 100%;
+    width: 0;
     height: 100%;
     position: fixed;
     overflow: hidden;
+    opacity: 0;
     transition: opacity .2s ease-in, width .2s ease-in; }
     .contains-sidebar.collapsed {
       width: 0%;
       opacity: 0; }
       .contains-sidebar.collapsed .sidebar {
-        left: -240px; } }
+        left: -240px; }
+    .contains-sidebar.visible {
+      width: 100%;
+      opacity: 1; }
+      .contains-sidebar.visible .sidebar {
+        left: 0; } }
 
 /*# sourceMappingURL=ui-layout.css.map */

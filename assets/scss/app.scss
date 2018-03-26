@@ -586,7 +586,7 @@ footer {
 	@import '_scaffolding';
 	
 	.mobile-only {
-		display: none;
+		display: none !important;
 	}
 }
 
@@ -594,7 +594,7 @@ footer {
 	@import '_scaffolding_mobile';
 	
 	.desktop-only {
-		display: none;
+		display: none !important;
 	}
 }
 

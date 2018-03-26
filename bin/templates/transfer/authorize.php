@@ -8,7 +8,7 @@ if ($this->request->isPost() && $transfer) {
 
 ?>
 
-<div class="topbar sticky">
+<div class="heading topbar sticky">
 	<span class="toggle-button-target" style="background: #2a912e; padding: 12px; margin: 0 10px 0 -10px; vertical-align: middle"><span class="toggle-button hidden"></span></span>
 	Authorize the transaction for <?= $recipient->getUsername() ?>
 </div>
