@@ -42,18 +42,32 @@ class AppAuthentication
 	 * @var Context[]
 	 */
 	private $contexts;
+	
+	/**
+	 *
+	 * @deprecated since version 20180326
+	 * @var type 
+	 */
 	private $redirect;
 	
-	public function __construct($sso, $authenticated, $grantStatus, $src, $remote, $context, $redirect) {
+	public function __construct($sso, $authenticated, $grantStatus, $src, $remote, $context) {
 		$this->sso = $sso;
 		$this->authenticated = $authenticated;
 		$this->grantStatus = $grantStatus;
 		$this->src = $src;
 		$this->remote = $remote;
 		$this->contexts = $context;
-		$this->redirect = $redirect;
 	}
 	
+	public function isAuthenticated() {
+		return !!$this->authenticated;
+	}
+	
+	/**
+	 * 
+	 * @deprecated since version 20180326
+	 * @return type
+	 */
 	public function getAuthenticated() {
 		return $this->authenticated;
 	}
@@ -106,6 +120,12 @@ class AppAuthentication
 		return $this;
 	}
 	
+	/**
+	 * 
+	 * @deprecated since version 20180326
+	 * @param type $redirect
+	 * @return $this
+	 */
 	public function setRedirect($redirect) {
 		$this->redirect = $redirect;
 		return $this;

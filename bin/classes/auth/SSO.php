@@ -119,7 +119,7 @@ class SSO
 		}
 		
 		$src  = new App($json->src->id, null, $json->src->name);
-		$res  = new AppAuthentication($this, $json->authenticated, $json->grant, $src, $app, $contexts, $json->redirect);
+		$res  = new AppAuthentication($this, $json->authenticated, $json->grant, $src, $app, $contexts);
 		
 		return $res;
 	}
