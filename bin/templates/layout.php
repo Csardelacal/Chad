@@ -15,7 +15,7 @@
 	<body>
 		<div class="navbar">
 			<div class="left">
-				<span class="toggle-button dark mobile-only"></span>
+				<span class="toggle-button dark"></span>
 				<a href="<?= url() ?>">CHAD</a>
 			</div>
 			
@@ -69,8 +69,8 @@
 				<a href="<?= url('user', 'logout') ?>">Logout</a>
 			</div>
 		</div>
-		<div>
-			<div class="contains-sidebar collapsable">
+		<div class="auto-extend">
+			<div class="contains-sidebar">
 				<div class="sidebar">
 					<div class="heading topbar" style="padding-left: 10px"><span class="mobile-only">Menu</span></div>
 					
@@ -89,13 +89,31 @@
 				</div>
 			</div><!--
 			--><div class="content">
-				<?= $content_for_layout ?>
-				<div class="spacer" style="height: 30px"></div>
+					<div class="spacer" style="height: 3000px"></div>
+				<div  data-sticky-context>
+					<?= $content_for_layout ?>
+					<div class="spacer" style="height: 3000px"></div>
+
+					<div class="heading topbar sticky" data-sticky="bottom">
+						Test
+					</div>
+				</div>
+				
+				<div  data-sticky-context>
+					<div class="heading topbar sticky" data-sticky="top">
+						Test top
+					</div>
+					<div class="spacer" style="height: 3000px"></div>
+
+					<div class="heading topbar sticky" data-sticky="bottom">
+						Test 2
+					</div>
+				</div>
 			</div>
 			
 		</div>
 		
-		<div class="bottom">
+		<footer>
 			<div class="row1">
 				<div class="span1">
 					<span style="font-size: .8em; color: #777">
@@ -103,7 +121,17 @@
 					</span>
 				</div>
 			</div>
-		</div>
+		</footer>
+		
+		<script type="text/javascript">
+		(function () {
+			var ae = document.querySelector('.auto-extend');
+			var wh = window.innerheight || document.documentElement.clientHeight;
+			var dh = document.body.clientHeight;
+			
+			ae.style.minHeight = Math.max(ae.clientHeight + (wh - dh), 0) + 'px';
+		}());
+		</script>
 		
 		<script src="<?= spitfire\core\http\URL::asset('js/depend.js') ?>" type="text/javascript"></script>
 		<script type="text/javascript">
@@ -117,6 +145,7 @@
 		</script>
 		<script src="<?= spitfire\core\http\URL::asset('js/ui-layout.js') ?>" type="text/javascript"></script>
 		<script src="<?= spitfire\core\http\URL::asset('js/dials.js') ?>" type="text/javascript"></script>
+		<script src="<?= spitfire\core\http\URL::asset('js/sticky.js') ?>" type="text/javascript"></script>
 		<script src="<?= url('cron')->setExtension('js') ?>" type="text/javascript"></script>
 	</body>
 </html>
