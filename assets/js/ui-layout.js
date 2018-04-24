@@ -81,7 +81,7 @@
 		containerHTML.style.height = floating()? height + 'px' : constraints.height + 'px';
 		sidebarHTML.style.height   = height + 'px';
 		sidebarHTML.style.width    = floating()? (collapsed? 0 : '240px') : '200px';
-		contentHTML.style.width    = floating() || collapsed? '100%' : (ww - 200) + 'px';
+		contentHTML.style.width    = floating() || collapsed? '100%' : (constraints.width - 200) + 'px';
 		
 		containerHTML.style.top    = detached || floating()?   '0px' : Math.max(0, 0 - constraints.top) + 'px';
 		sidebarHTML.style.position = detached || floating()? 'fixed' : 'static';

@@ -5,6 +5,7 @@ body {
 
 * {
 	box-sizing: border-box;
+	-moz-box-sizing: border-box;
 }
 
 //TODO: This needs to be moved.
@@ -55,18 +56,6 @@ body {
 
 .sidebar:hover {
 	overflow: auto;
-}
-
-.content {
-	position: relative;
-	transition: .2s margin .3s ease-in,  .2s padding .3s ease-in;
-	
-	/* 12.03.2018
-    * This was introduced to prevent browsers (namely Safari) from not redrawing
-    * the children properly when resizing the UI. For some reason, when the parent
-    * is changed in size, not all children behave as expected.
-	 */
-	overflow-x: hidden;
 }
 
 .toggle-button {
@@ -140,6 +129,13 @@ body > .toggle-button {
 	width: 100%;
 	vertical-align: top;
 	transition: .2s width .3s ease-in;
+	
+	/* 12.03.2018
+    * This was introduced to prevent browsers (namely Safari) from not redrawing
+    * the children properly when resizing the UI. For some reason, when the parent
+    * is changed in size, not all children behave as expected.
+	 */
+	overflow-x: hidden;
 }
 
 	

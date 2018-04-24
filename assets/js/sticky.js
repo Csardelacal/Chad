@@ -34,22 +34,39 @@
 	var registered = [];
 	
 	var Stuck = function (position) {
-		var html = document.createElement('div');
-		var child = undefined;
+		var html    = undefined;
+		var wrapper = undefined;
+		var child   = undefined;
 		
 		this.setChild = function (c, ctx, next) {
 			
 			if (c) {
-				html.parentNode || document.body.appendChild(html);
-				html.style.height     = c.getBoundaries().getH() + 'px';
-				html.style.width      = c.getBoundaries().getW() + 'px';
-				html.style.left       = c.getBoundaries().getX() + 'px';
-				html.style.background = ctx.getBackground();
 				
-				
-				if (child !== c) { 
-					html.innerHTML = ''; 
-					html.appendChild(c.getHTML().cloneNode(true)); 
+				if (child !== c) {
+					if (html) {
+						html.style.position  = null;
+						html.style[position] = null;
+						html.style.height    = null;
+						html.style.width     = null;
+						html.style.background = null;
+
+						wrapper.style.display   = null;
+						wrapper.style.height    = null;
+						wrapper.style.width     = null;
+					}
+					
+					wrapper = c.getHTML();
+					html = wrapper.firstChild;
+					
+					c.getHTML().style.display   = 'block';
+					c.getHTML().style.height    = c.getBoundaries().getH() + 'px';
+					c.getHTML().style.width     = c.getBoundaries().getW() + 'px';
+					
+					html.style.position  = 'fixed';
+					html.style[position] = '0';
+					html.style.height    = c.getBoundaries().getH() + 'px';
+					html.style.width     = c.getBoundaries().getW() + 'px';
+					html.style.background = ctx.getBackground();
 				}
 				
 				if (position === 'top') {
@@ -68,15 +85,23 @@
 					) + 'px';
 				}
 			}
-			else {
-				html.parentNode && html.parentNode.removeChild(html);
+			else if (html){
+				html.style.position  = null;
+				html.style[position] = null;
+				html.style.height    = null;
+				html.style.width     = null;
+				html.style.background = null;
+				
+				wrapper.style.display   = null;
+				wrapper.style.height    = null;
+				wrapper.style.width     = null;
+				
+				child = undefined;
+				html  = undefined;
 			}
 			
 			child = c;
 		};
-		
-		html.style.position  = 'fixed';
-		html.style[position] = '0';
 	};
 	
 	/**
@@ -186,13 +211,21 @@
 		return findContext(e.parentNode);
 	};
 	
+	var wrap = function (element) {
+		var wrapper = document.createElement('div');
+		element.parentNode.insertBefore(wrapper, element);
+		wrapper.appendChild(element);
+		
+		return wrapper;
+	};
+	
 	
 	/*
 	 * Export the basic functions and register the necessary listeners.
 	 */
 	window.sticky = {
 		stick : function (element, context, direction) { 
-			return new Sticky(new Element(element), new Context(new Element(context)), direction);
+			return new Sticky(new Element(wrap(wrap(element))), new Context(new Element(context)), direction);
 		}
 	};
 	
@@ -202,7 +235,7 @@
 	var els = document.querySelectorAll('*[data-sticky]');
 	
 	for (var i = 0; i < els.length; i++) {
-		new Sticky(new Element(els[i]), new Context(new Element(findContext(els[i]))), els[i].getAttribute('data-sticky'));
+		new Sticky(new Element(wrap(wrap(els[i]))), new Context(new Element(findContext(els[i]))), els[i].getAttribute('data-sticky'));
 	}
 	
 	window.addEventListener('scroll', debounce(function (e) {
