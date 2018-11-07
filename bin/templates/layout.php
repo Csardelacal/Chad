@@ -11,6 +11,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<link rel="stylesheet" type="text/css" href="<?= spitfire\core\http\URL::asset('css/app.css') ?>">
 		<link rel="stylesheet" type="text/css" href="<?= spitfire\core\http\URL::asset('css/ui-layout.css') ?>">
+		<meta name="_scss" content="<?= \spitfire\SpitFire::baseUrl() ?>/assets/scss/_/js/">
 	</head>
 	<body>
 		<div class="navbar">
@@ -21,48 +22,9 @@
 			
 			<div class="right">
 				<div class="has-dropdown" data-toggle="app-drawer" style="display: inline-block">
-					<span class="app-switcher toggle"></span>
-					<div class="dropdown right-bound app-drawer" data-dropdown="app-drawer">
-						<div class="row3 fluid"><!--
-							--><div class="span1">
-								<a class="app-entry">
-									<img class="app-icon" src="<?= \spitfire\core\http\URL::asset('img/user.png') ?>">
-									<span class="app-name">YCH</span>
-								</a>
-							</div><!--
-							--><div class="span1">
-								<a class="app-entry">
-									<img class="app-icon" src="<?= \spitfire\core\http\URL::asset('img/user.png') ?>">
-									<span class="app-name">YCH</span>
-								</a>
-							</div><!--
-							--><div class="span1">
-								<a class="app-entry">
-									<img class="app-icon" src="<?= \spitfire\core\http\URL::asset('img/user.png') ?>">
-									<span class="app-name">YCH</span>
-								</a>
-							</div>
-						</div>
-						<div class="row3 fluid"><!--
-							--><div class="span1">
-								<a class="app-entry">
-									<img class="app-icon" src="<?= \spitfire\core\http\URL::asset('img/user.png') ?>">
-									<span class="app-name">YCH</span>
-								</a>
-							</div><!--
-							--><div class="span1">
-								<a class="app-entry">
-									<img class="app-icon" src="<?= \spitfire\core\http\URL::asset('img/user.png') ?>">
-									<span class="app-name">YCH</span>
-								</a>
-							</div><!--
-							--><div class="span1">
-								<a class="app-entry">
-									<img class="app-icon" src="<?= \spitfire\core\http\URL::asset('img/user.png') ?>">
-									<span class="app-name">YCH</span>
-								</a>
-							</div>
-						</div>
+					<span class="app-switcher toggle" data-toggle="app-drawer"></span>
+					<div class="dropdown right-bound unpadded" data-dropdown="app-drawer">
+						<div class="app-drawer" id="app-drawer"></div>
 					</div>
 				</div>
 				<a href="<?= url('account') ?>">My accounts</a>
@@ -89,25 +51,8 @@
 				</div>
 			</div><!--
 			--><div class="content">
-					<div class="spacer" style="height: 3000px"></div>
 				<div  data-sticky-context>
-					<?= $content_for_layout ?>
-					<div class="spacer" style="height: 3000px"></div>
-
-					<div class="heading topbar sticky" data-sticky="bottom">
-						Test
-					</div>
-				</div>
-				
-				<div  data-sticky-context>
-					<div class="heading topbar sticky" data-sticky="top">
-						Test top
-					</div>
-					<div class="spacer" style="height: 3000px"></div>
-
-					<div class="heading topbar sticky" data-sticky="bottom">
-						Test 2
-					</div>
+					<?= $this->content() ?>
 				</div>
 			</div>
 			
@@ -133,19 +78,42 @@
 		}());
 		</script>
 		
-		<script src="<?= spitfire\core\http\URL::asset('js/depend.js') ?>" type="text/javascript"></script>
+		<script src="<?= spitfire\core\http\URL::asset('js/m3/depend.js') ?>" type="text/javascript"></script>
+		<script src="<?= spitfire\core\http\URL::asset('js/m3/depend/router.js') ?>" type="text/javascript"></script>
 		<script type="text/javascript">
 		(function () {
-			window.depend.setBaseURL('<?= \spitfire\SpitFire::baseUrl() . '/' . ASSET_DIRECTORY . '/js/' ?>');
+			depend(['m3/depend/router'], function(router) {
+				router.all().to(function(e) { return '<?= \spitfire\SpitFire::baseUrl() . '/assets/js/' ?>' + e + '.js'; });
+				router.equals('phpas/app/drawer').to( function() { return '<?= $sso->getAppDrawerJS() ?>'; });
+				router.equals('_scss').to( function() { return '<?= \spitfire\SpitFire::baseUrl() ?>/assets/scss/_/js/_.scss.js'; });
+			});
 			
 			depend(['ui/dropdown'], function (dropdown) {
-				dropdown('.has-dropdown');
+				dropdown('.app-switcher');
+			});
+			
+			depend(['phpas/app/drawer'], function (drawer) {
+				console.log(drawer);
+			});
+			
+			depend(['_scss'], function() {
+				console.log('Loaded _scss');
+			});
+			
+			depend(['sticky'], function (sticky) {
+				
+				/*
+				 * Create elements for all the elements defined via HTML
+				 */
+				var els = document.querySelectorAll('*[data-sticky]');
+
+				for (var i = 0; i < els.length; i++) {
+					sticky.stick(els[i], sticky.context(els[i]), els[i].getAttribute('data-sticky'));
+				}
 			});
 		}());
 		</script>
-		<script src="<?= spitfire\core\http\URL::asset('js/ui-layout.js') ?>" type="text/javascript"></script>
 		<script src="<?= spitfire\core\http\URL::asset('js/dials.js') ?>" type="text/javascript"></script>
-		<script src="<?= spitfire\core\http\URL::asset('js/sticky.js') ?>" type="text/javascript"></script>
 		<script src="<?= url('cron')->setExtension('js') ?>" type="text/javascript"></script>
 	</body>
 </html>

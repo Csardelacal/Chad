@@ -1,6 +1,8 @@
 <?php namespace auth;
 
 use Exception;
+use signature\Hash;
+use signature\Signature;
 
 class SSO
 {
@@ -16,6 +18,9 @@ class SSO
 		$this->appId     = $reflection->getUser();
 		$this->appSecret = $reflection->getPassword();
 		
+		if (!$this->appSecret) {
+			throw new Exception('App Secret is missing', 1807021658);
+		}
 	}
 	
 	/**
@@ -47,7 +52,7 @@ class SSO
 	 * be authorized afterwards. 
 	 * 
 	 * @param string $token
-	 * @return \auth\Token
+	 * @return Token
 	 */
 	public function makeToken($token) {
 		return new Token($this, $token, null, null);
@@ -81,22 +86,22 @@ class SSO
 	 * @param string $signature
 	 * @param string $token
 	 * @param string $context
-	 * @return \auth\AppAuthentication
+	 * @return AppAuthentication
 	 */
-	public function authApp($signature = null, $token = null, $context = null) {		
+	public function authApp($signature, $token = null, $context = null) {		
 		if ($token instanceof Token) {
 			$token = $token->getId();
 		}
 		
 		$request = new Request(
 			$this->endpoint . '/auth/app.json',
-			array_filter(Array('token' => $token, 'signature' => $signature?: $this->makeSignature(), 
-				'context' => $context))
+			array_filter(Array('token' => $token, 'signature' => (string)$this->makeSignature(), 'remote' => $signature, 'context' => $context))
 		);
 		
 		$response = $request->send();
 		
 		$json = json_decode($response);
+		$src  = new App($json->local->id, $this->appSecret, $json->local->name);
 		
 		if (isset($json->remote)) {
 			$app = new App($json->remote->id, null, $json->remote->name);
@@ -118,8 +123,7 @@ class SSO
 			$contexts = [];
 		}
 		
-		$src  = new App($json->src->id, null, $json->src->name);
-		$res  = new AppAuthentication($this, $json->authenticated, $json->grant, $src, $app, $contexts);
+		$res  = new AppAuthentication($this, $src, $app, $contexts, $json->token);
 		
 		return $res;
 	}
@@ -145,14 +149,33 @@ class SSO
 		return $this->appId;
 	}
 	
-	public function makeSignature($source = null, $target = null, $contexts = []) {
-		$contextstr = implode(',', $contexts);
-		$source     = $source?: $this->appId;
+	public function makeSignature($target = null, $contexts = []) {
+		$signature = new Signature(Hash::ALGO_DEFAULT, $this->appId, $this->appSecret, $target, $contexts);
+		return $signature;
+	}
+	
+	public function getAppList() {
+		$url      = $this->endpoint . '/appdrawer/index.json';
+		$request  = new Request($url, ['signature' => (string)$this->makeSignature(), 'all' => 'yes']);
 		
-		$salt = str_replace(['+', '/'], '', base64_encode(random_bytes(30)));
-		$hash = hash('sha512', implode('.', array_filter([$source, $target, $this->appSecret, $contextstr, $salt])));
+		$response = $request->send();
+		$data     = JSON::decode($response);
 		
-		return implode(':', array_filter(['sha512', $source, $target, $contextstr, $salt, $hash]));
+		return $data;
+	}
+	
+	public function getAppDrawer() {
+		$url = $this->endpoint . '/appdrawer/index.json';
+		$request  = new Request($url, []);
+		
+		$response = $request->send();
+		$data     = JSON::decode($response);
+		
+		return $data;
+	}
+	
+	public function getAppDrawerJS() {
+		return $this->endpoint . '/appdrawer/index.js';
 	}
 	
 	public function getGroupList() {
