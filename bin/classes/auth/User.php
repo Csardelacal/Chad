@@ -39,9 +39,13 @@ class User
 	
 	public function getAttribute($name) {
 		if (!isset($this->attributes->{$name})) { throw new Exception("Attribute {$name} is not set"); }
-		if (!is_object($this->attributes->{$name})) { return $this->attributes->{$name}; }
+		if (!is_object($this->attributes->{$name})) { return $this->attributes->{$name}->value; }
 		
-		$data = $this->attributes->{$name};
+		$data = $this->attributes->{$name}->value;
+		
+		if ($data === null) {
+			throw new Exception("Attribute {$name} is not set");
+		}
 		
 		switch($data->type) {
 			case 'file': return new File($data->preview, $data->download);

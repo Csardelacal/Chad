@@ -7,7 +7,7 @@
  */
 
 if ($books->count() === 1) {
-	return $this->response->setBody('Redirecting...')
+	return current_context()->response->setBody('Redirecting...')
 		->getHeaders()->redirect(url('account', 'balance', $account->_id, $books[0]->currency->ISO));
 }
 

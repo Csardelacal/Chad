@@ -116,10 +116,9 @@ class BookModel extends Model
 		$group->addRestriction('target', $this);
 		$group->addRestriction('source', $this);
 		
-		$query->setResultsPerPage(30);
 		$query->setOrder('created', 'DESC');
 		
-		return $query->fetchAll();
+		return $query->range(0, 30);
 	}
 	
 	public function nextReset() {
