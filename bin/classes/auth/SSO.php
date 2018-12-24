@@ -18,6 +18,9 @@ class SSO
 		$this->appId     = $reflection->getUser();
 		$this->appSecret = $reflection->getPassword();
 		
+		if (!$this->appSecret) {
+			throw new Exception('App Secret is missing', 1807021658);
+		}
 	}
 	
 	/**
@@ -65,7 +68,7 @@ class SSO
 		 */
 		$request = new Request(
 			$this->endpoint . '/user/detail/' . $username . '.json',
-			$token && $token->isAuthenticated()? Array('token' => $token->getTokenInfo()->token) : null
+			$token && $token->isAuthenticated()? Array('token' => $token->getTokenInfo()->token, 'signature' => (string)$this->makeSignature()) : Array('signature' => (string)$this->makeSignature())
 		);
 		
 		/*
@@ -98,6 +101,7 @@ class SSO
 		$response = $request->send();
 		
 		$json = json_decode($response);
+		$src  = new App($json->local->id, $this->appSecret, $json->local->name);
 		
 		if (isset($json->remote)) {
 			$app = new App($json->remote->id, null, $json->remote->name);
@@ -119,8 +123,7 @@ class SSO
 			$contexts = [];
 		}
 		
-		$src  = new App($json->src->id, null, $json->src->name);
-		$res  = new AppAuthentication($this, $json->authenticated, $json->grant, $src, $app, $contexts, $json->redirect);
+		$res  = new AppAuthentication($this, $src, $app, $contexts, $json->token);
 		
 		return $res;
 	}
@@ -149,6 +152,30 @@ class SSO
 	public function makeSignature($target = null, $contexts = []) {
 		$signature = new Signature(Hash::ALGO_DEFAULT, $this->appId, $this->appSecret, $target, $contexts);
 		return $signature;
+	}
+	
+	public function getAppList() {
+		$url      = $this->endpoint . '/appdrawer/index.json';
+		$request  = new Request($url, ['signature' => (string)$this->makeSignature(), 'all' => 'yes']);
+		
+		$response = $request->send();
+		$data     = JSON::decode($response);
+		
+		return $data;
+	}
+	
+	public function getAppDrawer() {
+		$url = $this->endpoint . '/appdrawer/index.json';
+		$request  = new Request($url, []);
+		
+		$response = $request->send();
+		$data     = JSON::decode($response);
+		
+		return $data;
+	}
+	
+	public function getAppDrawerJS() {
+		return $this->endpoint . '/appdrawer/index.js';
 	}
 	
 	public function getGroupList() {

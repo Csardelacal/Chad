@@ -32,9 +32,7 @@ class AppAuthentication
 	 * @var SSO
 	 */
 	private $sso;
-	private $authenticated;
-	private $grantStatus;
-	private $src;
+	private $local;
 	private $remote;
 	
 	/**
@@ -42,24 +40,23 @@ class AppAuthentication
 	 * @var Context[]
 	 */
 	private $contexts;
-	private $redirect;
+	private $token;
 	
-	public function __construct($sso, $authenticated, $grantStatus, $src, $remote, $context, $redirect) {
+	public function __construct($sso, $src, $remote, $context, $token) {
 		$this->sso = $sso;
-		$this->authenticated = $authenticated;
-		$this->grantStatus = $grantStatus;
-		$this->src = $src;
+		$this->local = $src;
 		$this->remote = $remote;
 		$this->contexts = $context;
-		$this->redirect = $redirect;
+		$this->token = $token;
 	}
 	
+	/**
+	 * 
+	 * @deprecated since version 20180704
+	 * @return boolean
+	 */
 	public function getAuthenticated() {
-		return $this->authenticated;
-	}
-	
-	public function getGrantStatus() {
-		return $this->grantStatus;
+		return true;
 	}
 	
 	public function getRemote() {
@@ -86,16 +83,6 @@ class AppAuthentication
 		return $this->sso->getEndpoint() . '/auth/connect?' . http_build_query(['signature' => $signatures]);
 	}
 	
-	public function setAuthenticated($authenticated) {
-		$this->authenticated = $authenticated;
-		return $this;
-	}
-	
-	public function setGrantStatus($grantStatus) {
-		$this->grantStatus = $grantStatus;
-		return $this;
-	}
-	
 	public function setRemote($remote) {
 		$this->remote = $remote;
 		return $this;
@@ -106,8 +93,8 @@ class AppAuthentication
 		return $this;
 	}
 	
-	public function setRedirect($redirect) {
-		$this->redirect = $redirect;
+	public function setToken($token) {
+		$this->token = $token;
 		return $this;
 	}
 	
@@ -116,11 +103,15 @@ class AppAuthentication
 	 * @return App
 	 */
 	public function getSrc() {
-		return $this->src;
+		return $this->local;
+	}
+	
+	public function getToken() {
+		return $this->token;
 	}
 
 	public function setSrc($src) {
-		$this->src = $src;
+		$this->local = $src;
 		return $this;
 	}
 }
