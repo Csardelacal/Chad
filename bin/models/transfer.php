@@ -1,7 +1,6 @@
 <?php
 
 use db\TagField;
-use redirection\RedirectionModel;
 use spitfire\Model;
 use spitfire\storage\database\Schema;
 

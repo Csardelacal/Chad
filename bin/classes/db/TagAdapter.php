@@ -38,10 +38,9 @@ class TagAdapter extends StringAdapter
 		if (is_string($data)) {
 			$data = collect(explode(',', $data))->each(function ($e) {
 				return trim($e);
-			})->filter();
+			})->filter()->toArray();
 		}
 		
-		return parent::usrSetData($data);
+		return parent::usrSetData(implode(',', $data));
 	}
-	
 }

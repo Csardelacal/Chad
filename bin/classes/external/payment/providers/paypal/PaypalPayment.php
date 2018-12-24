@@ -1,4 +1,10 @@
-<?php namespace payment\provider\flow;
+<?php namespace external\payment\providers\paypal;
+
+use payment\provider\flow\PaymentInterface;
+use PayPal\Api\Payment;
+use PayPal\Api\PaymentExecution;
+use PayPal\Auth\OAuthTokenCredential;
+use PayPal\Rest\ApiContext;
 
 /* 
  * The MIT License
@@ -24,20 +30,33 @@
  * THE SOFTWARE.
  */
 
-/**
- * The payment provider flow is the "next action" a user is required to take in
- * order to authorize a payment.
- * 
- * Flows can basically be of three different kinds:
- * 
- * * Redirection: The user needs to be redirected to a third part store.
- * * Form: The user is required to provide additional data to the application.
- * * Payment: The system is expected to execute the payment and show a success message to the end user.
- * * Defer: The system is required to wait for the confirmation, and the system confirming won't send a push notification
- * 
- */
-interface FlowInterface
+class PaypalPayment implements PaymentInterface
 {
 	
+	private $config;
 	
+	private $payerId;
+	
+	private $paymentId;
+	
+	public function __construct($config, $payerId, $paymentId) {
+		$this->config = $config;
+		$this->payerId = $payerId;
+		$this->paymentId = $paymentId;
+	}
+	
+	public function charge() {
+		
+		$apicontext = new ApiContext(new OAuthTokenCredential($this->config->getClient(), $this->config->getSecret()));
+		$apicontext->setConfig(Array('mode' => $this->config->getMode()));
+		
+		$paymentId = $this->paymentId;
+		$payment = Payment::get($paymentId, $apicontext);
+		
+		$execution = new PaymentExecution();
+		$execution->setPayerId($this->payerId);
+		
+		$payment->execute($execution, $apicontext);
+	}
+
 }

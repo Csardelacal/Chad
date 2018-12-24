@@ -24,20 +24,9 @@
  * THE SOFTWARE.
  */
 
-/**
- * The payment provider flow is the "next action" a user is required to take in
- * order to authorize a payment.
- * 
- * Flows can basically be of three different kinds:
- * 
- * * Redirection: The user needs to be redirected to a third part store.
- * * Form: The user is required to provide additional data to the application.
- * * Payment: The system is expected to execute the payment and show a success message to the end user.
- * * Defer: The system is required to wait for the confirmation, and the system confirming won't send a push notification
- * 
- */
-interface FlowInterface
+interface PaymentInterface extends FlowInterface
 {
 	
+	public function charge();
 	
 }

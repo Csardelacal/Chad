@@ -126,23 +126,49 @@ class FundsController extends BaseController
 		/*
 		 * Try and authorize the payment, pulling funds from the external source
 		 */
-		$return = $provider->authorize($context);
+		$flow = $provider->authorize($context);
 		
 		/*
 		 * If the payment requires further authorization, we redirect the user to 
 		 * the url the payment provider directed us.
 		 */
-		if ($return instanceof \payment\provider\Redirection) {
-			$this->response->setBody('redirecting...')->getHeaders()->redirect($return->getTarget());
+		if ($flow instanceof \payment\provider\flow\Redirection) {
+			$this->response->setBody('Redirecting...')->getHeaders()->redirect($flow->getTarget());
 			return;
+		}
+		
+		/*
+		 * The payment provider requires the user to add information for the payment
+		 * to succeed.
+		 */
+		if ($flow instanceof \payment\provider\flow\Form) {
+			#TODO: implement
+		}
+		
+		/*
+		 * The payment provider cannot yet confirm or deny whether the payment has
+		 * been successful. The application is therefore required to wait until the
+		 * payment has been cleared.
+		 */
+		if ($flow instanceof \payment\provider\flow\Defer) {
+			#TODO: implement
 		}
 		
 		/*
 		 * Once the payment provider has authorized the payment, we direct the 
 		 * user to the URL that we were indicated by the source app.
 		 */
-		if ($provider->execute($context, $job->_id, $amt)) {
+		if ($flow instanceof \payment\provider\flow\PaymentInterface) {
+			/**
+			 * Execute the payment - if the payment fails at this point the user 
+			 * should be presented with an appropriate error screen.
+			 */
+			$flow->charge();
 			
+			/*
+			 * Once the amount has been charged, the application must proceed to 
+			 * record the transaction.
+			 */
 			$source   = db()->table('payment\provider\source')->get('provider', get_class($provider))->fetch();
 			
 			if ($source) {

@@ -4,7 +4,7 @@ use Exception;
 use payment\provider\ConfigurationInterface;
 use payment\provider\PaymentAuthorization;
 use payment\provider\ProviderInterface;
-use payment\provider\Redirection;
+use payment\provider\flow\Redirection;
 use PayPal\Api\Amount;
 use PayPal\Api\Item;
 use PayPal\Api\ItemList;
@@ -65,7 +65,7 @@ class Paypal implements ProviderInterface
 	public function authorize(PaymentAuthorization $context) {
 		
 		if (isset($context->getFormData()['PayerID'])) {
-			return true;
+			return new PaypalPayment($this->config, $context->getFormData()['PayerID'], $context->getFormData()['paymentId']);
 		}
 		
 		$amt = $context->getAmt() / pow(10, $context->getCurrency()->decimals);
