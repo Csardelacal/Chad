@@ -86,7 +86,7 @@ class BaseController extends Controller
 		 */
 		if (isset($_GET['signature']) && $app = $this->sso->authApp($_GET['signature'], $this->token)) {
 			//TODO: Validate whether the app granting access is the same providing the token
-			$this->authapp = $app->getSrc()->getId();
+			$this->authapp = $app->getRemote()->getId();
 		} 
 		elseif ($this->user && $this->user->authenticated && $this->user->app->id != $this->sso->getAppId()) {
 			throw new PublicException('Unprivileged token or signature missmatch', 403);

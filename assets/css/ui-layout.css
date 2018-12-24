@@ -5,18 +5,6 @@ body {
   box-sizing: border-box;
   -moz-box-sizing: border-box; }
 
-.heading {
-  height: 50px;
-  line-height: 50px;
-  background: #F3F3F3;
-  text-transform: uppercase;
-  padding: 0px 10px; }
-  .heading.topbar {
-    color: #FFF;
-    border-bottom: none;
-    background: #50ab53;
-    font-weight: bold; }
-
 .sidebar {
   overflow: hidden;
   position: absolute;
@@ -126,5 +114,15 @@ body > .toggle-button {
     .contains-sidebar.floating.collapsed .sidebar {
       left: -240px;
       box-shadow: none; }
+
+@media all and (min-width: 1160px) {
+  .contains-sidebar:not(.floating):not(.persistent) {
+    width: 200px;
+    display: inline-block;
+    vertical-align: top;
+    position: relative;
+    z-index: 99999;
+    transition: .2s opacity .3s ease-in, .2s width .3s ease-in;
+    overflow-x: hidden; } }
 
 /*# sourceMappingURL=ui-layout.css.map */

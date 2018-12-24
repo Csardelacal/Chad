@@ -71,6 +71,8 @@ depend(function () {
 		};
 		
 		this.hide = function () {
+			var t;
+			
 			if (!target) {
 				t = showing;
 			}
@@ -78,11 +80,19 @@ depend(function () {
 				t = target;
 			}
 			
-			if (!t) { return }
+			if (!t) { return; }
 			
 			visible = false;
 			onscreen = null;
 			t.style.display = 'none';
+		};
+		
+		this.isShowing = function (el) {
+			do {
+				if (el === showing) { return true; }
+			} while (el.parentNode !== document.body && (el = el.parentNode));
+			
+			return false;
 		};
 		
 		listening.push(this);
@@ -108,7 +118,7 @@ depend(function () {
 			return;
 		}
 		
-		if (onscreen) {
+		if (onscreen && !onscreen.isShowing(e.target)) {
 			onscreen.hide();
 		}
 		

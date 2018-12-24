@@ -94,18 +94,23 @@
 					<?= $content_for_layout ?>
 					<div class="spacer" style="height: 3000px"></div>
 
-					<div class="heading topbar sticky" data-sticky="bottom">
+					<div class="heading topbar" data-sticky="bottom">
 						Test
 					</div>
 				</div>
 				
 				<div  data-sticky-context>
-					<div class="heading topbar sticky" data-sticky="top">
+					<div class="heading topbar" data-sticky="top">
 						Test top
 					</div>
 					<div class="spacer" style="height: 3000px"></div>
+					
+					<div class="heading topbar" data-sticky="top">
+						Test top 3
+					</div>
+					<div class="spacer" style="height: 3000px"></div>
 
-					<div class="heading topbar sticky" data-sticky="bottom">
+					<div class="heading topbar" data-sticky="bottom">
 						Test 2
 					</div>
 				</div>

@@ -1,9 +1,9 @@
-<?php
+<?php namespace payment\provider\flow;
 
 /* 
  * The MIT License
  *
- * Copyright 2017 César de la Cal Bretschneider <cesar@magic3w.com>.
+ * Copyright 2018 César de la Cal Bretschneider <cesar@magic3w.com>.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,11 +24,12 @@
  * THE SOFTWARE.
  */
 
-class TestController extends BaseController
+/**
+ * The payment provider flow is the "next action" a user is required to take in
+ * order to authorize a payment.
+ */
+interface FlowInterface
 {
 	
-	public function test() {
-		die(urlencode($this->sso->makeSignature()));
-	}
 	
 }

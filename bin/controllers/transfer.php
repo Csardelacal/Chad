@@ -110,7 +110,7 @@ class TransferController extends BaseController
 				//The user still needs to authorize this application to access their accounts at all
 				//This is separate from the authorization of individual transactions
 				$this->view->set('status', 'denied');
-				$this->view->set('redirect', $auth->getRedirect(['transfer.create.user'], $_POST['retryurl']?? null));
+				$this->view->set('redirect', $auth->getRedirect($this->authapp, ['transfer.create.user'], $_POST['retryurl']?? null));
 				return;
 			}
 		}

@@ -32,6 +32,7 @@
 	 * @type Array
 	 */
 	var registered = [];
+	var offset     = {x : window.pageXOffset, y : window.pageYOffset };
 	
 	var Stuck = function (position) {
 		var html    = undefined;
@@ -44,15 +45,8 @@
 				
 				if (child !== c) {
 					if (html) {
-						html.style.position  = null;
-						html.style[position] = null;
-						html.style.height    = null;
-						html.style.width     = null;
-						html.style.background = null;
-
-						wrapper.style.display   = null;
-						wrapper.style.height    = null;
-						wrapper.style.width     = null;
+						html.style    = null;
+						wrapper.style = null;
 					}
 					
 					wrapper = c.getHTML();
@@ -86,15 +80,8 @@
 				}
 			}
 			else if (html){
-				html.style.position  = null;
-				html.style[position] = null;
-				html.style.height    = null;
-				html.style.width     = null;
-				html.style.background = null;
-				
-				wrapper.style.display   = null;
-				wrapper.style.height    = null;
-				wrapper.style.width     = null;
+				html.style    = null;
+				wrapper.style = null;
 				
 				child = undefined;
 				html  = undefined;
@@ -137,20 +124,20 @@
 		this.getW = function () { return w; };
 		
 		this.onscreen = function () {
-			return (window.pageXOffset < x + w && window.pageXOffset + window.innerWidth  > x) &&
-			       (window.pageYOffset < y + h && window.pageYOffset + window.innerHeight > y);
+			return (offset.x < x + w && offset.x + window.innerWidth  > x) &&
+			       (offset.y < y + h && offset.y + window.innerHeight > y);
 		};
 		
 		this.getScreenOffsetTop = function () {
-			return y - window.pageYOffset;
+			return y - offset.y;
 		};
 		
 		this.getScreenOffsetBottom = function () {
-			return window.pageYOffset + window.innerHeight - (y + h);
+			return offset.y + window.innerHeight - (y + h);
 		};
 		
 		this.getScreenOffsetLeft = function () {
-			return x - window.pageXOffset;
+			return x - offset.x;
 		};
 	};
 	
@@ -158,7 +145,6 @@
 		
 		this.getBoundaries = debounce(function () { 
 			var box = original.getBoundingClientRect();
-			console.log('recalc');
 			
 			return new Boundaries(
 				box.left + window.pageXOffset, 
@@ -194,11 +180,13 @@
 		  if (timeout) { return returnv; }
 		  
 		  var args = arguments;
-
-		  timeout = setTimeout(function () {
+		  var callback = function () {
 			  returnv = fn.apply(window, args) || null;
 			  timeout = undefined;
-		  }, interval || 50);
+		  };
+		  
+		  if (window.requestAnimationFrame && !interval) { timeout = window.requestAnimationFrame(callback); }
+		  else { timeout = setTimeout(callback, interval || 50); }
 		  
 		  return returnv;
 	  };
@@ -242,6 +230,13 @@
 		var stuck     = { top : undefined, bottom : undefined };
 		var runnerups = { top : undefined, bottom : undefined };
 		
+		/*
+		 * Recalculate the offsets. Offsets do, for some reason, trigger reflows
+		 * of the browser. So, we must read them before making any changes to the
+		 * DOM
+		 */
+		offset        = {x : window.pageXOffset, y : window.pageYOffset };
+		
 		for (var i = 0; i < registered.length; i++) {
 			if (!registered[i].getContext().getElement().getBoundaries().onscreen() ) {
 				continue;
@@ -277,6 +272,6 @@
 		html.top.setChild(stuck.top && stuck.top.getElement(), stuck.top && stuck.top.getContext().getElement(), runnerups.top && runnerups.top.getElement());
 		html.bottom.setChild(stuck.bottom && stuck.bottom.getElement(), stuck.bottom && stuck.bottom.getContext().getElement(), runnerups.bottom && runnerups.bottom.getElement());
 		
-	}, 20), false);
+	}), false);
 	
 }());

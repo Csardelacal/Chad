@@ -42,32 +42,18 @@ class AppAuthentication
 	 * @var Context[]
 	 */
 	private $contexts;
-	
-	/**
-	 *
-	 * @deprecated since version 20180326
-	 * @var type 
-	 */
 	private $redirect;
 	
-	public function __construct($sso, $authenticated, $grantStatus, $src, $remote, $context) {
+	public function __construct($sso, $authenticated, $grantStatus, $src, $remote, $context, $redirect) {
 		$this->sso = $sso;
 		$this->authenticated = $authenticated;
 		$this->grantStatus = $grantStatus;
 		$this->src = $src;
 		$this->remote = $remote;
 		$this->contexts = $context;
+		$this->redirect = $redirect;
 	}
 	
-	public function isAuthenticated() {
-		return !!$this->authenticated;
-	}
-	
-	/**
-	 * 
-	 * @deprecated since version 20180326
-	 * @return type
-	 */
 	public function getAuthenticated() {
 		return $this->authenticated;
 	}
@@ -88,16 +74,16 @@ class AppAuthentication
 		return $this->contexts[$name];
 	}
 	
-	public function getRedirect($contexts = null, $returnurl = null) {
+	public function getRedirect($tgt, $contexts = null) {
 		if ($contexts === null) {
 			$contexts = [];
-			foreach ($this->contexts as $ctx) { $contexts[] = $ctx->getId(); }
 		}
 		
-		return $this->sso->getEndpoint() . '/auth/connect?' . http_build_query([
-			'signature' => $this->sso->makeSignature($this->getSrc()->getId(), $this->sso->getAppId(), $contexts),
-			'returnto'  => $returnurl
-		]);
+		foreach ($contexts as $ctx) { 
+			$signatures[] = (string)$this->sso->makeSignature($tgt, [$ctx instanceof Context? $ctx->getId() : $ctx]); 
+		}
+		
+		return $this->sso->getEndpoint() . '/auth/connect?' . http_build_query(['signature' => $signatures]);
 	}
 	
 	public function setAuthenticated($authenticated) {
@@ -120,12 +106,6 @@ class AppAuthentication
 		return $this;
 	}
 	
-	/**
-	 * 
-	 * @deprecated since version 20180326
-	 * @param type $redirect
-	 * @return $this
-	 */
 	public function setRedirect($redirect) {
 		$this->redirect = $redirect;
 		return $this;

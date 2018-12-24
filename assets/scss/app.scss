@@ -43,6 +43,10 @@ a {
 	color: #555;
 	text-decoration: none;
 	
+	&.active {
+		font-weight: bold;
+	}
+	
 	&:hover {
 		color: #333;
 	}
@@ -55,6 +59,21 @@ a img {
 h1 {
 	font-size: 22px;
 	color:     #222;
+}
+
+.heading {
+	height: 50px;
+	line-height: 50px;
+	background: #F3F3F3;
+	text-transform: uppercase;
+	padding: 0px 10px;
+	
+	&.topbar {
+		color: #FFF;
+		border-bottom: none;
+		background: #50ab53;
+		font-weight: bold;
+	}
 }
 
 form.condensed {
