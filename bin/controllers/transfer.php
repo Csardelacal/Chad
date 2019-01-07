@@ -134,10 +134,10 @@ class TransferController extends BaseController
 
 			validate($posted);
 			
-			
 			$transfer->target      = BookModel::getById($posted['tgt']->getValue());
 			$transfer->description = $posted['description']->getValue();
 			$transfer->tags        = $posted['tags']->getValue();
+			
 			
 			/*
 			 * Some applications, and specially users. Will prefer to use organic 
@@ -213,7 +213,7 @@ class TransferController extends BaseController
 			
 			$this->view->set('txnid', $transfer->_id);
 			$this->view->set('transfer', $transfer);
-			$this->view->set('redirect', strval(url('transfer', 'authorize', $transfer->_id, ['returnto' => _def($_GET['returnto'], '')])->absolute()));
+			$this->view->set('redirect', strval(url('transfer', 'authorize', $transfer->_id, ['returnto' => $_GET['returnto']])->absolute()));
 		}
 		catch (HTTPMethodException $ex) {
 			//Ignore this, just show the appropriate template 

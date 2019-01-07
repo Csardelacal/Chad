@@ -1,8 +1,8 @@
 <?php
 
-if ($this->request->isPost() && $transfer) {
+if (current_context()->request->isPost() && $transfer) {
 	//Now we can flag this as redirection to the authorize page.
-	$this->response->setBody('redirecting...')->getHeaders()->redirect(url('transfer', 'authorize', $transfer->_id));
+	current_context()->response->setBody('redirecting...')->getHeaders()->redirect(url('transfer', 'authorize', $transfer->_id));
 	return;
 }
 

@@ -67,7 +67,7 @@ class AccountController extends BaseController
 			if (!$auth->getContext('account.resets')->exists()) { $auth->getContext('account.resets')->create('Account resetting', 'Allows the remote application to create accounts in Chad that automatically reset.'); }
 			
 			if (!$auth->getContext('account.create')->isGranted()) {
-				return $this->view->set('redirect', $auth->getRedirect(['account.create'], $_GET['retryurl']?? null));
+				return $this->view->set('redirect', $auth->getRedirect($this->authapp, ['account.create']));
 			}
 			
 			$rights['create'] = $auth->getContext('account.create')->isGranted() == 2;

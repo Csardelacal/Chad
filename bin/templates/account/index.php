@@ -7,7 +7,7 @@
  */
 
 if (!$authUser) {
-	return $this->response->setBody('Redirecting...')
+	return current_context()->response->setBody('Redirecting...')
 		->getHeaders()->redirect(url('user', 'login', ['returnto' => (string)url('account')]));
 }
 

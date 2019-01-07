@@ -80,7 +80,7 @@ class AppAuthentication
 			$signatures[] = (string)$this->sso->makeSignature($tgt, [$ctx instanceof Context? $ctx->getId() : $ctx]); 
 		}
 		
-		return $this->sso->getEndpoint() . '/auth/connect?' . http_build_query(['signature' => $signatures]);
+		return $this->sso->getEndpoint() . '/auth/connect?' . http_build_query(['signatures' => $signatures]);
 	}
 	
 	public function setRemote($remote) {

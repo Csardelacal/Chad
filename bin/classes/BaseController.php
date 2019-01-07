@@ -84,7 +84,7 @@ class BaseController extends Controller
 		 * Sometimes, there's not only a token, but also a signature, indicating 
 		 * that an application may be requesting data in the name of a user.
 		 */
-		if (isset($_GET['signature']) && $app = $this->sso->authApp($_GET['signature'], $this->token)) {
+		if (isset($_GET['signature']) && ($app = $this->sso->authApp($_GET['signature'], $this->token))) {
 			//TODO: Validate whether the app granting access is the same providing the token
 			$this->authapp = $app->getRemote()->getId();
 		} 

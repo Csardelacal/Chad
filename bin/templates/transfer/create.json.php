@@ -1,8 +1,14 @@
 <?php
 
 $payload = [
-	'id' => $transfer->_id
 ];
+
+if (isset($transfer) && !empty($transfer)) {
+	$payload['id'] = $transfer->_id;
+}
+else {
+	$payload['id'] = null;
+}
 
 if (isset($redirect)) {
 	$payload['redirect'] = $redirect;
