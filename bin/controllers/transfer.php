@@ -152,45 +152,18 @@ class TransferController extends BaseController
 			/*
 			 * Check if there is a source defined.
 			 */
-			if (!$posted['src']->getValue()) { 
-				throw new NoAccountAuthorizedException('Missing source account', 1712011720); 
+			if ($posted['src']->getValue()) { 
+				/*
+				 * When a user reaches this endpoint they will already have had to 
+				 * select an account to bill. In this case the system will check whether
+				 * the user is allowed to perform the operation and check that the 
+				 * intent is legitimate.
+				 */
+				$transfer->source = BookModel::getById($posted['src']->getValue());
+				$transfer->amount = $transfer->source->currency->convert($transfer->received, $transfer->source->currency);
 			}
 
-			/*
-			 * When a user reaches this endpoint they will already have had to 
-			 * select an account to bill. In this case the system will check whether
-			 * the user is allowed to perform the operation and check that the 
-			 * intent is legitimate.
-			 */
-			$transfer->source = BookModel::getById($posted['src']->getValue());
-			$transfer->amount = $transfer->source->currency->convert($transfer->received, $transfer->source->currency);
 			
-			$lock     = new AccountLock($transfer->source->account);
-			
-			/*
-			 * At this point Chad needs to determine whether the user has enough 
-			 * balance on their account to grant the payment and whether they have
-			 * assigned an account that the application can automatically bill.
-			 * 
-			 * If the user has granted permissions on one of his accounts to the 
-			 * application, it will be able to access them. Then the create() method
-			 * will be preauthorized and instruct the application to directly call
-			 * execute()
-			 */
-			if (!$lock->unlock($this->user->user->id, $this->authapp)) {
-				throw new NoAccountAuthorizedException('Not authorized on the given account');
-			}
-			
-			/*
-			 * If the user is logged in and not represented by an app, we need to 
-			 * check whether the user is communicating directly with Chad or being
-			 * Man-in-the-middle'd
-			 */
-			if ($this->user && !$this->authapp && $this->user->app->id != $this->sso->getAppId()) {
-				throw new PublicException('Token authorized by an invalid application', 403);
-			}
-			
-			$transfer->authorized = time();
 			$transfer->store();
 			
 			$this->view->set('txnid', $transfer->_id);
@@ -246,104 +219,140 @@ class TransferController extends BaseController
 	 * 
 	 * @param string $txn
 	 */
-	public function authorize($txn, $sig = null) {
-		
-		$transfer = db()->table('transfer')->get('_id', $txn)->fetch();
-		
-		if ($sig) {
-			list($rand, $hash) = explode(':', $sig);
-			if (hash('sha512', implode(':', [$txn, $rand, $this->token->getId()])) !== $hash) { throw new PrivateException('Invalid signature'); } 
-			$sigcheck = true;
-		}
-		else {
-			$rand = str_replace(['+', '/', '='], '', base64_encode(random_bytes(20)));
-			$sig  = implode(':', [$rand, hash('sha512', implode(':', [$txn, $rand, $this->token->getId()]))]);
-			$this->view->set('sig', $sig);
-		}
-		
-		//TODO: Check if the token is local or provided via GET
-		if (!$transfer) { throw new PublicException('No transaction found', 404); }
+	public function authorize(TransferModel$transfer, $sig = null) {
+		$this->view->set('source', null);
 		
 		try {
-			if (!$this->request->isPost()) { throw new HTTPMethodException('Not POSTed', 1712050927); }
-			
-			$source = $transfer->source? $transfer->source : _def($_POST['source'], null);
-			
-			if (!$source) { throw new PublicException('Invalid source defined'); }
-			
-			if (is_string($source)) { 
-				list($account, $currency) = explode(':', $source);
-				$source = db()->table('book')
-					->get('account', db()->table('account')->get('_id', $account))
-					->addRestriction('currency', db()->table('currency')->get('ISO', $currency))
-					->fetch(); 
+			if ($this->user && !$this->authapp) {
+
+				$xsrf = new \spitfire\io\XSSToken();
+				$this->view->set('sig', $xsrf->getValue());
+
+				/*
+				 * Verify that the token has not been tampered with, and that the request
+				 * is actually sent from the user and not via XSS
+				 */
+				if ($sig && !$xsrf->verify($sig)) {
+					throw new PublicException('Malformed XSRF token. Please retry', 403);
+				}
+				
+				/*
+				 * If the user is not posting the data or the XSS token has not been
+				 * sent, we disregard the data sent
+				 */
+				if (!$this->request->isPost() || !$sig) { 
+					throw new HTTPMethodException('Not POSTed', 1712050927); 
+				}
+				
+				if (!$transfer->source) {
+					$transfer->source = BookModel::getById($_POST['source']);
+				}
+
+				if (!$transfer->source) { 
+					throw new PublicException('Invalid source defined', 400); 
+				}
+
+				/*
+				 * Check the permissions on the account. Whether the user can write.
+				 */
+				$lock     = new AccountLock($transfer->source->account);
+				
+				if (!$lock->unlock($this->user->user->id, null)) {
+					throw new NoAccountAuthorizedException('Not authorized on the given account');
+				}
+				
+				$transfer->amount = $transfer->source->currency->convert($transfer->received, $transfer->target->currency);
+				$transfer->store();
+
+				/*
+				 * If the account has no balance to support the transaction, we need to 
+				 * redirect the user to the appropriate page to add funds to the account
+				 */
+				if ($transfer->source->balance() < $transfer->amount) {
+					$this->response->setBody('Redirecting...')->getHeaders()->redirect(url('funds', 'add', $source->account->_id, $source->currency->ISO, $transfer->amount, ['returnto' => strval(url('transfer', 'authorize', $transfer->_id, ['returnto' => _def($_GET['returnto'], '')]))]));
+					return;
+				}
+
+				/*
+				 * Once the transfer has been authorized, the system records the 
+				 * authorization.
+				 */
+				$transfer->authorized = time();
+				$transfer->store();
+				
+				if (isset($_GET['returnto']) && filter_var($_GET['returnto'], FILTER_VALIDATE_URL)) {
+					$this->response->setBody('Redirecting...')->getHeaders()->redirect($_GET['returnto']);
+					return;
+				}
+				else {
+					$this->response->setBody('Redirecting...')->getHeaders()->redirect(url('account'));
+					return;
+				}
+
 			}
-			
-			/*
-			 * Check the permissions on the account. Whether the user can write.
-			 */
-			$granted = db()->table('rights\user')->get('user', db()->table('user')
-				->get('_id', $this->user->user->id))
-				->addRestriction('write', true)
-				->addRestriction('account', $source->account)
-				->fetch();
-			
-			if (!$granted) { throw new PublicException('You have no access on this account', 403); }
-			if (!isset($sigcheck) || !$sigcheck) { throw new PrivateException('Failed signature'); }
-			
-			$transfer->source = $source;
-			$transfer->amount = $source->currency->convert($transfer->received, $transfer->target->currency);
-			$transfer->store();
-			
-			/*
-			 * If the account has no balance to support the transaction, we need to 
-			 * redirect the user to the appropriate page to add funds to the account
-			 */
-			if ($source->balance() < $transfer->amount) {
-				$this->response->setBody('Redirecting...')->getHeaders()->redirect(url('funds', 'add', $source->account->_id, $source->currency->ISO, $transfer->amount, ['returnto' => strval(url('transfer', 'authorize', $transfer->_id, ['returnto' => _def($_GET['returnto'], '')]))]));
-				return;
-			}
-			
-			/*
-			 * Once the transfer has been authorized, the system records the 
-			 * authorization.
-			 */
-			$transfer->authorized = time();
-			$transfer->store();
-			
-			if (isset($_GET['returnto']) && filter_var($_GET['returnto'], FILTER_VALIDATE_URL)) {
-				$this->response->setBody('Redirecting...')->getHeaders()->redirect($_GET['returnto']);
-				return;
+
+			elseif ($this->authapp && !$this->user) {
+				
+				/*
+				 * We need the user to provide a source account first.
+				 */
+				if (!$transfer->source) {
+					throw new NoAccountAuthorizedException('No source selected');
+				}
+
+				$lock     = new AccountLock($transfer->source->account);
+
+				/*
+				 * At this point Chad needs to determine whether the user has enough 
+				 * balance on their account to grant the payment and whether they have
+				 * assigned an account that the application can automatically bill.
+				 * 
+				 * If the user has granted permissions on one of his accounts to the 
+				 * application, it will be able to access them. Then the create() method
+				 * will be preauthorized and instruct the application to directly call
+				 * execute()
+				 */
+				
+				if (!$transfer->authorized && !$lock->unlock(null, $this->authapp)) {
+					throw new NoAccountAuthorizedException('Not authorized on the given account');
+				}
+
+				$transfer->authorized = time();
+				$transfer->store();
 			}
 			else {
-				$this->response->setBody('Redirecting...')->getHeaders()->redirect(url('account'));
-				return;
+				throw new PublicException('Invalid request -' . print_r($this->authapp, 1), 400);
 			}
-			
+
 		} 
 		catch (HTTPMethodException$ex) {/*Do nothing*/}
 		
-		if ($transfer->source) {
-			
+		catch (TxnRequiresAuthException$ex) {
+			$this->view->set('redirect', strval(url('transfer', 'authorize', $transfer->_id, ['returnto' => $_GET['returnto']])->absolute()));
+		}
+		
+		
+		if ($this->user && $transfer->source) {
+
 			$granted = db()->table('rights\user')->get('user', db()->table('user')
 				->get('_id', $this->user->user->id))
 				->addRestriction('write', true)
 				->addRestriction('account', $transfer->source->account)
 				->fetch();
-			
+
 			if (!$granted) { throw new PublicException('You have no access on this account', 403); }
-			
+
 			$this->view->set('source', $transfer->source);
 		}
-		else {
-			
+		elseif($this->user && !$this->authapp) {
+
 			$granted = db()->table('rights\user')->get('user', db()->table('user')
 				->get('_id', $this->user->user->id))
 				->addRestriction('write', true);
-			
+
 			$accounts = db()->table('account')->get('ugrants', $granted)->fetchAll();
-			
-			$this->view->set('source', $accounts);
+
+			$this->view->set('accounts', $accounts);
 		}
 		
 		$this->view->set('transfer', $transfer);

@@ -37,7 +37,7 @@ if (current_context()->request->isPost() && $transfer) {
 		
 		<span class="styled-select">
 			<select name="source">
-				<?php foreach($source as $s): ?>
+				<?php foreach($accounts as $s): ?>
 					<?php $books = $s->getBooks(); ?>
 					<?php foreach ($books as $book): ?>
 					<option value="<?= $s->_id ?>:<?= $book->currency->ISO ?>">

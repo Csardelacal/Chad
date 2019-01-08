@@ -33,29 +33,10 @@ class CronController extends Controller
 		$ts = time() - 1;
 		
 		if (flock($fh, LOCK_EX|LOCK_NB)) {
-			#Get the accounts to be reset
-			$reset = db()->table('book')->get('nextReset', time(), '<')->fetch();
-			
-			if ($reset) {
-				$next  = $reset->nextReset();
-				
-				if ($reset->balance() != 0) {
-					$balance = db()->table('balance')->newRecord();
-					$balance->book      = $reset;
-					$balance->amount    = 0;
-					$balance->timestamp = $next;
-					$balance->store();
-				}
-				
-				$reset->reset     = $reset->nextReset + 1;
-				$reset->nextReset = $reset->nextReset();
-				$reset->store();
-			}
-			
 			#Get the accounts to be balanced
 			$pending = db()->table('book')->get('balanced', time() - 86400 * 30, '<')->fetch();
 			
-			if ($pending && ($pending->nextReset() === false || $pending->nextReset() > time())) {
+			if ($pending) {
 				$transfers = db()->table('transfer')->getAll();
 				$transfers->group()->addRestriction('source', $pending)->addRestriction('target', $pending);
 				

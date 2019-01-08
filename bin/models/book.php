@@ -78,14 +78,17 @@ class BookModel extends Model
 		$db = $this->getTable()->getDb();
 		
 		$query = $db->table('balance')->get('book', $this);
+		$query->where('timestamp', '<=', $until);
 		$query->setOrder('timestamp', 'DESC');
 		$record = $query->fetch();
 		
 		$balance = $record? $record->amount : 0;
 		$until   = $until? : time();
+		$since   = $record? $record->timestamp : 0;
 		
 		$incomingq = $db->table('transfer')->get('executed', $record ? $record->timestamp : 0, '>');
 		$incomingq->addRestriction('executed', $until, '<=');
+		$incomingq->where('executed', '>=', $since);
 		$incomingq->addRestriction('target', $this);
 		$incoming  = $incomingq->fetchAll();
 		
@@ -95,6 +98,7 @@ class BookModel extends Model
 		
 		$outgoingq = $db->table('transfer')->get('executed', $record ? $record->timestamp : 0, '>');
 		$outgoingq->addRestriction('executed', $until, '<=');
+		$outgoingq->where('executed', '>=', $since);
 		$outgoingq->addRestriction('source', $this);
 		$outgoing  = $outgoingq->fetchAll();
 		
@@ -116,45 +120,9 @@ class BookModel extends Model
 		$group->addRestriction('target', $this);
 		$group->addRestriction('source', $this);
 		
-		$query->setResultsPerPage(30);
 		$query->setOrder('created', 'DESC');
 		
-		return $query->fetchAll();
-	}
-	
-	public function nextReset() {
-		
-		if ($this->account->resets === AccountModel::RESETS_NONE) {
-			return false;
-		}
-		
-		$b = $this->reset === null? $this->account->created : $this->reset;
-		$r = $this->account->resetDate;
-		
-		if ($this->account->resets & AccountModel::RESETS_DAILY) {
-			$hour = $this->account->resets & AccountModel::RESETS_ABSOLUTE? $r : date('H', $b);
-			$day  = date('d', $b);
-		}
-		else {
-			$hour = $this->account->resets & AccountModel::RESETS_ABSOLUTE? 0 : date('H', $b);
-			$day  = $this->account->resets & AccountModel::RESETS_ABSOLUTE? $r : date('d', $b);
-		}
-		
-		switch($this->account->resets & 0xFF) {
-			case AccountModel::RESETS_YEARLY:
-				return mktime($hour, 0, 0, 1, $day, date('Y', $b) + 1);
-			case AccountModel::RESETS_QUARTERLY:
-				return mktime($hour, 0, 0, date('m', $b) + 3, $day, date('Y', $b));
-			case AccountModel::RESETS_MONTHLY:
-				return mktime($hour, 0, 0, date('m', $b) + 1, $day, date('Y', $b));
-			case AccountModel::RESETS_WEEKLY:
-				$woy = date('W', $b);
-				return mktime($hour, 0, 0, 1, ($woy > 52? $woy : $woy + 52) * 7 + $day, date('Y', $b) - 1);
-			case AccountModel::RESETS_DAILY:
-			default:
-				return mktime($hour, 0, 0, date('m', $b), $day + 1, date('Y', $b));
-		}
-		
+		return $query->range(0, 30);
 	}
 	
 	public static function getById($bookid) {

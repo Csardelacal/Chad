@@ -24,4 +24,4 @@
  * THE SOFTWARE.
  */
 
-$this->response->getHeaders()->redirect(url('account'));
+current_context()->response->getHeaders()->redirect(url('account'));

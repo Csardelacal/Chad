@@ -32,8 +32,12 @@ elseif ($source instanceof BookModel) {
 	
 }
 
+if (isset($redirect)) {
+	$payload['redirect'] = $redirect;
+}
 
-json_encode([
+
+echo json_encode([
 	'status'  => 'OK',
 	'payload' => $payload
 ]);

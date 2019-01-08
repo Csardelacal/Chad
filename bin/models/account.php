@@ -28,16 +28,6 @@ use spitfire\storage\database\Schema;
 class AccountModel extends Model
 {
 	
-	const RESETS_NONE      = 0x000;
-	const RESETS_DAILY     = 0x001;
-	const RESETS_WEEKLY    = 0x002;
-	const RESETS_MONTHLY   = 0x004;
-	const RESETS_QUARTERLY = 0x008;
-	const RESETS_YEARLY    = 0x010;
-	
-	const RESETS_ABSOLUTE  = 0x100;
-	const RESETS_RELATIVE  = 0x200;
-	
 	public function definitions(Schema $schema) {
 		#This is due to a bug in SF - should be fixed soon and then this can be removed
 		unset($schema->_id);
@@ -47,8 +37,6 @@ class AccountModel extends Model
 		$schema->name      = new StringField(50);
 		$schema->owner     = new Reference('user');
 		$schema->taxID     = new StringField(25); #This allows the system to export accounting data to external agents.
-		$schema->resets    = new IntegerField(true); #Resets the balance of the account to 0 at the given interval
-		$schema->resetDate = new IntegerField(true); #If this is anything but 0, resetting will happen at the nth day of the period (hours for days)
 		$schema->tags      = new TagField();
 		
 		$schema->books     = new ChildrenField(BookModel::class, 'account');
@@ -72,10 +60,6 @@ class AccountModel extends Model
 		 */
 		if ($this->_id === null) {
 			$this->_id = substr(str_replace(['/', '=', '-', '_'], '', base64_encode(random_bytes(100))), 0, 25);
-		}
-		
-		if ($this->resets === null) {
-			$this->resets = self::RESETS_NONE;
 		}
 	}
 	
