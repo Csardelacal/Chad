@@ -1,7 +1,10 @@
-<?php namespace payment\provider;
+<?php namespace payment;
 
+use payment\payout\PayoutProviderPool;
+use payment\provider\ProviderInterface;
 use spitfire\core\Collection;
 use spitfire\exceptions\PrivateException;
+use function db;
 
 /* 
  * The MIT License
@@ -27,14 +30,22 @@ use spitfire\exceptions\PrivateException;
  * THE SOFTWARE.
  */
 
-class PaymentProviderPool extends Collection
+class ProviderPool extends Collection
 {
 	
-	private static $instance = null;
+	private static $payment = null;
+	private static $payout  = null;
+	
+	private $type;
+	
+	public function __construct($type) {
+		parent::__construct();
+		$this->type = $type;
+	}
 	
 	public function push($element) {
 		
-		if (!$element instanceof ProviderInterface) {
+		if (!$element instanceof $this->type) {
 			throw new PrivateException('Invalid payment provider', 1712051119);
 		}
 		
@@ -44,7 +55,9 @@ class PaymentProviderPool extends Collection
 	public function configure() {
 		$db = db();
 		
-		return $this->each(function (ProviderInterface$e) use ($db) {
+		return $this->filter(function($e) {
+			return $e instanceof $this->type;
+		})->each(function ($e) use ($db) {
 			$config = $db->table('payment\provider\configuration')->get('provider', get_class($e))->fetchAll();
 			$computed = [];
 			
@@ -60,9 +73,14 @@ class PaymentProviderPool extends Collection
 		});
 	}
 	
-	public static function getInstance() {
-		if (self::$instance) { return self::$instance; }
-		else { return self::$instance = new PaymentProviderPool(); }
+	public static function payment() {
+		if (self::$payment) { return self::$payment; }
+		else { return self::$payment = new ProviderPool(ProviderInterface::class); }
+	}
+	
+	public static function payouts() {
+		if (self::$payout) { return self::$payout; }
+		else { return self::$payout = new ProviderPool(PayoutProviderPool::class); }
 	}
 	
 }

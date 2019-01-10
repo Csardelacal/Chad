@@ -1,18 +1,22 @@
 <?php namespace external\payment\providers\paypal;
 
 use Exception;
-use payment\provider\ConfigurationInterface;
-use payment\provider\PaymentAuthorization;
+use payment\ConfigurationInterface;
+use payment\Context;
+use payment\flow\Redirection;
+use payment\Logo;
 use payment\provider\ProviderInterface;
-use payment\provider\flow\Redirection;
 use PayPal\Api\Amount;
+use PayPal\Api\InputFields;
 use PayPal\Api\Item;
 use PayPal\Api\ItemList;
 use PayPal\Api\Payer;
 use PayPal\Api\Payment;
 use PayPal\Api\RedirectUrls;
 use PayPal\Api\Transaction;
+use PayPal\Api\WebProfile;
 use PayPal\Auth\OAuthTokenCredential;
+use PayPal\Exception\PayPalConnectionException;
 use PayPal\Rest\ApiContext;
 use spitfire\exceptions\PrivateException;
 use spitfire\exceptions\PublicException;
@@ -62,7 +66,7 @@ class Paypal implements ProviderInterface
 		}
 	}
 	
-	public function authorize(PaymentAuthorization $context) {
+	public function authorize(Context $context) {
 		
 		if (isset($context->getFormData()['PayerID'])) {
 			return new PaypalPayment($this->config, $context->getFormData()['PayerID'], $context->getFormData()['paymentId']);
@@ -107,17 +111,17 @@ class Paypal implements ProviderInterface
 		
 		
 		try {
-			$input = new \PayPal\Api\InputFields();
+			$input = new InputFields();
 			$input->setNoShipping(1);
 			$input->setAddressOverride(1);
 			
-			$experience = new \PayPal\Api\WebProfile();
+			$experience = new WebProfile();
 			$experience->setName('Chad - Digital Goods');
 			$experience->setInputFields($input);
 			$experience->create($apicontext);
 		} 
-		catch (\PayPal\Exception\PayPalConnectionException $ex) {
-			list($experience) = \PayPal\Api\WebProfile::get_list($apicontext);
+		catch (PayPalConnectionException $ex) {
+			list($experience) = WebProfile::get_list($apicontext);
 		}
 		
 		try {
@@ -142,26 +146,6 @@ class Paypal implements ProviderInterface
 		return false; //TODO: Implement
 	}
 
-	public function execute(PaymentAuthorization $auth, $id, $amt) {
-		
-		$apicontext = new ApiContext(new OAuthTokenCredential($this->config->getClient(), $this->config->getSecret()));
-		$apicontext->setConfig(Array('mode' => $this->config->getMode()));
-		
-		$paymentId = $auth->getFormData()['paymentId'];
-		$payment = Payment::get($paymentId, $apicontext);
-		
-		$execution = new \PayPal\Api\PaymentExecution();
-		$execution->setPayerId($auth->getFormData()['PayerID']);
-		
-		try {
-			$payment->execute($execution, $apicontext);
-			return true;
-		} 
-		catch (Exception $ex) {
-			return false;
-		}
-	}
-
 	public function getStatus($id) {
 		return false; //TODO: Implement
 	}
@@ -170,7 +154,7 @@ class Paypal implements ProviderInterface
 		$this->config = $config;
 	}
 
-	public function listen($id, PaymentAuthorization $context) {
+	public function listen($id, Context $context) {
 		return false; //TODO: Implement
 	}
 
@@ -179,7 +163,7 @@ class Paypal implements ProviderInterface
 	}
 
 	public function getLogo() {
-		return new \payment\provider\PaymentLogo(rtrim(dirname(__FILE__), '\/') . '/paypal-logo.jpg');
+		return new Logo(rtrim(dirname(__FILE__), '\/') . '/paypal-logo.jpg');
 	}
 	
 	public function getName() {

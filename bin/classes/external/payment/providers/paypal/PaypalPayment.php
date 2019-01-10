@@ -1,6 +1,6 @@
 <?php namespace external\payment\providers\paypal;
 
-use payment\provider\flow\PaymentInterface;
+use payment\flow\PaymentInterface;
 use PayPal\Api\Payment;
 use PayPal\Api\PaymentExecution;
 use PayPal\Auth\OAuthTokenCredential;

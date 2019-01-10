@@ -1,4 +1,4 @@
-<?php namespace payment\provider\flow;
+<?php namespace payment\flow;
 
 /* 
  * The MIT License

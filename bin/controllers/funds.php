@@ -95,7 +95,7 @@ class FundsController extends BaseController
 		/*
 		 * Prepare the provider list
 		 */
-		$providers = payment\provider\PaymentProviderPool::getInstance()->configure(); // Prepares the providers by loading their configuration
+		$providers = payment\ProviderPool::payment()->configure(); // Prepares the providers by loading their configuration
 		
 		$job       = db()->table('payment\provider\externalfunds')->get('_id', $fid)->fetch();
 		$account   = $job->account;
@@ -132,7 +132,7 @@ class FundsController extends BaseController
 		 * If the payment requires further authorization, we redirect the user to 
 		 * the url the payment provider directed us.
 		 */
-		if ($flow instanceof \payment\provider\flow\Redirection) {
+		if ($flow instanceof \payment\flow\Redirection) {
 			$this->response->setBody('Redirecting...')->getHeaders()->redirect($flow->getTarget());
 			return;
 		}
@@ -141,7 +141,7 @@ class FundsController extends BaseController
 		 * The payment provider requires the user to add information for the payment
 		 * to succeed.
 		 */
-		if ($flow instanceof \payment\provider\flow\Form) {
+		if ($flow instanceof \payment\flow\Form) {
 			#TODO: implement
 		}
 		
@@ -150,7 +150,7 @@ class FundsController extends BaseController
 		 * been successful. The application is therefore required to wait until the
 		 * payment has been cleared.
 		 */
-		if ($flow instanceof \payment\provider\flow\Defer) {
+		if ($flow instanceof \payment\flow\Defer) {
 			#TODO: implement
 		}
 		
@@ -158,7 +158,7 @@ class FundsController extends BaseController
 		 * Once the payment provider has authorized the payment, we direct the 
 		 * user to the URL that we were indicated by the source app.
 		 */
-		if ($flow instanceof \payment\provider\flow\PaymentInterface) {
+		if ($flow instanceof \payment\flow\PaymentInterface) {
 			/**
 			 * Execute the payment - if the payment fails at this point the user 
 			 * should be presented with an appropriate error screen.

@@ -1,7 +1,7 @@
 <?php namespace external\payment\providers\paypal;
 
-use payment\provider\ConfigurationInterface;
-use payment\provider\setting\StringSetting;
+use payment\ConfigurationInterface;
+use payment\setting\StringSetting;
 
 /* 
  * The MIT License

@@ -1,4 +1,4 @@
-<?php namespace payment\provider;
+<?php namespace payment\flow;
 
 /* 
  * The MIT License
@@ -24,48 +24,20 @@
  * THE SOFTWARE.
  */
 
-class PaymentLogo
+/**
+ * The payment provider flow is the "next action" a user is required to take in
+ * order to authorize a payment.
+ * 
+ * Flows can basically be of three different kinds:
+ * 
+ * * Redirection: The user needs to be redirected to a third part store.
+ * * Form: The user is required to provide additional data to the application.
+ * * Payment: The system is expected to execute the payment and show a success message to the end user.
+ * * Defer: The system is required to wait for the confirmation, and the system confirming won't send a push notification
+ * 
+ */
+interface FlowInterface
 {
 	
-	private $file;
 	
-	private $tempdir = 'bin/usr/uploads/';
-	
-	/**
-	 * 
-	 * @param string $file
-	 */
-	public function __construct($file) {
-		$this->file = $file;
-	}
-	
-	/**
-	 * 
-	 * @param type $size
-	 */
-	public function getEncoded($size = 128) {
-		
-		$icon = $this->file;
-		
-		/*
-		 * Define the filename of the target, we store the thumbs for the objects
-		 * inside the same directory they get stored to.
-		 */
-		$file = rtrim($this->tempdir, '\/') . DIRECTORY_SEPARATOR . $size . '_' . basename($icon);
-		
-		if (!file_exists($file)) {
-			
-			try {
-				$img = new \spitfire\io\Image($icon);
-			}
-			catch (PrivateException$e){
-				return null;
-			}
-			
-			$img->resize(null, $size);
-			$img->store($file);
-		}
-		
-		return sprintf('data:%s;base64,%s', mime_content_type($file), base64_encode(file_get_contents($file)));
-	}
 }

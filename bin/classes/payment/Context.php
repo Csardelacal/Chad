@@ -1,4 +1,4 @@
-<?php namespace payment\provider;
+<?php namespace payment;
 
 /* 
  * The MIT License
@@ -28,14 +28,8 @@
  * This object provides a series of context metadata for a payment, for example, 
  * the URL the application wishes to be redirected to once it's done.
  */
-class PaymentAuthorization
+class Context
 {
-	
-	/**
-	 *
-	 * @var string
-	 */
-	private $authId = null;
 	
 	/*
 	 * Chad will also provide success and failure URLs as well as passthrough POST
@@ -59,29 +53,6 @@ class PaymentAuthorization
 	 */
 	private $amt = null;
 	private $currency = null;
-	
-	/**
-	 * If the payment has not been marked as recurring, which Chad can alert the 
-	 * user of, it will flag the authorization as single use and not recycle it
-	 * in future uses.
-	 *
-	 * @var bool
-	 */
-	private $recurring = null;
-	
-	/**
-	 * The payment provider can define an expiration for the authorization, causing
-	 * Chad to stop using it once the date has been reached.
-	 * 
-	 * If the payment fails - Chad will reauthorize the payment regardless.
-	 *
-	 * @var int
-	 */
-	private $expires = null;
-	
-	public function getAuthId() {
-		return $this->authId;
-	}
 
 	public function getSuccessURL() {
 		return $this->successURL;
@@ -103,19 +74,6 @@ class PaymentAuthorization
 		return $this->currency;
 	}
 
-	public function getRecurring() {
-		return $this->recurring;
-	}
-
-	public function getExpires() {
-		return $this->expires;
-	}
-
-	public function setAuthId($authId) {
-		$this->authId = $authId;
-		return $this;
-	}
-
 	public function setSuccessURL($successURL) {
 		$this->successURL = $successURL;
 		return $this;
@@ -126,11 +84,6 @@ class PaymentAuthorization
 		return $this;
 	}
 
-	public function setFormData($formData) {
-		$this->formData = $formData;
-		return $this;
-	}
-
 	public function setAmt($amt) {
 		$this->amt = $amt;
 		return $this;
@@ -138,16 +91,6 @@ class PaymentAuthorization
 
 	public function setCurrency($currency) {
 		$this->currency = $currency;
-		return $this;
-	}
-
-	public function setRecurring($recurring) {
-		$this->recurring = $recurring;
-		return $this;
-	}
-
-	public function setExpires($expires) {
-		$this->expires = $expires;
 		return $this;
 	}
 }

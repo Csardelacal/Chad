@@ -1,4 +1,7 @@
-<?php namespace payment\provider\setting;
+<?php namespace payment\setting;
+
+use spitfire\validation\ValidationRule;
+use spitfire\validation\Validator;
 
 /* 
  * The MIT License
@@ -24,57 +27,46 @@
  * THE SOFTWARE.
  */
 
-abstract class Setting implements \spitfire\validation\ValidatorInterface
+class StringSetting extends Setting
 {
 	
-	private $name;
-	private $label;
-	private $value;
-	private $default;
+	private $validation;
 	
-	public function __construct($name, $label, $default, $value = null) {
-		$this->name = $name;
-		$this->label = $label;
-		$this->default = $default;
-		$this->value   = $value;
+	public function __construct($name, $label, $default, $value) {
+		parent::__construct($name, $label, $default, $value);
+		$this->validation = new Validator();
+	}
+
+	public function getFormComponent() {
+		return sprintf(
+			'<label for="%s">%s</label><input type="text" name="%s" value="%s" id="%s">',
+			'fc-' . $this->getName(),
+			$this->getLabel(),
+			$this->getName(),
+			$this->getValue()? : $this->getDefault(),
+			'fc-' . $this->getName()
+		);
 	}
 	
-	public function getName() {
-		return $this->name;
+	public function addRule(ValidationRule $rule) {
+		return $this->validation->addRule($rule);
 	}
 	
-	public function getValue() {
-		return $this->value;
+	public function getMessages() {
+		return $this->validation->getMessages();
 	}
 	
-	public function getDefault() {
-		return $this->default;
+	public function isOk() {
+		return $this->validation->isOk();
 	}
 	
-	public function setName($name) {
-		$this->name = $name;
-		return $this;
+	public function validate() {
+		return $this->validation->validate();
 	}
 	
 	public function setValue($value) {
-		$this->value = $value;
-		return $this;
+		$this->validation->setValue($value);
+		return parent::setValue($value);
 	}
-	
-	public function setDefault($default) {
-		$this->default = $default;
-		return $this;
-	}
-	
-	public function getLabel() {
-		return $this->label;
-	}
-	
-	public function setLabel($label) {
-		$this->label = $label;
-		return $this;
-	}
-	
-	abstract public function getFormComponent();
-	
+
 }

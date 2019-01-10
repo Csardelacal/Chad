@@ -1,9 +1,7 @@
-<?php namespace payment\provider;
+<?php namespace payment\payout;
 
 use payment\ConfigurationInterface;
 use payment\Context;
-use spitfire\core\router\Redirection;
-use UI\Controls\Form;
 
 /* 
  * The MIT License
@@ -36,16 +34,8 @@ use UI\Controls\Form;
  * 
  * @author César de la Cal Bretschneider <cesar@magic3w.com>
  */
-interface ProviderInterface
+interface PayoutInterface
 {
-	
-	/*
-	 * These constants allow the application to determine whether a payment has
-	 * been authorized or not.
-	 */
-	const AUTH_REJECTED   = -1;
-	const AUTH_PENDING    = 0;
-	const AUTH_AUTHORIZED = 1;
 	
 	/**
 	 * The set up method will be automatically called when the user activates a 
@@ -57,44 +47,26 @@ interface ProviderInterface
 	 * When the application needs to use this payment provider it will call this
 	 * method providing the user configurable data for this payment provider.
 	 * 
-	 * @param ConfigurationInterface $config
+	 * @param \payment\provider\ConfigurationInterface $config
 	 */
 	function init(ConfigurationInterface$config);
 	
 	/**
-	 * This endpoint creates a payment. The software will keep track of the transfer
-	 * to / from the account of the user and will only require the provider to 
-	 * create an appropriate transfer from the external source to Chad's managed 
-	 * account.
+	 * Executes a payment. For this to be executable, it needs to have been
+	 * previously authorized by authorize()
 	 * 
-	 * @param Context $context
-	 * @return int|Redirection|Form|PaymentAuthorization The id for the payment created
-	 */
-	function authorize(Context$context);
-	
-	/**
-	 * Cancels a payment. Receives an ID provided by execute().
-	 * 
+	 * @param Context $auth
 	 * @param string $id
+	 * @param string $amt
+	 * @return string Payment ID
 	 */
-	function cancel($id);
+	function prepare(Context$auth);
 	
 	/**
-	 * When a payment gets deferred (because, for example, a payment provider
-	 * needs a few minutes to process a credit card) the application will call
-	 * this method once it receives a return from the server.
 	 * 
-	 * @param int $id
-	 * @param \payment\provider\PaymentAuthorization $context
+	 * @param type $jobs
 	 */
-	function listen($id, Context$context);
-	
-	/**
-	 * Retrieves information about a payment. Receives an ID provided by execute()
-	 * 
-	 * @param int $id
-	 */
-	function getStatus($id);
+	function run($jobs);
 	
 	/**
 	 * 

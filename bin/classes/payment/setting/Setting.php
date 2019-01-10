@@ -1,4 +1,4 @@
-<?php namespace payment\provider;
+<?php namespace payment\setting;
 
 /* 
  * The MIT License
@@ -24,17 +24,57 @@
  * THE SOFTWARE.
  */
 
-class Redirection
+abstract class Setting implements \spitfire\validation\ValidatorInterface
 {
 	
-	private $target;
+	private $name;
+	private $label;
+	private $value;
+	private $default;
 	
-	public function __construct($target) {
-		$this->target = $target;
+	public function __construct($name, $label, $default, $value = null) {
+		$this->name = $name;
+		$this->label = $label;
+		$this->default = $default;
+		$this->value   = $value;
 	}
 	
-	public function getTarget() {
-		return $this->target;
+	public function getName() {
+		return $this->name;
 	}
+	
+	public function getValue() {
+		return $this->value;
+	}
+	
+	public function getDefault() {
+		return $this->default;
+	}
+	
+	public function setName($name) {
+		$this->name = $name;
+		return $this;
+	}
+	
+	public function setValue($value) {
+		$this->value = $value;
+		return $this;
+	}
+	
+	public function setDefault($default) {
+		$this->default = $default;
+		return $this;
+	}
+	
+	public function getLabel() {
+		return $this->label;
+	}
+	
+	public function setLabel($label) {
+		$this->label = $label;
+		return $this;
+	}
+	
+	abstract public function getFormComponent();
 	
 }

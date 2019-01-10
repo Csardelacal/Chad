@@ -1,4 +1,4 @@
-<?php namespace payment\provider\flow;
+<?php namespace payment;
 
 /* 
  * The MIT License
@@ -24,9 +24,48 @@
  * THE SOFTWARE.
  */
 
-interface PaymentInterface extends FlowInterface
+class Logo
 {
 	
-	public function charge();
+	private $file;
 	
+	private $tempdir = 'bin/usr/uploads/';
+	
+	/**
+	 * 
+	 * @param string $file
+	 */
+	public function __construct($file) {
+		$this->file = $file;
+	}
+	
+	/**
+	 * 
+	 * @param type $size
+	 */
+	public function getEncoded($size = 128) {
+		
+		$icon = $this->file;
+		
+		/*
+		 * Define the filename of the target, we store the thumbs for the objects
+		 * inside the same directory they get stored to.
+		 */
+		$file = rtrim($this->tempdir, '\/') . DIRECTORY_SEPARATOR . $size . '_' . basename($icon);
+		
+		if (!file_exists($file)) {
+			
+			try {
+				$img = new \spitfire\io\Image($icon);
+			}
+			catch (PrivateException$e){
+				return null;
+			}
+			
+			$img->resize(null, $size);
+			$img->store($file);
+		}
+		
+		return sprintf('data:%s;base64,%s', mime_content_type($file), base64_encode(file_get_contents($file)));
+	}
 }
