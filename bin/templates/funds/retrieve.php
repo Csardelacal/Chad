@@ -15,7 +15,8 @@
 					<div class="field">
 						<label for="account">Account</label>
 						<select name="account" id="account">
-							<?php $options = db()->table('account')->get('owner', db()->table('user')->get('_id', $authUser->user->id))->fetchAll(); ?>
+							<?php $ugrants  = db()->table('rights\user')->get('user', db()->table('user')->get('_id', $authUser->user->id)); ?>
+							<?php $options = db()->table('account')->get('ugrants', $ugrants)->all(); ?>
 							<?php foreach ($options as $option): ?>
 							<option value="<?= $option->_id ?>"><?= $option->name ?></option>
 							<?php endforeach; ?>
@@ -42,7 +43,7 @@
 						<select name="currency" id="currency">
 							<?php $currencies = db()->table('currency')->get('removed', null, 'IS')->fetchAll(); ?>
 							<?php foreach ($currencies as $c): ?>
-							<option value="<?= $c->ISOCode ?>"><?= $c->name ?> (<?= $c->ISO ?>)</option>
+							<option value="<?= $c->ISO ?>"><?= $c->name ?> (<?= $c->ISO ?>)</option>
 							<?php endforeach; ?>
 						</select>
 					</div>

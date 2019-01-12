@@ -68,6 +68,12 @@ class FundsController extends BaseController
 				return !!(_def($_POST['provider'], null) === get_class($e));
 			})->rewind();
 			
+			$granted  = db()->table('rights\user')->get('user', db()->table('user')->get('_id', $this->user->user->id))->where('account', $account)->first();
+
+			if (!$granted) {
+				throw new PublicException('Not permitted', 403);
+			}
+			
 			if ($amt < 0)   { throw new ValidationException('Invalid amount', 1712051113); }
 			if (!$amt)      { throw new PublicException('No amount provided', 400); }
 			if (!$currency) { throw new PublicException('No currency found', 404); }
@@ -127,6 +133,12 @@ class FundsController extends BaseController
 				return !!(_def($_POST['provider'], null) === get_class($e));
 			})->rewind();
 			
+			$granted  = db()->table('rights\user')->get('user', db()->table('user')->get('_id', $this->user->user->id))->where('account', $account)->first();
+
+			if (!$granted) {
+				throw new PublicException('Not permitted', 403);
+			}
+			
 			if ($amt < 0)   { throw new ValidationException('Invalid amount', 1712051113); }
 			if (!$amt)      { throw new PublicException('No amount provided', 400); }
 			if (!$currency) { throw new PublicException('No currency found', 404); }
@@ -173,6 +185,13 @@ class FundsController extends BaseController
 		 */
 		try                  { $book = $account->getBook($currency); }
 		catch (\Exception$e) { $book = $account->addBook($currency); }
+		
+		
+		$granted  = db()->table('rights\user')->get('user', db()->table('user')->get('_id', $this->user->user->id))->where('account', $job->account)->first();
+		
+		if (!$granted) {
+			throw new PublicException('Not permitted', 403);
+		}
 			
 		/* @var $provider ProviderInterface */
 		$provider = $providers->filter(function ($e) use ($job) {
