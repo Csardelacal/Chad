@@ -28,14 +28,14 @@ class ProviderController extends BaseController
 {
 	
 	public function index() {
-		$providers = \payment\provider\PaymentProviderPool::getInstance();
+		$providers = \payment\ProviderPool::payment()->add(\payment\ProviderPool::payouts());
 		
 		$this->view->set('providers', $providers);
 	}
 	
 	public function edit($id) {
 		
-		$provider = \payment\provider\PaymentProviderPool::getInstance()->filter(function ($e) use ($id) {
+		$provider = \payment\ProviderPool::payment()->add(\payment\ProviderPool::payouts())->filter(function ($e) use ($id) {
 			return str_replace('\\', '-', get_class($e)) === $id;
 		})->rewind();
 		

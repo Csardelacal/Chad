@@ -1,12 +1,9 @@
-<?php namespace payment\payout;
-
-use payment\ConfigurationInterface;
-use payment\Context;
+<?php namespace payment\flow;
 
 /* 
  * The MIT License
  *
- * Copyright 2017 César de la Cal Bretschneider <cesar@magic3w.com>.
+ * Copyright 2019 César de la Cal Bretschneider <cesar@magic3w.com>.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,53 +24,11 @@ use payment\Context;
  * THE SOFTWARE.
  */
 
-/**
- * The provider interface allows to create and integrate external payment providers
- * into Chad and to quickly implement new sources for the application to allow
- * users to pay for goods provided by the software.
- * 
- * @author César de la Cal Bretschneider <cesar@magic3w.com>
- */
 interface PayoutInterface
 {
 	
-	/**
-	 * When the application needs to use this payment provider it will call this
-	 * method providing the user configurable data for this payment provider.
-	 * 
-	 * @param \payment\provider\ConfigurationInterface $config
-	 */
-	function init(ConfigurationInterface$config);
+	function getAdditional();
 	
-	/**
-	 * 
-	 * @param Context $ctx
-	 */
-	function authorize(Context$ctx);
-	
-	/**
-	 * 
-	 * @param type $jobs
-	 */
-	function run($jobs);
-	
-	/**
-	 * 
-	 * @return ConfigurationInterface
-	 */
-	function makeConfiguration();
-	
-	/**
-	 * 
-	 * @return string The name of the provider
-	 */
-	function getName();
-	
-	/**
-	 * 
-	 * @param int $size
-	 * @return string The location of the logo file
-	 */
-	function getLogo();
+	function write();
 	
 }

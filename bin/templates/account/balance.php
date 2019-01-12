@@ -6,17 +6,22 @@
 
 <div class="spacer" style="height: 20px"></div>
 
-<div class="row3 has-dials">
-	<div class="span2">
+<div class="row l3 has-dials">
+	<div class="span l2">
 		<?php foreach ($history as $record): ?>
 		<div class="material">
 			<?php $incoming = $account->_id === $record->target->account->_id ?>
-			<?php $displayname = $incoming? $record->source->account->owner->_id : $record->target->account->owner->_id ?>
+			<?php $user  = $incoming? $record->source->account->owner : $record->target->account->owner; ?>
+			<?php $displayname = $user? $user->_id : null ?>
 			
 			<div class="row2 fluid">
 				<div class="span1">
 					<div>
+						<?php try { ?>
 						<strong><?= $displayname? $sso->getUser($displayname)->getUsername() : 'External' ?></strong>
+						<?php } catch (\Exception$e) { ?>
+						<strong><?= $displayname ?></strong>
+						<?php } ?>
 					</div>
 					<div>
 						<span style="color: #777; font-size: .8em">
@@ -48,5 +53,6 @@
 		</div>
 		<?php endif; ?>
 	</div>
+	
 </div>
 	

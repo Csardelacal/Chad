@@ -1,5 +1,11 @@
 <?php
 
+use payment\Context;
+use payment\flow\PaymentInterface;
+use payment\flow\Redirection;
+use payment\provider\ExternalfundsModel;
+use payment\provider\ProviderInterface;
+use payment\ProviderPool;
 use spitfire\exceptions\HTTPMethodException;
 use spitfire\exceptions\PublicException;
 use spitfire\validation\ValidationException;
@@ -38,7 +44,7 @@ class FundsController extends BaseController
 		/*
 		 * Prepare the provider list
 		 */
-		$providers = payment\provider\PaymentProviderPool::getInstance()->configure(); // Prepares the providers by loading their configuration
+		$providers = ProviderPool::payment()->configure(); // Prepares the providers by loading their configuration
 		$currency  = $currencyISO? db()->table('currency')->get('ISO', _def($_POST['currency'], $currencyISO))->fetch() : db()->table('currency')->get('default', true)->fetch();
 		$account   = db()->table('account')->get('_id', _def($_POST['account'], $acctid))->fetch();
 		
@@ -57,7 +63,7 @@ class FundsController extends BaseController
 			}
 			
 			
-			/* @var $provider \payment\provider\ProviderInterface */
+			/* @var $provider ProviderInterface */
 			$provider = $providers->filter(function ($e) {
 				return !!(_def($_POST['provider'], null) === get_class($e));
 			})->rewind();
@@ -68,6 +74,66 @@ class FundsController extends BaseController
 			if (!$provider) { throw new PublicException('No provider found', 404); }
 			
 			$record = db()->table('payment\provider\externalfunds')->newRecord();
+			$record->type     = ExternalfundsModel::TYPE_PAYMENT;
+			$record->source   = get_class($provider);
+			$record->amt      = $amt;
+			$record->account  = $account;
+			$record->currency = $currency;
+			$record->returnto = _def($_GET['returnto'], strval(url('account')->absolute()));
+			$record->store();
+			
+			$this->response->setBody('Redirecting...')->getHeaders()->redirect(url('funds', 'execute', $record->_id));
+			return;
+		} 
+		catch (HTTPMethodException $ex) {
+			/*
+			 * Do nothing, just show the appropriate screen
+			 */
+		}
+		
+		$this->view->set('amt', $amt);
+		$this->view->set('account', $account);
+		$this->view->set('currency', $currency);
+		$this->view->set('providers', $providers);
+	}
+	
+	public function retrieve($acctid = null, $currencyISO = null, $amtParam = null) {
+		
+		
+		/*
+		 * Prepare the provider list
+		 */
+		$providers = ProviderPool::payouts()->configure(); // Prepares the providers by loading their configuration
+		$currency  = $currencyISO? db()->table('currency')->get('ISO', _def($_POST['currency'], $currencyISO))->fetch() : db()->table('currency')->get('default', true)->fetch();
+		$account   = db()->table('account')->get('_id', _def($_POST['account'], $acctid))->fetch();
+		
+		try {
+			/*
+			 * First thing we need to do is check whether the request was posted,
+			 * if this is not the case, we need to show the user the source select 
+			 * screen.
+			 */
+			if (!$this->request->isPost()) { throw new HTTPMethodException('Not POSTed', 1712051108); }
+			
+			$amt      = _def($_POST['amt'], $amtParam);
+			
+			if (isset($_POST['decimals']) && $_POST['decimals'] === 'natural') {
+				$amt = $amt * pow(10, $currency->decimals);
+			}
+			
+			
+			/* @var $provider ProviderInterface */
+			$provider = $providers->filter(function ($e) {
+				return !!(_def($_POST['provider'], null) === get_class($e));
+			})->rewind();
+			
+			if ($amt < 0)   { throw new ValidationException('Invalid amount', 1712051113); }
+			if (!$amt)      { throw new PublicException('No amount provided', 400); }
+			if (!$currency) { throw new PublicException('No currency found', 404); }
+			if (!$provider) { throw new PublicException('No provider found', 404); }
+			
+			$record = db()->table('payment\provider\externalfunds')->newRecord();
+			$record->type     = ExternalfundsModel::TYPE_PAYOUT;
 			$record->source   = get_class($provider);
 			$record->amt      = $amt;
 			$record->account  = $account;
@@ -92,15 +158,15 @@ class FundsController extends BaseController
 	
 	public function execute($fid) {
 		
-		/*
-		 * Prepare the provider list
-		 */
-		$providers = payment\ProviderPool::payment()->configure(); // Prepares the providers by loading their configuration
-		
 		$job       = db()->table('payment\provider\externalfunds')->get('_id', $fid)->fetch();
 		$account   = $job->account;
 		$amt       = $job->amt;
 		$currency  = $job->currency;
+		
+		/*
+		 * Prepare the provider list
+		 */
+		$providers = $job->type == ExternalfundsModel::TYPE_PAYMENT? ProviderPool::payment()->configure() : ProviderPool::payouts()->configure();  // Prepares the providers by loading their configuration
 		
 		/*
 		 * Get the appropriate book to add the funds to
@@ -108,7 +174,7 @@ class FundsController extends BaseController
 		try                  { $book = $account->getBook($currency); }
 		catch (\Exception$e) { $book = $account->addBook($currency); }
 			
-		/* @var $provider \payment\provider\ProviderInterface */
+		/* @var $provider ProviderInterface */
 		$provider = $providers->filter(function ($e) use ($job) {
 			return !!($job->source === get_class($e));
 		})->rewind();
@@ -116,12 +182,35 @@ class FundsController extends BaseController
 		/*
 		 * Create the context to manage the payment authorization.
 		 */
-		$context = new payment\provider\PaymentAuthorization();
+		$context = new Context();
 		$context->setAmt($amt);
 		$context->setCurrency($currency);
 		$context->setSuccessURL(url('funds', 'execute', $fid)->absolute());
 		$context->setFailureURL(url('funds', 'failed', $fid)->absolute());
 		$context->setFormData($_REQUEST);
+		
+			
+		/*
+		 * Once the amount has been charged, the application must proceed to 
+		 * record the transaction.
+		 */
+		$source   = db()->table('payment\provider\source')->get('provider', get_class($provider))->fetch();
+		
+		if ($source) {
+			$srcaccount = $source->account;
+		}
+		else {
+			$srcaccount = db()->table('account')->newRecord();
+			$srcaccount->name      = get_class($provider);
+			$srcaccount->owner     = null;
+			$srcaccount->taxID     = null;
+			$srcaccount->store();
+
+			$source  = db()->table('payment\provider\source')->newRecord();
+			$source->provider = get_class($provider);
+			$source->account  = $srcaccount;
+			$source->store();
+		}
 		
 		/*
 		 * Try and authorize the payment, pulling funds from the external source
@@ -132,7 +221,7 @@ class FundsController extends BaseController
 		 * If the payment requires further authorization, we redirect the user to 
 		 * the url the payment provider directed us.
 		 */
-		if ($flow instanceof \payment\flow\Redirection) {
+		if ($flow instanceof Redirection) {
 			$this->response->setBody('Redirecting...')->getHeaders()->redirect($flow->getTarget());
 			return;
 		}
@@ -142,7 +231,8 @@ class FundsController extends BaseController
 		 * to succeed.
 		 */
 		if ($flow instanceof \payment\flow\Form) {
-			#TODO: implement
+			$this->view->set('form', $flow);
+			return;
 		}
 		
 		/*
@@ -158,7 +248,8 @@ class FundsController extends BaseController
 		 * Once the payment provider has authorized the payment, we direct the 
 		 * user to the URL that we were indicated by the source app.
 		 */
-		if ($flow instanceof \payment\flow\PaymentInterface) {
+		if ($flow instanceof PaymentInterface && $job->type == ExternalfundsModel::TYPE_PAYMENT) {
+			
 			/**
 			 * Execute the payment - if the payment fails at this point the user 
 			 * should be presented with an appropriate error screen.
@@ -166,34 +257,60 @@ class FundsController extends BaseController
 			$flow->charge();
 			
 			/*
-			 * Once the amount has been charged, the application must proceed to 
-			 * record the transaction.
+			 * 
 			 */
-			$source   = db()->table('payment\provider\source')->get('provider', get_class($provider))->fetch();
-			
-			if ($source) {
-				$srcaccount = $source->account;
-			}
-			else {
-				$srcaccount = db()->table('account')->newRecord();
-				$srcaccount->name      = get_class($provider);
-				$srcaccount->owner     = null;
-				$srcaccount->taxID     = null;
-				$srcaccount->resets    = AccountModel::RESETS_MONTHLY | AccountModel::RESETS_ABSOLUTE;
-				$srcaccount->resetDate = 1;
-				$srcaccount->store();
-				
-				$source  = db()->table('payment\provider\source')->newRecord();
-				$source->provider = get_class($provider);
-				$source->account  = $srcaccount;
-				$source->store();
-			}
+			$job->approved = time();
+			$job->executed = time();
+			$job->store();
 			
 			$srcbook = $srcaccount->getBook($book->currency)? : $srcaccount->addBook($book->currency);
 			
 			$transfer = db()->table('transfer')->newRecord();
 			$transfer->source = $srcbook;
 			$transfer->target = $book;
+			$transfer->amount = $amt;
+			$transfer->received = $amt;
+			$transfer->description = get_class($provider);
+			$transfer->created  = time();
+			$transfer->executed = time();
+			$transfer->store();
+			$transfer->notify();
+		}
+		
+		/*
+		 * Once the payment provider has authorized the payment, we direct the 
+		 * user to the URL that we were indicated by the source app.
+		 */
+		if ($flow instanceof \payment\flow\PayoutInterface && $job->type == ExternalfundsModel::TYPE_PAYOUT) {
+			
+			/*
+			 * This is the last safeguard before the charge gets executed, if the 
+			 * balance is not enough to cover the transaction, we stop the user from
+			 * performing it.
+			 */
+			if (!$book->balance() > $amt) {
+				throw new PublicException('Not permitted', 403);
+			}
+			
+			/*
+			 * Payouts are only recorded, they get executed in batches and after a
+			 * bureaucrat has approved the transaction.
+			 */
+			$flow->write();
+			
+			/*
+			 * Record that the payout has been approved by the payment processor, and
+			 * needs to be released by an administrator.
+			 */
+			$job->approved = time();
+			$job->additional = $flow->getAdditional();
+			$job->store();
+			
+			$srcbook = $srcaccount->getBook($book->currency)? : $srcaccount->addBook($book->currency);
+			
+			$transfer = db()->table('transfer')->newRecord();
+			$transfer->source = $book;
+			$transfer->target = $srcbook;
 			$transfer->amount = $amt;
 			$transfer->received = $amt;
 			$transfer->description = get_class($provider);

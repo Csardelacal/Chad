@@ -40,6 +40,7 @@
 					
 					<div class="menu-entry"><a href="<?= url('account', 'index')  ?>">My accounts</a></div>
 					<div class="menu-entry"><a href="<?= url('account', 'create') ?>">Create account</a></div>
+					<div class="menu-entry"><a href="<?= url('funds', 'retrieve') ?>">Transfer money</a></div>
 					
 					<div class="spacer" style="height: 10px"></div>
 					
@@ -47,6 +48,7 @@
 					<div class="heading" style="color: #999; padding-left: 10px">Administration</div>
 					<div class="menu-entry"><a href="<?= url('redirection', 'index')  ?>">Redirections</a></div>
 					<div class="menu-entry"><a href="<?= url('provider', 'index')  ?>">Payment providers</a></div>
+					<div class="menu-entry"><a href="<?= url('payout', 'index')  ?>">Payouts</a></div>
 					<?php endif; ?>
 				</div>
 			</div><!--

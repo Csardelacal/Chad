@@ -12,7 +12,10 @@
 		<div class="material">
 			<div class="row3 fluid has-dials">
 				<div class="span2">
-					<div><strong><?= $provider->getName() ?></strong></div>
+					<div>
+						<strong><?= $provider->getName() ?></strong>
+						<span style="color: #777; font-size: .9em;"><?= $provider instanceof payment\provider\ProviderInterface? 'Payment provider' : 'Payout provider' ?></span>
+					</div>
 					<div class="spacer" style="height: 5px"></div>
 					<div><span style="color: #777; font-size: .8em"></span></div>
 				</div>
@@ -25,6 +28,8 @@
 				</div>
 			</div>
 		</div>
+		
+		<div class="spacer" style="height: 20px"></div>
 	</div>
 </div>
 <?php endforeach; ?>

@@ -1,6 +1,6 @@
 <?php namespace payment;
 
-use payment\payout\PayoutProviderPool;
+use payment\payout\PayoutInterface;
 use payment\provider\ProviderInterface;
 use spitfire\core\Collection;
 use spitfire\exceptions\PrivateException;
@@ -80,7 +80,7 @@ class ProviderPool extends Collection
 	
 	public static function payouts() {
 		if (self::$payout) { return self::$payout; }
-		else { return self::$payout = new ProviderPool(PayoutProviderPool::class); }
+		else { return self::$payout = new ProviderPool(PayoutInterface::class); }
 	}
 	
 }

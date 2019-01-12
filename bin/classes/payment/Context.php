@@ -84,6 +84,11 @@ class Context
 		return $this;
 	}
 
+	public function setFormData($formData) {
+		$this->formData = $formData;
+		return $this;
+	}
+
 	public function setAmt($amt) {
 		$this->amt = $amt;
 		return $this;

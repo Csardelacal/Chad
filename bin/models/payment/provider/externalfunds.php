@@ -1,10 +1,12 @@
 <?php namespace payment\provider;
 
+use EnumField;
 use IntegerField;
 use Reference;
 use spitfire\Model;
 use spitfire\storage\database\Schema;
 use StringField;
+use TextField;
 
 /* 
  * The MIT License
@@ -33,17 +35,29 @@ use StringField;
 class ExternalfundsModel extends Model
 {
 	
+	const TYPE_PAYMENT = 'payment';
+	
+	const TYPE_PAYOUT = 'payout';
+	
 	/**
 	 * 
 	 * @param Schema $schema
 	 */
 	public function definitions(Schema $schema) {
+		/*
+		 * An external operation can be any of two kinds. If it's a payment, it's 
+		 * a transfer of funds into the system. A payout implies that money has 
+		 * been transfered (or is to be transfered) from Chad to an external source.
+		 */
+		$schema->type     = new EnumField(self::TYPE_PAYMENT, self::TYPE_PAYOUT);
 		$schema->source   = new StringField(50); #Classname of the payment provider
 		$schema->amt      = new IntegerField(true);
 		$schema->account  = new Reference('account');  #While these technically form a book
 		$schema->currency = new Reference('currency'); #it's sometimes convenient to separate them
 		$schema->returnto = new StringField(4096);
+		$schema->additional = new TextField();
 		$schema->created  = new IntegerField(true);
+		$schema->approved = new IntegerField(true);
 		$schema->executed = new IntegerField(true);
 	}
 	
