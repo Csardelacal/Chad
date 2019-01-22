@@ -48,6 +48,12 @@ class FundsController extends BaseController
 		$currency  = $currencyISO? db()->table('currency')->get('ISO', _def($_POST['currency'], $currencyISO))->fetch() : db()->table('currency')->get('default', true)->fetch();
 		$account   = db()->table('account')->get('_id', _def($_POST['account'], $acctid))->fetch();
 		
+		$amt = _def($_POST['amt'], $amtParam);
+
+		if (isset($_POST['decimals']) && $_POST['decimals'] === 'natural') {
+			$amt = $amt * pow(10, $currency->decimals);
+		}
+		
 		try {
 			/*
 			 * First thing we need to do is check whether the request was posted,
@@ -56,11 +62,6 @@ class FundsController extends BaseController
 			 */
 			if (!$this->request->isPost()) { throw new HTTPMethodException('Not POSTed', 1712051108); }
 			
-			$amt      = _def($_POST['amt'], $amtParam);
-			
-			if (isset($_POST['decimals']) && $_POST['decimals'] === 'natural') {
-				$amt = $amt * pow(10, $currency->decimals);
-			}
 			
 			
 			/* @var $provider ProviderInterface */

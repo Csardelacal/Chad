@@ -60,18 +60,16 @@ class AccountController extends BaseController
 			 * The authorization app needs to be allowed by the user to manage and
 			 * or create accounts that they then shall own.
 			 */
-			$auth = $this->sso->authApp($_GET['signature'], $this->token, ['account.create', 'account.resets']);
+			$auth = $this->sso->authApp($_GET['signature'], $this->token, ['account.create']);
 			
 			if (!$auth->getAuthenticated())                     { throw new PublicException('Invalid app', 403); }
 			if (!$auth->getContext('account.create')->exists()) { $auth->getContext('account.create')->create('Account creation', 'Allows the remote application to create accounts in Chad on your behalf.'); }
-			if (!$auth->getContext('account.resets')->exists()) { $auth->getContext('account.resets')->create('Account resetting', 'Allows the remote application to create accounts in Chad that automatically reset.'); }
 			
 			if (!$auth->getContext('account.create')->isGranted()) {
 				return $this->view->set('redirect', $auth->getRedirect($this->authapp, ['account.create']));
 			}
 			
 			$rights['create'] = $auth->getContext('account.create')->isGranted() == 2;
-			$rights['reset']  = $auth->getContext('account.resets')->isGranted() == 2;
 			$rights['tags']   = true;
 			
 		}
@@ -81,7 +79,6 @@ class AccountController extends BaseController
 		 */
 		elseif ($this->user) {
 			$rights['create'] = true;
-			$rights['reset']  = false;
 			$rights['tags']   = false;
 		}
 		else {
@@ -103,7 +100,6 @@ class AccountController extends BaseController
 			$v = [
 				'owner'  => validate($this->user? $this->user->user->id : $_POST['owner']), 
 				'name'   => validate($_POST['name']),
-				'resets' => validate($_POST['resets']),
 				'tags'   => validate($_POST['tags'])
 			];
 			
@@ -115,7 +111,6 @@ class AccountController extends BaseController
 			$account = db()->table('account')->newRecord();
 			$account->name   = $v['name']->getValue();
 			$account->owner  = db()->table('user')->get('_id', $v['owner']->getValue())->fetch();
-			$account->resets = $v['resets']->getValue();
 			$account->tags   = $v['tags']->getValue();
 			$account->store();
 			

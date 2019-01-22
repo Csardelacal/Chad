@@ -34,15 +34,16 @@ class UserController extends BaseController
 	public function login() {
 		$session = $this->session;
 		$sso     = $this->sso;
+		$rtt     = $_GET['returnto']?? strval(url('account'));
 		
 		if ($this->token->isAuthenticated()) {
-			return $this->response->setBody('Redirecting...')->getHeaders()->redirect(url('account'));
+			return $this->response->setBody('Redirecting...')->getHeaders()->redirect($rtt);
 		}
 		
 		$token   = $sso->createToken();
 		$session->lock($token);
 		
-		$this->response->setBody('Redirecting...')->getHeaders()->redirect($token->getRedirect(url('user', 'login')->absolute()));
+		$this->response->setBody('Redirecting...')->getHeaders()->redirect($token->getRedirect(url('user', 'login', ['returnto' => $rtt])->absolute()));
 	}
 	
 	

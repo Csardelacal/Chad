@@ -269,7 +269,7 @@ class TransferController extends BaseController
 				 * redirect the user to the appropriate page to add funds to the account
 				 */
 				if ($transfer->source->balance() < $transfer->amount) {
-					$this->response->setBody('Redirecting...')->getHeaders()->redirect(url('funds', 'add', $source->account->_id, $source->currency->ISO, $transfer->amount, ['returnto' => strval(url('transfer', 'authorize', $transfer->_id, ['returnto' => _def($_GET['returnto'], '')]))]));
+					$this->response->setBody('Redirecting...')->getHeaders()->redirect(url('funds', 'add', $transfer->source->account->_id, $transfer->source->currency->ISO, $transfer->amount, ['returnto' => strval(url('transfer', 'authorize', $transfer->_id, ['returnto' => _def($_GET['returnto'], '')]))]));
 					return;
 				}
 
@@ -321,7 +321,8 @@ class TransferController extends BaseController
 				$transfer->store();
 			}
 			else {
-				throw new PublicException('Invalid request -' . print_r($this->authapp, 1), 400);
+				$rtt = strval(url('transfer', 'authorize', $transfer->_id, ['returnto' => $_GET['returnto']])->absolute());
+				return $this->response->setBody('Redirecting...')->getHeaders()->redirect(url('user', 'login', ['returnto' => $rtt]));
 			}
 
 		} 

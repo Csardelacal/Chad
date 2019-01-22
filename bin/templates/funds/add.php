@@ -32,7 +32,7 @@
 				<div class="span2">
 					<div class="field">
 						<label for="amt">Amount</label>
-						<input type="text" name="amt" id="amt">
+						<input type="text" name="amt" id="amt" value="<?= $amt ?>">
 						<input type="hidden" name="decimals" value="natural">
 					</div>
 				</div>
@@ -46,6 +46,24 @@
 							<option value="<?= $c->ISO ?>"><?= $c->name ?> (<?= $c->ISO ?>)</option>
 							<?php endforeach; ?>
 						</select>
+					</div>
+				</div>
+			</div>
+			<?php else: ?>
+			
+			<div class="spacer" style="height: 30px"></div>
+			<div class="material">
+				<div class="row3 fluid">
+					<div class="span2">
+						<p class="secondary small">Account:</p>
+						<p><?= __($account->name) ?></p>
+					</div>
+
+					<div class="span1">
+						<p class="secondary small">Amount:</p>
+						<?= $currency->ISO ?><?= number_format($amt / pow(10, $currency->decimals), $currency->decimals) ?>
+						<input type="hidden" name="currency" id="amt" value="<?= $currency->ISO ?>">
+						<input type="hidden" name="amt" id="amt" value="<?= $amt ?>">
 					</div>
 				</div>
 			</div>
@@ -66,6 +84,7 @@
 						(function () { 
 							document.getElementById('logo-<?= str_replace('\\', '-', get_class($provider)) ?>').addEventListener('click', function () {
 								document.getElementById('pp-<?= str_replace('\\', '-', get_class($provider)) ?>').click();
+								document.getElementById('addfunds').removeAttribute('disabled');
 							}); 
 						}());
 						</script>
@@ -75,8 +94,10 @@
 				<?= $every->next(); ?>
 				<?php endforeach; ?>
 			</div>
-
-			<input type="submit" value="Add funds">
+			
+			<div class="form-footer">
+				<input type="submit" value="Add funds" id="addfunds" disabled>
+			</div>
 		</form>
 	</div>
 </div>
