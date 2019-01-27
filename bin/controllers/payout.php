@@ -39,4 +39,23 @@ class PayoutController extends BaseController
 		$this->view->set('payouts', db()->table('payment\provider\externalfunds')->get('type', ExternalfundsModel::TYPE_PAYOUT)->where('executed', null)->all());
 	}
 	
+	public function complete() {
+		
+		if (!$this->privileges->isAdmin()) {
+			throw new PublicException('Forbidden', 403);
+		}
+		
+		if (!is_array($_POST['payout'])) {
+			throw new PublicException('Forbidden', 403);
+		}
+		
+		foreach ($_POST['payout'] as $id => $ign) {
+			$payout = db()->table('payment\provider\externalfunds')->get('type', ExternalfundsModel::TYPE_PAYOUT)->where('_id', $id)->first();
+			$payout->executed = time();
+			$payout->store();
+		}
+		
+		$this->response->setBody('Redirect...')->getHeaders()->redirect(url('payout'));
+		
+	}
 }

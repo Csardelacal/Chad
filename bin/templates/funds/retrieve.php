@@ -66,6 +66,7 @@
 						(function () { 
 							document.getElementById('logo-<?= str_replace('\\', '-', get_class($provider)) ?>').addEventListener('click', function () {
 								document.getElementById('pp-<?= str_replace('\\', '-', get_class($provider)) ?>').click();
+								document.getElementById('getfunds').removeAttribute('disabled');
 							}); 
 						}());
 						</script>
@@ -75,8 +76,10 @@
 				<?= $every->next(); ?>
 				<?php endforeach; ?>
 			</div>
-
-			<input type="submit" value="Add funds">
+			
+			<div class="form-footer">
+				<input type="submit" value="Retrieve" id="getfunds" disabled>
+			</div>
 		</form>
 	</div>
 </div>

@@ -36,7 +36,7 @@ class Form
 	}
 	
 	public function __toString() {
-		return sprintf('<form method="POST" action="">%s<input type="submit" value="Continue..."></form>', implode(PHP_EOL, $this->fields));
+		return sprintf('<form method="POST" action="" class="regular">%s<div class="form-footer"><input type="submit" value="Continue..."></div></form>', implode(PHP_EOL, $this->fields));
 	}
 	
 }
