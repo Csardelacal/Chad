@@ -98,15 +98,7 @@ class BaseController extends Controller
 		$c = db()->table('currency')->get('default', true)->fetch();
 		
 		if (!$c) {
-			$c = db()->table('currency')->newRecord();
-			$c->ISO = Environment::get('chad.default.currency.ISO')? : 'USD';
-			$c->symbol = Environment::get('chad.default.currency.symbol')? : '$';
-			$c->name = Environment::get('chad.default.currency.name')? : 'US Dollar';
-			$c->decimals = Environment::get('chad.default.currency.decimals')? : 2;
-			$c->conversion = Environment::get('chad.default.currency.conversion')? : 1;
-			$c->display = Environment::get('chad.default.currency.display')? : (CurrencyModel::DISPLAY_SYMBOL_BEFORE|CurrencyModel::DISPLAY_DECIMAL_SEPARATOR_STOP|CurrencyModel::DISPLAY_THOUSAND_SEPARATOR_COMMA);
-			$c->default = true;
-			$c->store();
+			$this->response->setBody('Redirecting...')->getHeaders()->redirect(url('setup'));
 		}
 		
 		/*
