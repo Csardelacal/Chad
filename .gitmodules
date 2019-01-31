@@ -2,3 +2,6 @@
 	path = spitfire
 	url = https://github.com/Csardelacal/SpitfireEngine.git
 	branch = develop
+[submodule "m3js"]
+	path = assets/js/m3
+	url = https://github.com/Csardelacal/m3.js.git
