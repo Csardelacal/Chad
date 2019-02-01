@@ -352,6 +352,10 @@ class TransferController extends BaseController
 				->addRestriction('write', true);
 
 			$accounts = db()->table('account')->get('ugrants', $granted)->fetchAll();
+			
+			if ($accounts->isEmpty()) {
+				$this->response->setBody('Redirect...')->getHeaders()->redirect(url('account', 'create', ['returnto' => strval(spitfire\core\http\URL::current())]));
+			}
 
 			$this->view->set('accounts', $accounts);
 		}

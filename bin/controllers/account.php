@@ -151,6 +151,11 @@ class AccountController extends BaseController
 			 */
 			$this->view->set('success', true);
 			$this->view->set('account', $account);
+			
+			if (isset($_GET['returnto'])) {
+				$this->response->setBody('Redirect...')->getHeaders()->redirect($_GET['returnto']);
+				return;
+			}
 		} 
 		/*
 		 * If the request was not posted, it means that a user is accessing this 
