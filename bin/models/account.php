@@ -59,7 +59,7 @@ class AccountModel extends Model
 		 * Create a random ID.
 		 */
 		if ($this->_id === null) {
-			$this->_id = substr(str_replace(['/', '=', '-', '_'], '', base64_encode(random_bytes(100))), 0, 25);
+			$this->_id = substr(str_replace(['/', '=', '-', '_', '+'], '', base64_encode(random_bytes(100))), 0, 25);
 		}
 	}
 	
