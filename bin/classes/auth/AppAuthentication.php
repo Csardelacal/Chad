@@ -71,7 +71,7 @@ class AppAuthentication
 		return $this->contexts[$name];
 	}
 	
-	public function getRedirect($tgt, $contexts = null) {
+	public function getRedirect($tgt, $contexts = null, $returnto = null) {
 		if ($contexts === null) {
 			$contexts = [];
 		}
@@ -80,7 +80,7 @@ class AppAuthentication
 			$signatures[] = (string)$this->sso->makeSignature($tgt, [$ctx instanceof Context? $ctx->getId() : $ctx]); 
 		}
 		
-		return $this->sso->getEndpoint() . '/auth/connect?' . http_build_query(['signatures' => $signatures]);
+		return $this->sso->getEndpoint() . '/auth/connect?' . http_build_query(['signatures' => $signatures, 'returnto' => $returnto]);
 	}
 	
 	public function setRemote($remote) {
