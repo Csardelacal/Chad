@@ -1,15 +1,15 @@
 
 <div class="heading topbar sticky">
-	Add funds to your account
+	Retrieve funds from your account
 </div>
 
 <div class="row1">
 	<div class="span1">
 		<form class="regular" method="POST">
-			
+
 			<?php if (!$account): ?>
 			<div class="spacer" style="height: 30px"></div>
-			
+
 			<div class="row1 fluid">
 				<div class="span1">
 					<div class="field">
@@ -52,9 +52,9 @@
 			<?php endif; ?>
 
 			<div class="spacer" style="height: 30px"></div>
-			
+
 			<?php $every = new Every('</div><div class="row4">', 4); ?>
-			
+
 			<div class="row4">
 				<?php foreach ($providers as /*@var $provider \payment\provider\ProviderInterface*/$provider): ?>
 				<div class="span1">
@@ -63,20 +63,20 @@
 						<img src="<?= $provider->getLogo()->getEncoded(); ?>" id="logo-<?= str_replace('\\', '-', get_class($provider)) ?>">
 
 						<script type="text/javascript">
-						(function () { 
+						(function () {
 							document.getElementById('logo-<?= str_replace('\\', '-', get_class($provider)) ?>').addEventListener('click', function () {
 								document.getElementById('pp-<?= str_replace('\\', '-', get_class($provider)) ?>').click();
 								document.getElementById('getfunds').removeAttribute('disabled');
-							}); 
+							});
 						}());
 						</script>
 					</div>
 				</div>
-				
+
 				<?= $every->next(); ?>
 				<?php endforeach; ?>
 			</div>
-			
+
 			<div class="form-footer">
 				<input type="submit" value="Retrieve" id="getfunds" disabled>
 			</div>
@@ -87,5 +87,3 @@
 <?php if ($providers->isEmpty()): ?>
 No payment providers enabled
 <?php endif; ?>
-
-
