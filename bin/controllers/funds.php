@@ -308,7 +308,7 @@ class FundsController extends BaseController
 			 * balance is not enough to cover the transaction, we stop the user from
 			 * performing it.
 			 */
-			if (!$book->balance() > $amt) {
+			if ($book->balance() < $amt) {
 				throw new PublicException('Not permitted', 403);
 			}
 			
