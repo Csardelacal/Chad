@@ -48,12 +48,6 @@ interface ProviderInterface
 	const AUTH_AUTHORIZED = 1;
 	
 	/**
-	 * The set up method will be automatically called when the user activates a 
-	 * payment provider which has not yet been properly configured.
-	 */
-	function setUp();
-	
-	/**
 	 * When the application needs to use this payment provider it will call this
 	 * method providing the user configurable data for this payment provider.
 	 * 
@@ -73,28 +67,22 @@ interface ProviderInterface
 	function authorize(Context$context);
 	
 	/**
-	 * Cancels a payment. Receives an ID provided by execute().
-	 * 
-	 * @param string $id
-	 */
-	function cancel($id);
-	
-	/**
 	 * When a payment gets deferred (because, for example, a payment provider
 	 * needs a few minutes to process a credit card) the application will call
 	 * this method once it receives a return from the server.
 	 * 
 	 * @param int $id
-	 * @param \payment\provider\PaymentAuthorization $context
+	 * @param Context $context
 	 */
 	function listen($id, Context$context);
 	
 	/**
-	 * Retrieves information about a payment. Receives an ID provided by execute()
+	 * When a payment gets deferred this method gets called regularly to supervise
+	 * the payment, in case listen() is not called or is not intended to be called.
 	 * 
 	 * @param int $id
 	 */
-	function getStatus($id);
+	function await($id);
 	
 	/**
 	 * 

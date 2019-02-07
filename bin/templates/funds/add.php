@@ -76,14 +76,16 @@
 			<div class="row4">
 				<?php foreach ($providers as /*@var $provider \payment\provider\ProviderInterface*/$provider): ?>
 				<div class="span1">
-					<div class="payment-provider">
-						<input type="radio" name="provider" value="<?= get_class($provider) ?>" id="pp-<?= str_replace('\\', '-', get_class($provider)) ?>">
+					<div class="payment-provider" id="pp-<?= str_replace('\\', '-', get_class($provider)) ?>">
+						<input type="radio" name="provider" value="<?= get_class($provider) ?>">
 						<img src="<?= $provider->getLogo()->getEncoded(); ?>" id="logo-<?= str_replace('\\', '-', get_class($provider)) ?>">
 
 						<script type="text/javascript">
 						(function () { 
-							document.getElementById('logo-<?= str_replace('\\', '-', get_class($provider)) ?>').addEventListener('click', function () {
-								document.getElementById('pp-<?= str_replace('\\', '-', get_class($provider)) ?>').click();
+							document.getElementById('pp-<?= str_replace('\\', '-', get_class($provider)) ?>').addEventListener('click', function () {
+								document.querySelector('.payment-provider.selected') && (document.querySelector('.payment-provider.selected').className ="payment-provider");
+								document.getElementById('pp-<?= str_replace('\\', '-', get_class($provider)) ?>').className ="payment-provider selected";
+								document.getElementById('pp-<?= str_replace('\\', '-', get_class($provider)) ?>').querySelector('input[type=radio]').click();
 								document.getElementById('addfunds').removeAttribute('disabled');
 							}); 
 						}());

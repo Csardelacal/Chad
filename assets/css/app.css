@@ -405,14 +405,18 @@ footer {
   .validation-errors .extended-message {
     font-size: .9em; }
 
-.payment-provider input[type=radio] {
-  display: none; }
-.payment-provider img {
+.payment-provider {
   border: solid 2px #CCC;
   border-radius: 5px;
-  max-width: 100%; }
-.payment-provider input[type=radio]:checked + img {
-  border: solid 2px #55C; }
+  background: #FFF;
+  width: 100%;
+  text-align: center; }
+  .payment-provider input[type=radio] {
+    display: none; }
+  .payment-provider img {
+    max-width: 100%; }
+  .payment-provider.selected {
+    border: solid 2px #55C; }
 
 @media all and (min-width: 960px) {
   /*

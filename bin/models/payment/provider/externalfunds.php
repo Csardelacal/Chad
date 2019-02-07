@@ -59,6 +59,7 @@ class ExternalfundsModel extends Model
 		$schema->created  = new IntegerField(true);
 		$schema->approved = new IntegerField(true);
 		$schema->executed = new IntegerField(true);
+		$schema->deferred = new IntegerField(true);
 	}
 	
 	public function onbeforesave() {

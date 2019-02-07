@@ -142,24 +142,12 @@ class Paypal implements ProviderInterface
 		return new Redirection($payment->getApprovalLink());
 	}
 
-	public function cancel($id) {
-		return false; //TODO: Implement
-	}
-
-	public function getStatus($id) {
-		return false; //TODO: Implement
-	}
-
 	public function init(ConfigurationInterface $config) {
 		$this->config = $config;
 	}
 
 	public function listen($id, Context $context) {
 		return false; //TODO: Implement
-	}
-
-	public function setUp() {
-		return; //Paypal does not need extra set up
 	}
 
 	public function getLogo() {
@@ -172,6 +160,10 @@ class Paypal implements ProviderInterface
 
 	public function makeConfiguration() {
 		return new PaypalConfiguration();
+	}
+
+	public function await($id) {
+		return false;
 	}
 
 }

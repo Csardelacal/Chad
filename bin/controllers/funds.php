@@ -261,7 +261,19 @@ class FundsController extends BaseController
 		 * payment has been cleared.
 		 */
 		if ($flow instanceof \payment\flow\Defer) {
-			#TODO: implement
+			/*
+			 * When the charge is deferred, we need to record the fact that it has 
+			 * been deferred and record that it has been approved. This way it will
+			 * show up to the administrator(s) to manually approve if the payment 
+			 * provider doesn't automatically.
+			 */
+			$job->approved = time();
+			$job->deferred = time();
+			$job->additional = $flow->getAdditional();
+			$job->store();
+			
+			$this->view->set('defer', $flow);
+			return;
 		}
 		
 		/*

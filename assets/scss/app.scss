@@ -577,18 +577,21 @@ footer {
 }
 
 .payment-provider {
+	border: solid 2px #CCC;
+	border-radius: 5px;
+	background: #FFF;
+	width: 100%;
+	text-align: center;
 	
 	input[type=radio] {
 		display: none;
 	}
 	
 	img {
-		border: solid 2px #CCC;
-		border-radius: 5px;
 		max-width: 100%;
 	}
 	
-	input[type=radio]:checked + img {
+	&.selected {
 		border: solid 2px #55C;
 	}
 }
