@@ -203,6 +203,7 @@ class FundsController extends BaseController
 		 * Create the context to manage the payment authorization.
 		 */
 		$context = new Context();
+		$context->setId($fid);
 		$context->setAmt($amt);
 		$context->setCurrency($currency);
 		$context->setSuccessURL(url('funds', 'execute', $fid)->absolute());

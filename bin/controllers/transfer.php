@@ -376,6 +376,13 @@ class TransferController extends BaseController
 		
 		$transfer = db()->table('transfer')->get('_id', $txn)->fetch();
 		
+		/**
+		 * Prevents double execution of the transfer.
+		 */
+		if ($transfer->executed) {
+			throw new PublicException('Already executed', 400);
+		}
+		
 		if ($transfer->source && $transfer->target && !$transfer->cancelled && $transfer->authorized) {
 			$transfer->executed = time();
 			$transfer->store();

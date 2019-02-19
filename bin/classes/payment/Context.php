@@ -43,6 +43,19 @@ class Context
 	private $failureURL = null;
 	private $formData = null;
 	
+	/**
+	 * The transaction ID. Whenever a request to push funds into, or out of the 
+	 * application is created, we need to ensure that it receives a unique ID.
+	 * 
+	 * This unique ID allows to interact with external payment providers in a 
+	 * consistent manner. Additionally, some payment providers require a unique
+	 * ID to be created every time a payment is created and they do not allow to
+	 * recycle old / duplicate id.
+	 *
+	 * @var int
+	 */
+	private $id;
+	
 	/*
 	 * For some absurd reason, many payment providers will require that the system
 	 * provides an amount for the authorization of payments before they can be
@@ -96,6 +109,29 @@ class Context
 
 	public function setCurrency($currency) {
 		$this->currency = $currency;
+		return $this;
+	}
+	
+	/**
+	 * Returns the unique identifier for this transaction. This ID is numeric, if
+	 * your payment provider requires a string based ID, just prefix it to your 
+	 * liking.
+	 * 
+	 * @return int
+	 */
+	public function getId() {
+		return $this->id;
+	}
+	
+	/**
+	 * Set the transaction id. This allows the payment provider to refer to the 
+	 * transaction at a later point.
+	 * 
+	 * @param int $id
+	 * @return $this
+	 */
+	public function setId($id) {
+		$this->id = $id;
 		return $this;
 	}
 }
