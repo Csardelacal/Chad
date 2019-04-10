@@ -283,6 +283,17 @@ class FundsController extends BaseController
 		 */
 		if ($flow instanceof PaymentInterface && $job->type == ExternalfundsModel::TYPE_PAYMENT) {
 			
+			/*
+			 * Some payment providers (including Paypal) will return success messages
+			 * multiple times if the same payment is authorized multiple times.
+			 * 
+			 * Chad should not fund a source twice when the user calls the same URL
+			 * twice. Thanks to Ganix for uncovering and reporting the bug.
+			 */
+			if ($job->approved) {
+				throw new PublicException('Payment was already processed', 403);
+			}
+			
 			/**
 			 * Execute the payment - if the payment fails at this point the user 
 			 * should be presented with an appropriate error screen.
