@@ -2,6 +2,7 @@
 
 use payment\ConfigurationInterface;
 use payment\Context;
+use payment\flow\Defer;
 use payment\flow\Form;
 use payment\flow\form\StringField;
 use payment\Logo;
@@ -56,7 +57,7 @@ class PaypalPayout implements PayoutInterface
 	
 	public function authorize(Context $context) {
 		if ($context->getFormData()['email']) {
-			return new Payout($context->getFormData()['email']);
+			return new Defer($context->getFormData()['email']);
 		}
 		
 		$form = new Form();

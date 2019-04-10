@@ -232,6 +232,26 @@ class FundsController extends BaseController
 			$source->account  = $srcaccount;
 			$source->store();
 		}
+			
+		/*
+		 * This is the last safeguard before the charge gets executed, if the 
+		 * balance is not enough to cover the transaction, we stop the user from
+		 * performing it.
+		 */
+		if ($job->type == ExternalfundsModel::TYPE_PAYOUT && $book->balance() < $amt) {
+			throw new PublicException('Not permitted', 403);
+		}
+			
+		/*
+		 * Some payment providers (including Paypal) will return success messages
+		 * multiple times if the same payment is authorized multiple times.
+		 * 
+		 * Chad should not fund a source twice when the user calls the same URL
+		 * twice. Thanks to Ganix for uncovering and reporting the bug.
+		 */
+		if ($job->approved) {
+			throw new PublicException('Payment was already processed', 403);
+		}
 		
 		/*
 		 * Try and authorize the payment, pulling funds from the external source
@@ -262,6 +282,7 @@ class FundsController extends BaseController
 		 * payment has been cleared.
 		 */
 		if ($flow instanceof \payment\flow\Defer) {
+			
 			/*
 			 * When the charge is deferred, we need to record the fact that it has 
 			 * been deferred and record that it has been approved. This way it will
@@ -282,17 +303,6 @@ class FundsController extends BaseController
 		 * user to the URL that we were indicated by the source app.
 		 */
 		if ($flow instanceof PaymentInterface && $job->type == ExternalfundsModel::TYPE_PAYMENT) {
-			
-			/*
-			 * Some payment providers (including Paypal) will return success messages
-			 * multiple times if the same payment is authorized multiple times.
-			 * 
-			 * Chad should not fund a source twice when the user calls the same URL
-			 * twice. Thanks to Ganix for uncovering and reporting the bug.
-			 */
-			if ($job->approved) {
-				throw new PublicException('Payment was already processed', 403);
-			}
 			
 			/**
 			 * Execute the payment - if the payment fails at this point the user 
@@ -327,19 +337,6 @@ class FundsController extends BaseController
 		 */
 		if ($flow instanceof \payment\flow\PayoutInterface && $job->type == ExternalfundsModel::TYPE_PAYOUT) {
 			
-			/*
-			 * This is the last safeguard before the charge gets executed, if the 
-			 * balance is not enough to cover the transaction, we stop the user from
-			 * performing it.
-			 */
-			if ($book->balance() < $amt) {
-				throw new PublicException('Not permitted', 403);
-			}
-			
-			/*
-			 * Payouts are only recorded, they get executed in batches and after a
-			 * bureaucrat has approved the transaction.
-			 */
 			$flow->write();
 			
 			/*
