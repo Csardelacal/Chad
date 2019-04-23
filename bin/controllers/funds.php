@@ -171,10 +171,15 @@ class FundsController extends BaseController
 	
 	public function execute($fid) {
 		
-		$job       = db()->table('payment\provider\externalfunds')->get('_id', $fid)->fetch();
-		$account   = $job->account;
-		$amt       = $job->amt;
-		$currency  = $job->currency;
+		/*
+		 * Retrieve the job from the database. The job should contain all the relevant
+		 * information to properly create a transaction to move the funds from / to
+		 * an external payment provider.
+		 */
+		$job        = db()->table('payment\provider\externalfunds')->get('_id', $fid)->fetch();
+		$usraccount = $job->account;
+		$amt        = $job->amt;
+		$currency   = $job->currency;
 		
 		/*
 		 * Prepare the provider list
@@ -182,18 +187,25 @@ class FundsController extends BaseController
 		$providers = $job->type == ExternalfundsModel::TYPE_PAYMENT? ProviderPool::payment()->configure() : ProviderPool::payouts()->configure();  // Prepares the providers by loading their configuration
 		
 		/*
-		 * Get the appropriate book to add the funds to
+		 * Get the appropriate book to add / remove the funds to. This is always the
+		 * user's account.
 		 */
-		try                  { $book = $account->getBook($currency); }
-		catch (\Exception$e) { $book = $account->addBook($currency); }
+		try                  { $usrbook = $usraccount->getBook($currency); }
+		catch (\Exception$e) { $usrbook = $usraccount->addBook($currency); }
 		
-		
+		/*
+		 * Check the user's permissions to even retrieve funds in the first place.
+		 * The user needs proper access permissions to retrieve funds from an account.
+		 */
 		$granted  = db()->table('rights\user')->get('user', db()->table('user')->get('_id', $this->user->user->id))->where('account', $job->account)->first();
 		
 		if (!$granted) {
 			throw new PublicException('Not permitted', 403);
 		}
-			
+		
+		/*
+		 * Retrieve the appropriate provider to manage the transaction.
+		 */
 		/* @var $provider ProviderInterface */
 		$provider = $providers->filter(function ($e) use ($job) {
 			return !!($job->source === get_class($e));
@@ -232,14 +244,40 @@ class FundsController extends BaseController
 			$source->account  = $srcaccount;
 			$source->store();
 		}
+		
+		/*
+		 * Get the appropriate book from the payment provider's system account to
+		 * move the funds to the user.
+		 */
+		$srcbook = $srcaccount->getBook($usrbook->currency)? : $srcaccount->addBook($usrbook->currency);
 			
 		/*
 		 * This is the last safeguard before the charge gets executed, if the 
 		 * balance is not enough to cover the transaction, we stop the user from
 		 * performing it.
 		 */
-		if ($job->type == ExternalfundsModel::TYPE_PAYOUT && $book->balance() < $amt) {
+		if ($job->type == ExternalfundsModel::TYPE_PAYOUT && $usrbook->balance() < $amt) {
 			throw new PublicException('Not permitted', 403);
+		}
+		
+		/*
+		 * Ensure a transaction for this operation exists. Some payment providers 
+		 * will immediately execute the transaction, some will wait, and some may 
+		 * never actually transfer any funds.
+		 */
+		if (!$job->txn) {
+			
+			$transfer = db()->table('transfer')->newRecord();
+			$transfer->source = $job->type == ExternalfundsModel::TYPE_PAYMENT? $srcbook : $usrbook;
+			$transfer->target = $job->type == ExternalfundsModel::TYPE_PAYMENT? $usrbook : $srcbook;
+			$transfer->amount = $amt;
+			$transfer->received = $amt;
+			$transfer->description = get_class($provider);
+			$transfer->created  = time();
+			$transfer->store();
+			
+			$job->txn = $transfer;
+			$job->store();
 		}
 			
 		/*
@@ -294,6 +332,21 @@ class FundsController extends BaseController
 			$job->additional = $flow->getAdditional();
 			$job->store();
 			
+			/*
+			 * Defers are asymetrical. When a payment provider sends a defer, we will
+			 * wait for them to confirm the incoming money before we add the funds to 
+			 * the user's account. Otherwise we'd be giving the user credit.
+			 * 
+			 * On the other hand. When a user is requesting a payout, a deferral will
+			 * be considered as the funds being removed. The system can then send the
+			 * funds at it's own discression.
+			 */
+			if ($job->type == ExternalfundsModel::TYPE_PAYOUT) {
+				$job->txn->executed = time();
+				$job->txn->store();
+				$job->txn->notify();
+			}
+			
 			$this->view->set('defer', $flow);
 			return;
 		}
@@ -317,18 +370,9 @@ class FundsController extends BaseController
 			$job->executed = time();
 			$job->store();
 			
-			$srcbook = $srcaccount->getBook($book->currency)? : $srcaccount->addBook($book->currency);
-			
-			$transfer = db()->table('transfer')->newRecord();
-			$transfer->source = $srcbook;
-			$transfer->target = $book;
-			$transfer->amount = $amt;
-			$transfer->received = $amt;
-			$transfer->description = get_class($provider);
-			$transfer->created  = time();
-			$transfer->executed = time();
-			$transfer->store();
-			$transfer->notify();
+			$job->txn->executed = time();
+			$job->txn->store();
+			$job->txn->notify();
 		}
 		
 		/*
@@ -347,18 +391,9 @@ class FundsController extends BaseController
 			$job->additional = $flow->getAdditional();
 			$job->store();
 			
-			$srcbook = $srcaccount->getBook($book->currency)? : $srcaccount->addBook($book->currency);
-			
-			$transfer = db()->table('transfer')->newRecord();
-			$transfer->source = $book;
-			$transfer->target = $srcbook;
-			$transfer->amount = $amt;
-			$transfer->received = $amt;
-			$transfer->description = get_class($provider);
-			$transfer->created  = time();
-			$transfer->executed = time();
-			$transfer->store();
-			$transfer->notify();
+			$job->txn->executed = time();
+			$job->txn->store();
+			$job->txn->notify();
 		}
 		
 		$this->response->setBody('Redirecting...')->getHeaders()->redirect($job->returnto);

@@ -56,6 +56,7 @@ class ExternalfundsModel extends Model
 		$schema->currency = new Reference('currency'); #it's sometimes convenient to separate them
 		$schema->returnto = new StringField(4096);
 		$schema->additional = new TextField();
+		$schema->txn      = new Reference('transfer');
 		$schema->created  = new IntegerField(true);
 		$schema->approved = new IntegerField(true);
 		$schema->executed = new IntegerField(true);

@@ -53,51 +53,6 @@ class PayoutController extends BaseController
 			$payout = db()->table('payment\provider\externalfunds')->get('type', ExternalfundsModel::TYPE_PAYOUT)->where('_id', $id)->first();
 			$payout->executed = time();
 			$payout->store();
-			
-			$account   = $payout->account;
-			$amt       = $payout->amt;
-			$currency  = $payout->currency;
-			
-			/*
-			 * Get the appropriate book to add the funds to
-			 */
-			try                  { $book = $account->getBook($currency); }
-			catch (\Exception$e) { $book = $account->addBook($currency); }
-			
-			/*
-			 * Once the amount has been charged, the application must proceed to 
-			 * record the transaction.
-			 */
-			$source   = db()->table('payment\provider\source')->get('provider', $payout->source)->fetch();
-
-			if ($source) {
-			  $srcaccount = $source->account;
-			}
-			else {
-			  $srcaccount = db()->table('account')->newRecord();
-			  $srcaccount->name      = $payout->source;
-			  $srcaccount->owner     = null;
-			  $srcaccount->taxID     = null;
-			  $srcaccount->store();
-
-			  $source  = db()->table('payment\provider\source')->newRecord();
-			  $source->provider = $payout->source;
-			  $source->account  = $srcaccount;
-			  $source->store();
-			}
-			
-			$srcbook = $srcaccount->getBook($book->currency)? : $srcaccount->addBook($book->currency);
-			
-			$transfer = db()->table('transfer')->newRecord();
-			$transfer->source = $book;
-			$transfer->target = $srcbook;
-			$transfer->amount = $amt;
-			$transfer->received = $amt;
-			$transfer->description = $payout->source;
-			$transfer->created  = time();
-			$transfer->executed = time();
-			$transfer->store();
-			$transfer->notify();
 		}
 		
 		$this->response->setBody('Redirect...')->getHeaders()->redirect(url('payout'));
