@@ -53,9 +53,9 @@ interface PayoutInterface
 	
 	/**
 	 * 
-	 * @param type $jobs
+	 * @param type $job
 	 */
-	function run($jobs);
+	function run($job);
 	
 	/**
 	 * 

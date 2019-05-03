@@ -82,8 +82,8 @@ class PaypalPayout implements PayoutInterface
 		return new PaypalConfiguration();
 	}
 
-	public function run($jobs) {
-		
+	public function run($job) {
+		//Void
 	}
 
 }

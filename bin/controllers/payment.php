@@ -53,6 +53,10 @@ class PaymentController extends BaseController
 			$payout = db()->table('payment\provider\externalfunds')->get('type', ExternalfundsModel::TYPE_PAYOUT)->where('_id', $id)->first();
 			$payout->executed = time();
 			$payout->store();
+			
+			$payout->txn->authorized = time();
+			$payout->txn->executed = time();
+			$payout->store();
 		}
 		
 		$this->response->setBody('Redirect...')->getHeaders()->redirect(url('payout'));
