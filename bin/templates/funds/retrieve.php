@@ -1,11 +1,14 @@
 
+<?php $ugrants  = db()->table('rights\user')->get('user', db()->table('user')->get('_id', $authUser->user->id)); ?>
+<?php $accounts = db()->table('account')->get('ugrants', $ugrants)->all(); ?>
+<?php $balances = $accounts->each(function($e) { return ['account' => $e->_id, 'books' => collect($e->books->toArray())->each(function ($f) { return ['currency' => $f->currency->ISO, 'decimals' => $f->currency->decimals, 'balance' => $f->balance()]; })->toArray()]; })->toArray(); ?>
 <div class="heading topbar sticky">
 	Retrieve funds from your account
 </div>
 
 <div class="row1">
 	<div class="span1">
-		<form class="regular" method="POST">
+		<form class="regular" id="form" method="POST">
 
 			<?php if (!$account): ?>
 			<div class="spacer" style="height: 30px"></div>
@@ -15,14 +18,13 @@
 					<div class="field">
 						<label for="account">Account</label>
 						<select name="account" id="account">
-							<?php $ugrants  = db()->table('rights\user')->get('user', db()->table('user')->get('_id', $authUser->user->id)); ?>
-							<?php $options = db()->table('account')->get('ugrants', $ugrants)->all(); ?>
-							<?php foreach ($options as $option): ?>
+							<?php foreach ($accounts as $option): ?>
 							<option value="<?= $option->_id ?>"><?= $option->name ?></option>
 							<?php endforeach; ?>
 						</select>
 					</div>
 				</div>
+			</div>
 			<?php endif; ?>
 
 			<?php if (!$amt): ?>
@@ -68,7 +70,7 @@
 								document.querySelector('.payment-provider.selected') && (document.querySelector('.payment-provider.selected').className ="payment-provider");
 								document.getElementById('pp-<?= str_replace('\\', '-', get_class($provider)) ?>').className ="payment-provider selected";
 								document.getElementById('pp-<?= str_replace('\\', '-', get_class($provider)) ?>').querySelector('input[type=radio]').click();
-								document.getElementById('getfunds').removeAttribute('disabled');
+								document.getElementById('amt').value = 0;
 							}); 
 						}());
 						</script>
@@ -86,6 +88,50 @@
 	</div>
 </div>
 
+<script type="text/javascript">
+(function() {
+	var balances = <?= json_encode($balances) ?>;
+	var maximum  = 0;
+	var decimals = 0;
+	
+	document.getElementById('form').addEventListener('submit', function (e) {
+		if (document.getElementById('amt').value * Math.pow(10, decimals) < maximum) {
+			//Do nothing, it's perfectly fine
+		}
+		else {
+			e.preventDefault();
+		}
+	});
+	
+	
+	function determineMax(e) {
+		var account  = document.getElementById('account').value;
+		var currency = document.getElementById('currency').value;
+		
+		for (var i = 0; i < balances.length; i++) {
+			if (account !== balances[i].account) { continue; }
+			
+			for (var j = 0; j < balances[i].books.length; j++) {
+				if (currency !== balances[i].books[j].currency) { continue; }
+				maximum = balances[i].books[j].balance;
+				decimals = balances[i].books[j].decimals;
+			}
+		}
+		
+		if (document.getElementById('amt').value * Math.pow(10, decimals) > maximum || !document.querySelector('.payment-provider.selected')) {
+			document.getElementById('getfunds').setAttribute('disabled', 'disabled');
+		}
+		else {
+			document.getElementById('getfunds').removeAttribute('disabled');
+		}
+	}
+	
+	document.getElementById('account').addEventListener('change', determineMax);
+	document.getElementById('amt').addEventListener('keyup', determineMax);
+	determineMax();
+}());
+</script>
+	
 <?php if ($providers->isEmpty()): ?>
 No payment providers enabled
 <?php endif; ?>
