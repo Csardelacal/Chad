@@ -1,7 +1,10 @@
 <?php
 
 use payment\Context;
+use payment\flow\Defer;
+use payment\flow\Form;
 use payment\flow\PaymentInterface;
+use payment\flow\PayoutInterface;
 use payment\flow\Redirection;
 use payment\provider\ExternalfundsModel;
 use payment\provider\ProviderInterface;
@@ -309,7 +312,7 @@ class FundsController extends BaseController
 		 * The payment provider requires the user to add information for the payment
 		 * to succeed.
 		 */
-		if ($flow instanceof \payment\flow\Form) {
+		if ($flow instanceof Form) {
 			$this->view->set('form', $flow);
 			return;
 		}
@@ -319,7 +322,7 @@ class FundsController extends BaseController
 		 * been successful. The application is therefore required to wait until the
 		 * payment has been cleared.
 		 */
-		if ($flow instanceof \payment\flow\Defer) {
+		if ($flow instanceof Defer) {
 			
 			/*
 			 * When the charge is deferred, we need to record the fact that it has 
@@ -379,7 +382,7 @@ class FundsController extends BaseController
 		 * Once the payment provider has authorized the payment, we direct the 
 		 * user to the URL that we were indicated by the source app.
 		 */
-		if ($flow instanceof \payment\flow\PayoutInterface && $job->type == ExternalfundsModel::TYPE_PAYOUT) {
+		if ($flow instanceof PayoutInterface && $job->type == ExternalfundsModel::TYPE_PAYOUT) {
 			
 			$flow->write();
 			

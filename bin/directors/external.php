@@ -46,7 +46,17 @@ class ExternalDirector extends \spitfire\mvc\Director
 				return $job->source === get_class($e);
 			});
 			
-			$provider->run($job);
+			$r = $provider->run($job);
+			
+			if ($r instanceof \payment\payout\PayoutInterface) {
+				$r->charge();
+				
+				$job->executed = time();
+				$job->txn->executed = time();
+				
+				$job->store();
+				$job->txn->store();
+			}
 		}
 	}
 	
@@ -60,7 +70,18 @@ class ExternalDirector extends \spitfire\mvc\Director
 				return $job->source === get_class($e);
 			});
 			
-			$provider->run($job);
+			/*@var $provider payment\provider\ProviderInterface */
+			$r = $provider->await($job);
+			
+			if ($r instanceof \payment\payout\PaymentInterface) {
+				$r->charge();
+				
+				$job->executed = time();
+				$job->txn->executed = time();
+				
+				$job->store();
+				$job->txn->store();
+			}
 		}
 	}
 	

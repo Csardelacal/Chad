@@ -43,18 +43,8 @@ class BookModel extends Model
 		 * Housekeeping flags. These are intended for the system to know when a 
 		 * book needs to be rebalanced (to prevent the system from dragging along
 		 * old records) and when the account expects to be reset.
-		 * 
-		 * Please note, that the account reset mechanism does not guarantee that
-		 * the account will be reset "on time". It will, though, always reset the
-		 * proper times. 
-		 * 
-		 * For example, an account resetting on the 1st may be reset on the 2nd if
-		 * the system is extremely busy. But, when resetting on the 2nd, all transfers
-		 * after that date will be ignored.
 		 */
 		$schema->balanced  = new IntegerField(true);
-		$schema->reset     = new IntegerField(true);
-		$schema->nextReset = new IntegerField(true);
 		
 		#Set the id and currency as primary, this is deprecated, but needs to be done for now
 		$schema->account->setPrimary(true);
@@ -65,10 +55,11 @@ class BookModel extends Model
 	}
 	
 	public function onbeforesave() {
-		if ($this->account->reset) {
-			$this->nextReset = $this->nextReset();
-		}
-		
+		/*
+		 * If the account has never been balanced, then we should record that it's
+		 * balancing date was so far in the past that the cronjob will pick it up
+		 * and balance it.
+		 */
 		if (!$this->balanced) {
 			$this->balanced = 0;
 		}

@@ -32,6 +32,17 @@ use UserModel;
  * THE SOFTWARE.
  */
 
+/**
+ * An authorization represents a payment method that allows the user to use it 
+ * multiple times without requiring them to renew the source. This doesn't mean
+ * that CHAD does recurring payments - at least not without the help of third 
+ * party components.
+ * 
+ * For example, when authorizing a bank account, the user can reuse the bank 
+ * account later without requiring them to reenter the details.
+ * 
+ * @author César de la Cal Bretschneider <cesar@magic3w.com>
+ */
 class AuthorizationModel extends Model
 {
 	

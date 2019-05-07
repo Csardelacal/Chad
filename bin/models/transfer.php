@@ -50,7 +50,6 @@ class TransferModel extends Model
 		 */
 		$schema->created     = new IntegerField(true);
 		$schema->authorized  = new IntegerField(true);
-		$schema->due         = new IntegerField(true);
 		$schema->executed    = new IntegerField(true);
 		$schema->cancelled   = new IntegerField(true);
 		
