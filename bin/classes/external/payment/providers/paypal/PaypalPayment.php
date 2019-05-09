@@ -59,4 +59,8 @@ class PaypalPayment implements PaymentInterface
 		$payment->execute($execution, $apicontext);
 	}
 
+	public function authorization() {
+		return new \payment\provider\Authorization($this->payerId, null);
+	}
+
 }

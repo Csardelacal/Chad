@@ -23,10 +23,10 @@ if (!$authUser) {
 	<?php	foreach ($payouts as $payout) : ?>
 	<div class="spacer" style="height: 20px"></div>
 	
-	<div class="row1">
-		<div class="span1">
+	<div class="row l1">
+		<div class="span l1">
 			<div class="material">
-				<div class="row5 fluid">
+				<div class="row l5 fluid">
 					<div class="span4">
 						from <strong><?= $payout->account->name ?></strong>
 						
@@ -36,7 +36,7 @@ if (!$authUser) {
 						</div>
 						<?php endif ?>
 					</div>
-					<div class="span1" style="text-align: right">
+					<div class="span l1" style="text-align: right">
 						<?= $currencyLocalizer->format($payout->amt / pow(10, $payout->currency->decimals), $preferences->currency->sf()) ?>
 					</div>
 				</div>
@@ -56,16 +56,16 @@ if (!$authUser) {
 <?php foreach ($accounts as $account): ?>
 <div class="spacer" style="height: 20px"></div>
 
-<div class="row1">
-	<div class="span1">
+<div class="row l1">
+	<div class="span l1">
 		<div class="material">
-			<div class="row3 fluid has-dials">
-				<div class="span2">
+			<div class="row l3 fluid has-dials">
+				<div class="span l2">
 					<div><strong><?= $account->name ?></strong><span style="color: #777; font-size: .8em" title="This is your account ID">::<?= $account->_id ?></span></div>
 					<div class="spacer" style="height: 5px"></div>
 					<div><span style="color: #777; font-size: .8em" title="This value may include converted currencies">Approx. <?= $currencyLocalizer->format($account->estimatedBalance($preferences->currency) / pow(10, $preferences->currency->decimals), $preferences->currency->sf()) ?></span></div>
 				</div>
-				<div class="span1 dials">
+				<div class="span l1 dials">
 					<ul>
 						<li>
 							<a href="<?= url('funds', 'add', $account->_id) ?>">Add funds</a>

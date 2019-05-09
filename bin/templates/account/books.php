@@ -20,8 +20,8 @@ if ($books->count() === 1) {
 
 <div class="spacer" style="height: 20px"></div>
 
-<div class="row3 fluid has-dials">
-	<div class="span2">
+<div class="row l3 fluid has-dials">
+	<div class="span l2">
 		<?php foreach ($books as $book): ?>
 		<div class="material">
 			<div><strong><a href="<?= url('account', 'balance', $account->_id, $book->currency->ISO) ?>"><?= $book->currency->ISO ?></a></strong></div>

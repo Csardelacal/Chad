@@ -9,6 +9,7 @@ and open the template in the editor.
 */
 
 $disbled-darken-amount: 30;
+$MobileBreakpoint: 960px;
 
 @import 'reset/_clearfix';
 
@@ -596,23 +597,7 @@ footer {
 	}
 }
 
-@media all and (min-width: 960px) {
-	@import '_scaffolding';
-	
-	.mobile-only {
-		display: none !important;
-	}
-}
-
-@media all and (max-width: 960px) {
-	@import '_scaffolding_mobile';
-	
-	.desktop-only {
-		display: none !important;
-	}
-}
-
-
+@import '_/_.scss';
 @import 'ui/_ui.scss';
 @import '_navbar';
 @import '_admin';

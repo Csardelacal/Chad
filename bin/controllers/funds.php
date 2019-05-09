@@ -86,6 +86,7 @@ class FundsController extends BaseController
 			$record = db()->table('payment\provider\externalfunds')->newRecord();
 			$record->type     = ExternalfundsModel::TYPE_PAYMENT;
 			$record->source   = get_class($provider);
+			$record->user     = db()->table('user')->get('_id', $this->user->user->id)->first();
 			$record->amt      = $amt;
 			$record->account  = $account;
 			$record->currency = $currency;
@@ -101,10 +102,13 @@ class FundsController extends BaseController
 			 */
 		}
 		
+		$authorizations = db()->table('payment\provider\authorization')->get('user', db()->table('user')->get('_id', $this->user->user->id))->where('status', \payment\provider\AuthorizationModel::AVAILABLE)->all();
+		
 		$this->view->set('amt', $amt);
 		$this->view->set('account', $account);
 		$this->view->set('currency', $currency);
 		$this->view->set('providers', $providers);
+		$this->view->set('authorizations', $authorizations);
 	}
 	
 	public function retrieve($acctid = null, $currencyISO = null, $amtParam = null) {
@@ -150,6 +154,7 @@ class FundsController extends BaseController
 			
 			$record = db()->table('payment\provider\externalfunds')->newRecord();
 			$record->type     = ExternalfundsModel::TYPE_PAYOUT;
+			$record->user     = db()->table('user')->get('_id', $this->user->user->id)->first();
 			$record->source   = get_class($provider);
 			$record->amt      = $amt;
 			$record->account  = $account;
@@ -376,6 +381,21 @@ class FundsController extends BaseController
 			$job->txn->executed = time();
 			$job->txn->store();
 			$job->txn->notify();
+			
+			/*
+			 * Sometimes the payment provider can return an authorization to inform
+			 * the application that it wishes to allow the user to re-use the payment
+			 * information it retrieved.
+			 */
+			if ($flow->authorization() && !$flow->authorization()->isRecorded()) {
+				$authorization = db()->table('payment\provider\authorization')->newRecord();
+				$authorization->status   = \payment\provider\AuthorizationModel::AVAILABLE;
+				$authorization->user     = $job->user;
+				$authorization->provider = $job->provider;
+				$authorization->expires  = $flow->authorization()->getExpires();
+				$authorization->data     = $flow->authorization()->getAuthorization();
+				$authorization->store();
+			}
 		}
 		
 		/*

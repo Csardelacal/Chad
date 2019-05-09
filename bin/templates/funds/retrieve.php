@@ -6,15 +6,15 @@
 	Retrieve funds from your account
 </div>
 
-<div class="row1">
-	<div class="span1">
+<div class="row l1">
+	<div class="span l1">
 		<form class="regular" id="form" method="POST">
 
 			<?php if (!$account): ?>
 			<div class="spacer" style="height: 30px"></div>
 
-			<div class="row1 fluid">
-				<div class="span1">
+			<div class="row l1 fluid">
+				<div class="span l1">
 					<div class="field">
 						<label for="account">Account</label>
 						<select name="account" id="account">
@@ -30,8 +30,8 @@
 			<?php if (!$amt): ?>
 			<div class="spacer" style="height: 30px"></div>
 
-			<div class="row3 fluid">
-				<div class="span2">
+			<div class="row l3 fluid">
+				<div class="span l2">
 					<div class="field">
 						<label for="amt">Amount</label>
 						<input type="text" name="amt" id="amt">
@@ -39,7 +39,7 @@
 					</div>
 				</div>
 
-				<div class="span1">
+				<div class="span l1">
 					<div class="field">
 						<label for="currency">Currency</label>
 						<select name="currency" id="currency">
@@ -55,11 +55,11 @@
 
 			<div class="spacer" style="height: 30px"></div>
 
-			<?php $every = new Every('</div><div class="row4">', 4); ?>
+			<?php $every = new Every('</div><div class="row l4">', 4); ?>
 
-			<div class="row4">
+			<div class="row l4">
 				<?php foreach ($providers as /*@var $provider \payment\provider\ProviderInterface*/$provider): ?>
-				<div class="span1">
+				<div class="span l1">
 					<div class="payment-provider" id="pp-<?= str_replace('\\', '-', get_class($provider)) ?>">
 						<input type="radio" name="provider" value="<?= get_class($provider) ?>">
 						<img src="<?= $provider->getLogo()->getEncoded(); ?>" id="logo-<?= str_replace('\\', '-', get_class($provider)) ?>">

@@ -14,8 +14,8 @@
 			<?php $user  = $incoming? $record->source->account->owner : $record->target->account->owner; ?>
 			<?php $displayname = $user? $user->_id : null ?>
 			
-			<div class="row2 fluid">
-				<div class="span1">
+			<div class="row l2 fluid">
+				<div class="span l1">
 					<div>
 						<?php try { ?>
 						<strong><?= $displayname? $sso->getUser($displayname)->getUsername() : 'External' ?></strong>
@@ -29,7 +29,7 @@
 						</span>
 					</div>
 				</div>
-				<div class="span1" style="text-align: right">
+				<div class="span l1" style="text-align: right">
 					<div>
 						<span style="color: #777; font-size: .8em">
 						<?= date('m/d/Y', $record->created) ?>

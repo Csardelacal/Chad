@@ -45,11 +45,11 @@ class PaymentController extends BaseController
 			throw new PublicException('Forbidden', 403);
 		}
 		
-		if (!is_array($_POST['payout'])) {
+		if (!is_array($_POST['payment'])) {
 			throw new PublicException('Forbidden', 403);
 		}
 		
-		foreach ($_POST['payout'] as $id => $ign) {
+		foreach ($_POST['payment'] as $id => $ign) {
 			$payout = db()->table('payment\provider\externalfunds')->get('type', ExternalfundsModel::TYPE_PAYOUT)->where('_id', $id)->first();
 			$payout->executed = time();
 			$payout->store();

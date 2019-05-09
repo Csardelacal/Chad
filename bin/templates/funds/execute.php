@@ -1,7 +1,7 @@
 
 <?php if (isset($form)): ?>
-<div class="row1">
-	<div class="span1">
+<div class="row l1">
+	<div class="span l1">
 		<div class="spacer" style="height: 30px"></div>
 		<?= $form; ?>
 		<div class="spacer" style="height: 30px"></div>
@@ -10,8 +10,8 @@
 <?php endif; ?>
 
 <?php if (isset($defer)): ?>
-<div class="row1">
-	<div class="span1">
+<div class="row l1">
+	<div class="span l1">
 		<h1>Payment is being processed</h1>
 		<p>
 			Please wait while your funds are being moved to your account. This may take a 

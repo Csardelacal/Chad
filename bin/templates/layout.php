@@ -61,8 +61,8 @@
 		</div>
 		
 		<footer>
-			<div class="row1">
-				<div class="span1">
+			<div class="row l1">
+				<div class="span l1">
 					<span style="font-size: .8em; color: #777">
 						&copy; <?= date('Y') ?> Magic3W - This software is licensed under MIT License
 					</span>

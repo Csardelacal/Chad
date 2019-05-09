@@ -50,6 +50,7 @@ class ExternalfundsModel extends Model
 		 * been transfered (or is to be transfered) from Chad to an external source.
 		 */
 		$schema->type     = new EnumField(self::TYPE_PAYMENT, self::TYPE_PAYOUT);
+		$schema->user     = new Reference('user');
 		$schema->source   = new StringField(50); #Classname of the payment provider
 		$schema->amt      = new IntegerField(true);
 		$schema->account  = new Reference('account');  #While these technically form a book

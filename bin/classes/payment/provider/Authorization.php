@@ -1,15 +1,9 @@
-<?php namespace external\payment\providers\bank;
-
-use payment\flow\PaymentInterface;
-use PayPal\Api\Payment;
-use PayPal\Api\PaymentExecution;
-use PayPal\Auth\OAuthTokenCredential;
-use PayPal\Rest\ApiContext;
+<?php namespace payment\provider;
 
 /* 
  * The MIT License
  *
- * Copyright 2018 César de la Cal Bretschneider <cesar@magic3w.com>.
+ * Copyright 2019 César de la Cal Bretschneider <cesar@magic3w.com>.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,19 +24,42 @@ use PayPal\Rest\ApiContext;
  * THE SOFTWARE.
  */
 
-class BankPayment implements PaymentInterface
+class Authorization
 {
 	
-	public function __construct($IBAN) {
-		$this->IBAN = $IBAN;
+	private $authorization;
+	private $expires;
+	private $recorded = false;
+	
+	public function __construct($authorization, $expires = null) {
+		$this->authorization = $authorization;
+		$this->expires = $expires;
 	}
 	
-	public function charge() {
-		return true;
+	public function getAuthorization() {
+		return $this->authorization;
 	}
-
-	public function authorization() {
-		return new \payment\provider\Authorization($this->IBAN, time() + 365 * 86400);
+	
+	public function setAuthorization($authorization) {
+		$this->authorization = $authorization;
+		return $this;
 	}
-
+	
+	public function getExpires() {
+		return $this->expires;
+	}
+	
+	public function setExpires($expires) {
+		$this->expires = $expires;
+		return $this;
+	}
+	
+	public function setRecorded($set = true) {
+		$this->recorded = $set;
+	}
+	
+	public function isRecorded() {
+		return $this->recorded;
+	}
+	
 }

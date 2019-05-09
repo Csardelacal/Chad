@@ -29,4 +29,6 @@ interface PaymentInterface extends FlowInterface
 	
 	public function charge();
 	
+	public function authorization();
+	
 }

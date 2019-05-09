@@ -46,17 +46,13 @@ class Bank implements ProviderInterface
 		
 		$posted = $context->getFormData();
 		
-		if (isset($posted['transactionid'])) {
-			return new \payment\flow\Defer($context->getFormData()['transactionid']);
+		if (isset($posted['IBAN'])) {
+			return new \payment\flow\Defer($context->getFormData()['IBAN']);
 		}
-		
-		$amt = $context->getAmt() * pow(10, 0 - $context->getCurrency()->decimals);
 		
 		$form = new \payment\flow\Form();
 		$form->add(new \payment\flow\form\TextBlock($this->config->getInstructions()));
-		$form->add(new \payment\flow\form\TextBlock('USD' . number_format($amt, 2) . PHP_EOL . 'EUR' . number_format($amt / 1.17, 2)));
-		$form->add(new \payment\flow\form\TextBlock('Subject: trx' . $context->getId()));
-		$form->add(new \payment\flow\form\StringField('transactionid', 'Transaction id'));
+		$form->add(new \payment\flow\form\StringField('IBAN', 'Enter your IBAN'));
 		return $form;
 	}
 
@@ -73,7 +69,7 @@ class Bank implements ProviderInterface
 	}
 	
 	public function getName() {
-		return 'Bank';
+		return 'SEPA charge';
 	}
 
 	public function makeConfiguration() {
@@ -81,7 +77,7 @@ class Bank implements ProviderInterface
 	}
 
 	public function await($id) {
-		return false;
+		return new BankPayment($id->additional);
 	}
 
 }

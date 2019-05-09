@@ -5,8 +5,8 @@
 
 <div class="spacer" style="height: 30px"></div>
 
-<div class="row3">
-	<div class="span2">
+<div class="row l3">
+	<div class="span l2">
 		<form method="POST" action="" class="regular">
 			<div class="field">
 				<label for="name">Name:</label>

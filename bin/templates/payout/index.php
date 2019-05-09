@@ -1,22 +1,22 @@
 
 <div class="spacer" style="height: 20px"></div>
 
-<div class="row1">
-	<div class="span1">
+<div class="row l1">
+	<div class="span l1">
 		<form method="POST" action="<?= url('payout', 'complete') ?>" class="regular">
 			<?php foreach($payouts as $payout): ?>
-			<div class="row4 fluid">
-				<div class="span1">
+			<div class="row l4 fluid">
+				<div class="span l1">
 					<input type="checkbox" name="payout[<?= $payout->_id ?>]">
 					<?= $sso->getUser($payout->account->owner->_id)->getUsername() ?> 
 				</div><!--
-				--><div class="span1">
+				--><div class="span l1">
 					<?= $payout->source ?> 
 				</div><!--
-				--><div class="span1">
+				--><div class="span l1">
 					<?= $currencyLocalizer->format($payout->amt / pow(10, $payout->currency->decimals), $payout->currency->sf()) ?> 
 				</div><!--
-				--><div class="span1">
+				--><div class="span l1">
 					<?= __($payout->additional) ?> 
 				</div>
 			</div>

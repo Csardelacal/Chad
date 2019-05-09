@@ -36,7 +36,13 @@ class PayoutController extends BaseController
 			throw new PublicException('Forbidden', 403);
 		}
 		
-		$this->view->set('payouts', db()->table('payment\provider\externalfunds')->get('type', ExternalfundsModel::TYPE_PAYOUT)->where('approved', '!=', null)->where('executed', null)->all());
+		$pending = db()->table('payment\provider\externalfunds')
+				->get('type', ExternalfundsModel::TYPE_PAYOUT)
+				->where('approved', '!=', null)
+				->where('executed', null)
+				->all();
+		
+		$this->view->set('payouts', $pending);
 	}
 	
 	public function complete() {

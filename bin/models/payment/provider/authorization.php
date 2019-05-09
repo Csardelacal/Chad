@@ -1,5 +1,6 @@
 <?php namespace payment\provider;
 
+use EnumField;
 use IntegerField;
 use Reference;
 use spitfire\Model;

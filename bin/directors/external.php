@@ -37,19 +37,25 @@ class ExternalDirector extends \spitfire\mvc\Director
 	}
 	
 	public function payout() {
-		$pending = db()->table('payment\provider\externalfunds')->get('type', payment\provider\ExternalfundsModel::TYPE_PAYOUT)->where('deferred', '!=', null)->where('processed', null)->where('approved', '!=', null)->all();
+		$pending = db()->table('payment\provider\externalfunds')
+				->get('type', payment\provider\ExternalfundsModel::TYPE_PAYOUT)
+				->where('deferred', '!=', null)
+				->where('executed', null)
+				->where('approved', '!=', null)
+				->all();
+		
 		$providers = \payment\ProviderPool::payouts()->configure();
 		
 		foreach($pending as $job) {
 			
-			$provider = $providers-filter(function ($e) use ($job) {
+			$provider = $providers->filter(function ($e) use ($job) {
 				return $job->source === get_class($e);
-			});
+			})->rewind();
 			
 			$r = $provider->run($job);
 			
-			if ($r instanceof \payment\payout\PayoutInterface) {
-				$r->charge();
+			if ($r instanceof \payment\flow\PayoutInterface) {
+				$r->write();
 				
 				$job->executed = time();
 				$job->txn->executed = time();
@@ -61,19 +67,26 @@ class ExternalDirector extends \spitfire\mvc\Director
 	}
 	
 	public function payment() {
-		$pending = db()->table('payment\provider\externalfunds')->get('type', payment\provider\ExternalfundsModel::TYPE_PAYMENT)->where('deferred', '!=', null)->where('processed', null)->where('approved', '!=', null)->all();
-		$providers = \payment\ProviderPool::payouts()->configure();
+		$pending = db()->table('payment\provider\externalfunds')
+			->get('type', payment\provider\ExternalfundsModel::TYPE_PAYMENT)
+			->where('deferred', '!=', null)
+			->where('executed', null)
+			->where('approved', '!=', null)->all();
+		
+		$providers = \payment\ProviderPool::payment()->configure();
 		
 		foreach($pending as $job) {
 			
-			$provider = $providers-filter(function ($e) use ($job) {
+			$provider = $providers->filter(function ($e) use ($job) {
 				return $job->source === get_class($e);
-			});
+			})->rewind();
 			
 			/*@var $provider payment\provider\ProviderInterface */
 			$r = $provider->await($job);
+			console()->info($job->source . ' checked')->ln();
 			
-			if ($r instanceof \payment\payout\PaymentInterface) {
+			if ($r instanceof \payment\flow\PaymentInterface) {
+				console()->info($job->source . ' charged')->ln();
 				$r->charge();
 				
 				$job->executed = time();
@@ -81,6 +94,16 @@ class ExternalDirector extends \spitfire\mvc\Director
 				
 				$job->store();
 				$job->txn->store();
+				
+				if ($r->authorization() && !$r->authorization()->isRecorded()) {
+					$authorization = db()->table('payment\provider\authorization')->newRecord();
+					$authorization->status   = \payment\provider\AuthorizationModel::AVAILABLE;
+					$authorization->user     = $job->user;
+					$authorization->provider = $job->provider;
+					$authorization->expires  = $r->authorization()->getExpires();
+					$authorization->data     = $r->authorization()->getAuthorization();
+					$authorization->store();
+				}
 			}
 		}
 	}

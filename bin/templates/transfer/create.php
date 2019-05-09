@@ -19,8 +19,8 @@ if (current_context()->request->isPost() && $transfer) {
 	
 	<!-- Source account -->
 	<div class="field">
-		<div class="row1 fluid">
-			<div class="span1">
+		<div class="row l1 fluid">
+			<div class="span l1">
 				<label for="src">Source account</label>
 				<span class="styled-select">
 					<select name="src">
@@ -40,8 +40,8 @@ if (current_context()->request->isPost() && $transfer) {
 	
 	
 	<div class="field">
-		<div class="row1 fluid">
-			<div class="span1">
+		<div class="row l1 fluid">
+			<div class="span l1">
 				<label for="tgt">Target account</label>
 				<input type="text" name="tgt" placeholder="Target account ID...">
 			</div>
@@ -50,16 +50,16 @@ if (current_context()->request->isPost() && $transfer) {
 	
 	
 	<div class="field">
-		<div class="row1 fluid">
-			<div class="span1">
+		<div class="row l1 fluid">
+			<div class="span l1">
 				<label for="amt">Amount to be transferred</label>
 			</div>
 		</div>
-		<div class="row4 fluid">
-			<div class="span3">
+		<div class="row l4 fluid">
+			<div class="span l3">
 				<input type="text" name="amt" placeholder="Amount...">
 			</div>
-			<div class="span1">
+			<div class="span l1">
 				<?php $currencies = db()->table('currency')->get('removed', null, 'IS')->fetchAll(); ?>
 				<span class="styled-select">
 					<select name="currency">
@@ -74,8 +74,8 @@ if (current_context()->request->isPost() && $transfer) {
 	
 	
 	<div class="field">
-		<div class="row1 fluid">
-			<div class="span1">
+		<div class="row l1 fluid">
+			<div class="span l1">
 				<label for="description">Description</label>
 				<input type="text" name="description" placeholder="A brief description...">
 			</div>

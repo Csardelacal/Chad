@@ -39,6 +39,7 @@ class Payout implements \payment\flow\PayoutInterface
 
 	public function write() {
 		#TODO: THis could validate that the paypal email could be used in the first place.
+		console()->success('Paypal payout')->ln();
 		return;
 	}
 
