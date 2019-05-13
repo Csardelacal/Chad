@@ -66,6 +66,8 @@ class Context
 	 */
 	private $amt = null;
 	private $currency = null;
+	
+	private $auth;
 
 	public function getSuccessURL() {
 		return $this->successURL;
@@ -134,4 +136,14 @@ class Context
 		$this->id = $id;
 		return $this;
 	}
+	
+	public function getAuth() {
+		return $this->auth;
+	}
+	
+	public function setAuth($auth) {
+		$this->auth = $auth;
+		return $this;
+	}
+
 }

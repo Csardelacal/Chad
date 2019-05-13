@@ -89,6 +89,12 @@ class AuthorizationModel extends Model
 		 * from to identify the payer, provide credentials, etc.
 		 */
 		$schema->data = new TextField();
+		
+		/*
+		 * Provides a human readable string that does not contain user-identifiable
+		 * information when the user has multiple recorded payment providers
+		 */
+		$schema->human  = new StringField(100);
 		$schema->status = new EnumField(self::PENDING, self::AVAILABLE, self::CONSUMED);
 		$schema->expires = new IntegerField(true);
 		$schema->created = new IntegerField(true);

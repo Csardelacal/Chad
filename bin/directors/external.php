@@ -95,11 +95,12 @@ class ExternalDirector extends \spitfire\mvc\Director
 				$job->store();
 				$job->txn->store();
 				
-				if ($r->authorization() && !$r->authorization()->isRecorded()) {
+				if ($r->authorization() && !$r->authorization()->isRecorded() && !$job->auth) {
 					$authorization = db()->table('payment\provider\authorization')->newRecord();
 					$authorization->status   = \payment\provider\AuthorizationModel::AVAILABLE;
 					$authorization->user     = $job->user;
-					$authorization->provider = $job->provider;
+					$authorization->provider = $job->source;
+					$authorization->human    = $r->authorization()->getAuthorization();
 					$authorization->expires  = $r->authorization()->getExpires();
 					$authorization->data     = $r->authorization()->getAuthorization();
 					$authorization->store();

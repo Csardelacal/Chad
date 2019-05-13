@@ -65,12 +65,24 @@ class FundsController extends BaseController
 			 */
 			if (!$this->request->isPost()) { throw new HTTPMethodException('Not POSTed', 1712051108); }
 			
-			
+			/*
+			 * Check if the payment provider data was sent with a persistent authorization
+			 */
+			$pd = explode(':', _def($_POST['provider'], null));
+			$pp = $pd[0]?? null;
+			$pa = $pd[1]?? null;
 			
 			/* @var $provider ProviderInterface */
-			$provider = $providers->filter(function ($e) {
-				return !!(_def($_POST['provider'], null) === get_class($e));
+			$provider = $providers->filter(function ($e) use ($pp) {
+				return !!($pp === get_class($e));
 			})->rewind();
+			
+			if ($pa) {
+				$auth = db()->table('payment\provider\authorization')->get('_id', $pa)->first(true);
+				if ($auth->user->_id != $this->user->user->id) { throw new PublicException('Unauthorized', 401);}
+				if (get_class($provider) != $auth->provider) { throw new PublicException('Bad request', 400);}
+			}
+			
 			
 			$granted  = db()->table('rights\user')->get('user', db()->table('user')->get('_id', $this->user->user->id))->where('account', $account)->first();
 
@@ -86,6 +98,7 @@ class FundsController extends BaseController
 			$record = db()->table('payment\provider\externalfunds')->newRecord();
 			$record->type     = ExternalfundsModel::TYPE_PAYMENT;
 			$record->source   = get_class($provider);
+			$record->auth     = $auth?? null;
 			$record->user     = db()->table('user')->get('_id', $this->user->user->id)->first();
 			$record->amt      = $amt;
 			$record->account  = $account;
@@ -219,6 +232,11 @@ class FundsController extends BaseController
 			return !!($job->source === get_class($e));
 		})->rewind();
 		
+		if ($job->auth) {
+			$preauth = new payment\provider\Authorization($job->auth->data, $job->auth->expires);
+			$preauth->setRecorded(true);
+		}
+		
 		/*
 		 * Create the context to manage the payment authorization.
 		 */
@@ -226,6 +244,7 @@ class FundsController extends BaseController
 		$context->setId($fid);
 		$context->setAmt($amt);
 		$context->setCurrency($currency);
+		$context->setAuth($preauth?? null);
 		$context->setSuccessURL(url('funds', 'execute', $fid)->absolute());
 		$context->setFailureURL(url('funds', 'failed', $fid)->absolute());
 		$context->setFormData($_REQUEST);

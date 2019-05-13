@@ -72,7 +72,7 @@ class ProviderPool extends Collection
 			return $e;
 		});
 	}
-	
+
 	public static function payment() {
 		if (self::$payment) { return self::$payment; }
 		else { return self::$payment = new ProviderPool(ProviderInterface::class); }

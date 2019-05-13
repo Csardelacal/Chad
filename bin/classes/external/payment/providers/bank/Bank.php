@@ -46,6 +46,10 @@ class Bank implements ProviderInterface
 		
 		$posted = $context->getFormData();
 		
+		if ($context->getAuth()) {
+			return new \payment\flow\Defer($context->getAuth()->getAuthorization());
+		}
+		
 		if (isset($posted['IBAN'])) {
 			return new \payment\flow\Defer($context->getFormData()['IBAN']);
 		}
