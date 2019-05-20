@@ -27,15 +27,11 @@
 						<div class="app-drawer" id="app-drawer"></div>
 					</div>
 				</div>
-				<a href="<?= url('account') ?>">My accounts</a>
-				<a href="<?= url('user', 'logout') ?>">Logout</a>
 			</div>
 		</div>
 		<div class="auto-extend">
 			<div class="contains-sidebar">
 				<div class="sidebar">
-					<div class="heading topbar" style="padding-left: 10px"><span class="mobile-only">Menu</span></div>
-					
 					<div class="spacer" style="height: 10px"></div>
 					
 					<div class="menu-entry"><a href="<?= url('account', 'index')  ?>">My accounts</a></div>

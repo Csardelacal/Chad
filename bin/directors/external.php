@@ -58,10 +58,11 @@ class ExternalDirector extends \spitfire\mvc\Director
 				$r->write();
 				
 				$job->executed = time();
-				$job->txn->executed = time();
-				
 				$job->store();
-				$job->txn->store();
+				
+				#IMPORTANT
+				#The transaction is not marked executed when processing payouts because
+				#it has already been executed when the client requested the payout
 			}
 		}
 	}
@@ -95,7 +96,7 @@ class ExternalDirector extends \spitfire\mvc\Director
 				$job->store();
 				$job->txn->store();
 				
-				if ($r->authorization() && !$r->authorization()->isRecorded() && !$job->auth) {
+				if ($r->authorization() && !$job->auth) {
 					$authorization = db()->table('payment\provider\authorization')->newRecord();
 					$authorization->status   = \payment\provider\AuthorizationModel::AVAILABLE;
 					$authorization->user     = $job->user;

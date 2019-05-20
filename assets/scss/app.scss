@@ -24,7 +24,7 @@ html {
 body {
 	margin: 0;
 	font-family: sans-serif;
-	background-color: #F3F3F3;
+	background-color: #FCFCFC;
 }
 
 .wrapper {
@@ -65,15 +65,15 @@ h1 {
 .heading {
 	height: 50px;
 	line-height: 50px;
-	background: #F3F3F3;
+	background: #FEFEFE;
 	text-transform: uppercase;
 	padding: 0px 10px;
 	
 	&.topbar {
-		color: #FFF;
+		color: #777;
 		border-bottom: none;
-		background: #50ab53;
 		font-weight: bold;
+		font-size: .9em;
 	}
 }
 
@@ -475,10 +475,11 @@ footer {
 
 .material {
 	background: #FFF;
-	box-shadow: 1px 1px 1px #DDD;
+	box-shadow: 0px 0px 1px #EEE;
 	border-radius: 2px;
-	border: solid 1px #CCC;
+	border: solid 1px #DDD;
 	padding: 20px 15px 15px;
+	transition: box-shadow .3s ease;
 	
 	&.unpadded {
 		padding: 0;
@@ -486,6 +487,10 @@ footer {
 	
 	.padded {
 		padding: 20px 15px 15px;
+	}
+	
+	&:hover {
+		box-shadow: 0px 0px 3px #DDD;
 	}
 }
 

@@ -406,7 +406,7 @@ class FundsController extends BaseController
 			 * the application that it wishes to allow the user to re-use the payment
 			 * information it retrieved.
 			 */
-			if ($flow->authorization() && !$flow->authorization()->isRecorded()) {
+			if ($flow->authorization() && !$job->auth) {
 				$authorization = db()->table('payment\provider\authorization')->newRecord();
 				$authorization->status   = \payment\provider\AuthorizationModel::AVAILABLE;
 				$authorization->user     = $job->user;

@@ -1,13 +1,13 @@
 
-$navbar-background:        #EEE;
+$navbar-background:        #FFF;
 $navbar-fontColor :        #444;
 $navbar-height    :        50px;
 $navbar-padding   :        15px;
 
 .navbar {
 	background: $navbar-background;
-	box-shadow: 0 2px 2px #DDD;
-	border-bottom: 1px solid #CCC;
+	box-shadow: 0 2px 2px #EEE;
+	border-bottom: 1px solid #DDD;
 	display: table;
 	width: 100%;
 	

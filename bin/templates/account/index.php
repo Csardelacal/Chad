@@ -13,23 +13,30 @@ if (!$authUser) {
 
 ?>
 
+<div class="spacer" style="height: 20px"></div>
 
 <?php $payouts = db()->table('payment\provider\externalfunds')->get('type', \payment\provider\ExternalfundsModel::TYPE_PAYOUT)->where('executed', null)->all() ?>
 <?php if (!$payouts->isEmpty()) : ?>
-<div class="heading topbar" data-sticky>
-	In progress
+
+<div class="row l1">
+	<div class="span l1">
+		<div class="heading topbar" data-sticky>
+			In progress
+		</div>
+	</div>
 </div>
 
-	<?php	foreach ($payouts as $payout) : ?>
-	<div class="spacer" style="height: 20px"></div>
-	
-	<div class="row l1">
-		<div class="span l1">
-			<div class="material">
+<div class="spacer" style="height: 15px"></div>
+
+<div class="row l1">
+	<div class="span l1">
+		<div class="material unpadded">
+			<?php	foreach ($payouts as $payout) : ?>
+			<div class="padded">
 				<div class="row l5 fluid">
-					<div class="span4">
+					<div class="span l4">
 						from <strong><?= $payout->account->name ?></strong>
-						
+
 						<?php if (!$payout->approved): ?>
 						<div>
 							<a href="<?= url('funds', 'execute', $payout->_id) ?>" style="color: #900">Incomplete</a>
@@ -41,27 +48,33 @@ if (!$authUser) {
 					</div>
 				</div>
 			</div>
+			<div class="separator"></div>
+			<?php endforeach; ?>
 		</div>
 	</div>
-	<?php endforeach; ?>
+</div>
 	
-<div class="spacer" style="height: 30px"></div>
+<div class="spacer" style="height: 25px"></div>
 <?php endif; ?>
 
 
-<div class="heading topbar" data-sticky>
-	Your accounts
+<div class="row l1">
+	<div class="span l1">
+		<div class="heading topbar" data-sticky>
+			Your accounts
+		</div>
+	</div>
 </div>
 
 <?php foreach ($accounts as $account): ?>
-<div class="spacer" style="height: 20px"></div>
+<div class="spacer" style="height: 15px"></div>
 
 <div class="row l1">
 	<div class="span l1">
 		<div class="material">
 			<div class="row l3 fluid has-dials">
 				<div class="span l2">
-					<div><strong><?= $account->name ?></strong><span style="color: #777; font-size: .8em" title="This is your account ID">::<?= $account->_id ?></span></div>
+					<div><strong><?= $account->name ?></strong><span class="not-mobile" style="color: #777; font-size: .8em" title="This is your account ID">::<?= $account->_id ?></span></div>
 					<div class="spacer" style="height: 5px"></div>
 					<div><span style="color: #777; font-size: .8em" title="This value may include converted currencies">Approx. <?= $currencyLocalizer->format($account->estimatedBalance($preferences->currency) / pow(10, $preferences->currency->decimals), $preferences->currency->sf()) ?></span></div>
 				</div>

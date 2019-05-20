@@ -29,7 +29,6 @@ class Authorization
 	
 	private $authorization;
 	private $expires;
-	private $recorded = false;
 	
 	public function __construct($authorization, $expires = null) {
 		$this->authorization = $authorization;
@@ -52,14 +51,6 @@ class Authorization
 	public function setExpires($expires) {
 		$this->expires = $expires;
 		return $this;
-	}
-	
-	public function setRecorded($set = true) {
-		$this->recorded = $set;
-	}
-	
-	public function isRecorded() {
-		return $this->recorded;
 	}
 	
 }
