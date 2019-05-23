@@ -65,9 +65,8 @@ h1 {
 .heading {
 	height: 50px;
 	line-height: 50px;
-	background: #FEFEFE;
+	background: #FCFCFC;
 	text-transform: uppercase;
-	padding: 0px 10px;
 	
 	&.topbar {
 		color: #777;
@@ -380,8 +379,13 @@ h2 {
 }
 
 p {
-	color: #555;
+	color: #333;
 	line-height: 1.6em;
+	
+	&.secondary {
+		color: #555;
+		font-size: .8em;
+	}
 }
 
 small {
