@@ -1,5 +1,6 @@
 <?php
 
+use spitfire\core\http\URL;
 use spitfire\exceptions\HTTPMethodException;
 use spitfire\exceptions\PublicException;
 use spitfire\validation\ValidationException;
@@ -81,6 +82,15 @@ class AccountController extends BaseController
 			$rights['create'] = true;
 			$rights['tags']   = false;
 		}
+		/*
+		 * If the user is attempting to create an account using a browser, therefore
+		 * not using a special extension for the output, they will be directed
+		 * to the login page to ensure they can actually create their account.
+		 */
+		elseif($this->context->request->getPath()->getFormat() == 'php') {
+			$this->response->setBody('Redirecting...')->getHeaders()
+				->redirect(url('user', 'login', ['returnto' => (string) URL::current()]));
+		} 
 		else {
 			throw new PublicException('Not authorized - #1711191310', 403);
 		}
