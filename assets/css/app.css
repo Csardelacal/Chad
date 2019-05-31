@@ -415,10 +415,13 @@ footer {
   border-radius: 5px;
   background: #FFF;
   width: 100%;
-  padding: 20px;
-  transition: box-shadow .3s ease; }
+  padding: 10px 20px;
+  transition: box-shadow .3s ease;
+  cursor: pointer; }
   .payment-provider .pp-logo {
     text-align: center; }
+  .payment-provider .pp-descr {
+    padding: 2px 0; }
   .payment-provider input[type=radio] {
     display: none; }
   .payment-provider img {

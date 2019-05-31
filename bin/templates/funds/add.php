@@ -23,6 +23,7 @@
 						</select>
 					</div>
 				</div>
+			</div>
 			<?php endif; ?>
 
 			<?php if (!$amt): ?>
@@ -71,62 +72,68 @@
 
 			<div class="spacer" style="height: 30px"></div>
 			
-			<?php foreach ($providers as /*@var $provider \payment\provider\ProviderInterface*/$provider): ?>
-			<div class="payment-provider" id="pp-<?= str_replace('\\', '-', get_class($provider)) ?>">
-				<div class="row s4 l8 fluid">
-					<div class="span s1 l1 pp-logo">
-							<input type="radio" name="provider" value="<?= get_class($provider) ?>">
-							<img src="<?= $provider->getLogo()->getEncoded(); ?>" id="logo-<?= str_replace('\\', '-', get_class($provider)) ?>">
-					</div>
-					<div class="span s3 l7">
-						<?= __($provider->getName()) ?>
-					</div>
-
-				</div>
-			</div>
-			<script type="text/javascript">
-			(function () { 
-				document.getElementById('pp-<?= str_replace('\\', '-', get_class($provider)) ?>').addEventListener('click', function () {
-					document.querySelector('.payment-provider.selected') && document.querySelector('.payment-provider.selected').classList.remove("selected");
-					document.getElementById('pp-<?= str_replace('\\', '-', get_class($provider)) ?>').classList.add("selected");
-					document.getElementById('pp-<?= str_replace('\\', '-', get_class($provider)) ?>').querySelector('input[type=radio]').click();
-					document.getElementById('addfunds').removeAttribute('disabled');
-				}); 
-			}());
-			</script>
-			<div class="spacer" style="height: 10px"></div>
-			<?php endforeach; ?>
-			
-			<?php $every = new Every('</div><div class="row l4">', 4); ?>
-			
-			<?php foreach ($authorizations as $authorization): ?>
-			<?php $provider = $providers->filter(function ($e) use ($authorization) { return get_class($e) === $authorization->provider; })->rewind(); ?>
-			<div class="payment-provider" id="pp-<?= str_replace('\\', '-', get_class($provider)) ?>-<?= $authorization->_id?>">
-				<div class="row s4 l8 fluid">
-					<div class="span s1 l1 pp-logo">
-							<input type="radio" name="provider" value="<?= get_class($provider) ?>:<?= $authorization->_id?>">
-							<img src="<?= $provider->getLogo()->getEncoded(); ?>" id="logo-<?= str_replace('\\', '-', get_class($provider)) ?>">
-					</div>
-					<div class="span s3 l7">
-						<?= __($provider->getName()) ?>
-						<div><small><?= $authorization->human?: 'Empty' ?></small></div>
-					</div>
-
-				</div>
-			</div>
-			<script type="text/javascript">
-			(function () { 
-				document.getElementById('pp-<?= str_replace('\\', '-', get_class($provider)) ?>-<?= $authorization->_id?>').addEventListener('click', function () {
-					document.querySelector('.payment-provider.selected') && document.querySelector('.payment-provider.selected').classList.remove("selected");
-					document.getElementById('pp-<?= str_replace('\\', '-', get_class($provider)) ?>-<?= $authorization->_id?>').classList.add("selected");
-					document.getElementById('pp-<?= str_replace('\\', '-', get_class($provider)) ?>-<?= $authorization->_id?>').querySelector('input[type=radio]').click();
-					document.getElementById('addfunds').removeAttribute('disabled');
-				}); 
-			}());
-			</script>
-			<div class="spacer" style="height: 10px"></div>
+			<?php $every = new Every('</div><div class="row l3">', 3); ?>
+			<div class="row l3">
 				
-			<?php endforeach; ?>
+				<?php foreach ($authorizations as $authorization): ?>
+				<div class="span l1">
+					<?php $provider = $providers->filter(function ($e) use ($authorization) { return get_class($e) === $authorization->provider; })->rewind(); ?>
+					<div class="payment-provider" id="pp-<?= str_replace('\\', '-', get_class($provider)) ?>-<?= $authorization->_id?>">
+						<div class="row s5 fluid">
+							<div class="span s1 pp-logo">
+									<input type="radio" name="provider" value="<?= get_class($provider) ?>:<?= $authorization->_id?>">
+									<img src="<?= $provider->getLogo()->getEncoded(); ?>" id="logo-<?= str_replace('\\', '-', get_class($provider)) ?>">
+							</div>
+							<div class="span s4 pp-descr">
+								<?= __($provider->getName()) ?>
+								<div><small><?= $authorization->human?: 'Empty' ?></small></div>
+							</div>
+
+						</div>
+					</div>
+					<script type="text/javascript">
+					(function () { 
+						document.getElementById('pp-<?= str_replace('\\', '-', get_class($provider)) ?>-<?= $authorization->_id?>').addEventListener('click', function () {
+							document.querySelector('.payment-provider.selected') && document.querySelector('.payment-provider.selected').classList.remove("selected");
+							document.getElementById('pp-<?= str_replace('\\', '-', get_class($provider)) ?>-<?= $authorization->_id?>').classList.add("selected");
+							document.getElementById('pp-<?= str_replace('\\', '-', get_class($provider)) ?>-<?= $authorization->_id?>').querySelector('input[type=radio]').click();
+							document.getElementById('addfunds').removeAttribute('disabled');
+						}); 
+					}());
+					</script>
+					<div class="spacer" style="height: 10px"></div>
+				</div>
+				<?php endforeach; ?>
+				
+				<?php foreach ($providers as /*@var $provider \payment\provider\ProviderInterface*/$provider): ?>
+				<div class="span l1">
+					<div class="payment-provider" id="pp-<?= str_replace('\\', '-', get_class($provider)) ?>">
+						<div class="row s4 fluid">
+							<div class="span s1 pp-logo">
+									<input type="radio" name="provider" value="<?= get_class($provider) ?>">
+									<img src="<?= $provider->getLogo()->getEncoded(); ?>" id="logo-<?= str_replace('\\', '-', get_class($provider)) ?>">
+							</div>
+							<div class="span s3 pp-descr">
+								<?= __($provider->getName()) ?>
+								<div><small>Payment provider</small></div>
+							</div>
+
+						</div>
+					</div>
+					<script type="text/javascript">
+					(function () { 
+						document.getElementById('pp-<?= str_replace('\\', '-', get_class($provider)) ?>').addEventListener('click', function () {
+							document.querySelector('.payment-provider.selected') && document.querySelector('.payment-provider.selected').classList.remove("selected");
+							document.getElementById('pp-<?= str_replace('\\', '-', get_class($provider)) ?>').classList.add("selected");
+							document.getElementById('pp-<?= str_replace('\\', '-', get_class($provider)) ?>').querySelector('input[type=radio]').click();
+							document.getElementById('addfunds').removeAttribute('disabled');
+						}); 
+					}());
+					</script>
+				</div>
+				<?php endforeach; ?>
+				
+			</div>
 			
 			<div class="form-footer">
 				<input type="submit" value="Add funds" id="addfunds" disabled>

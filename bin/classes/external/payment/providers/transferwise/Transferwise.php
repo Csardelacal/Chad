@@ -49,7 +49,8 @@ class Transferwise implements PayoutInterface
 		$token = $this->config->token();
 		
 		if ($context->getFormData()['email']) {
-			return new Payout($token, $context->getFormData()['email'],  $context->getFormData()['name'], $context->getAmt(), $context->getFormData()['currency']);
+			$amt = $context->getAmt() / pow(10, $context->getCurrency()->decimals);
+			return new Payout($token, $context->getFormData()['email'],  $context->getFormData()['name'], $amt, $context->getFormData()['currency']);
 		}
 		
 		$form = new Form();

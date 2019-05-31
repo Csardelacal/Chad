@@ -430,6 +430,7 @@ class FundsController extends BaseController
 			 * needs to be released by an administrator.
 			 */
 			$job->approved = time();
+			$job->executed = time();
 			$job->additional = $flow->getAdditional();
 			$job->store();
 			

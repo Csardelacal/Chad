@@ -19,7 +19,7 @@
 						<label for="account">Account</label>
 						<select name="account" id="account">
 							<?php foreach ($accounts as $option): ?>
-							<option value="<?= $option->_id ?>"><?= $option->name ?></option>
+							<option value="<?= $option->_id ?>"><?= $option->name ?> (~ <?= $option->estimatedBalance($preferences->currency) / pow(10, $preferences->currency->decimals) ?> <?= $preferences->currency->symbol?>)</option>
 							<?php endforeach; ?>
 						</select>
 					</div>
@@ -55,26 +55,34 @@
 
 			<div class="spacer" style="height: 30px"></div>
 
-			<?php $every = new Every('</div><div class="row l4">', 4); ?>
+			<?php $every = new Every('</div><div class="row l3">', 3); ?>
 
-			<div class="row l4">
+			<div class="row l3">
 				<?php foreach ($providers as /*@var $provider \payment\provider\ProviderInterface*/$provider): ?>
 				<div class="span l1">
 					<div class="payment-provider" id="pp-<?= str_replace('\\', '-', get_class($provider)) ?>">
-						<input type="radio" name="provider" value="<?= get_class($provider) ?>">
-						<img src="<?= $provider->getLogo()->getEncoded(); ?>" id="logo-<?= str_replace('\\', '-', get_class($provider)) ?>">
+						<div class="row s4 fluid">
+							<div class="span s1 pp-logo">
+									<input type="radio" name="provider" value="<?= get_class($provider) ?>">
+									<img src="<?= $provider->getLogo()->getEncoded(); ?>" id="logo-<?= str_replace('\\', '-', get_class($provider)) ?>">
+							</div>
+							<div class="span s3 pp-descr">
+								<?= __($provider->getName()) ?>
+								<div><small>Payout provider</small></div>
+							</div>
 
-						<script type="text/javascript">
-						(function () { 
-							document.getElementById('pp-<?= str_replace('\\', '-', get_class($provider)) ?>').addEventListener('click', function () {
-								document.querySelector('.payment-provider.selected') && (document.querySelector('.payment-provider.selected').className ="payment-provider");
-								document.getElementById('pp-<?= str_replace('\\', '-', get_class($provider)) ?>').className ="payment-provider selected";
-								document.getElementById('pp-<?= str_replace('\\', '-', get_class($provider)) ?>').querySelector('input[type=radio]').click();
-								document.getElementById('amt').value = 0;
-							}); 
-						}());
-						</script>
+						</div>
 					</div>
+					<script type="text/javascript">
+					(function () { 
+						document.getElementById('pp-<?= str_replace('\\', '-', get_class($provider)) ?>').addEventListener('click', function () {
+							document.querySelector('.payment-provider.selected') && (document.querySelector('.payment-provider.selected').className ="payment-provider");
+							document.getElementById('pp-<?= str_replace('\\', '-', get_class($provider)) ?>').className ="payment-provider selected";
+							document.getElementById('pp-<?= str_replace('\\', '-', get_class($provider)) ?>').querySelector('input[type=radio]').click();
+							document.getElementById('amt').value = 0;
+						}); 
+					}());
+					</script>
 				</div>
 
 				<?= $every->next(); ?>

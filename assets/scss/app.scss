@@ -591,11 +591,16 @@ footer {
 	border-radius: 5px;
 	background: #FFF;
 	width: 100%;
-	padding: 20px;
+	padding: 10px 20px;
 	transition: box-shadow .3s ease;
+	cursor: pointer;
 	
 	.pp-logo {
 		text-align: center;
+	}
+	
+	.pp-descr {
+		padding: 2px 0;
 	}
 	
 	input[type=radio] {
