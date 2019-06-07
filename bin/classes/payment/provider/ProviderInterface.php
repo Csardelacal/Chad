@@ -71,6 +71,11 @@ interface ProviderInterface
 	 * needs a few minutes to process a credit card) the application will call
 	 * this method once it receives a return from the server.
 	 * 
+	 * This may also provide a null value for ID in the event of as webhook, 
+	 * some payment providers (in my case GoCardless) will not allow the application
+	 * to define a callback URL but instead will send out a webhook regularly to 
+	 * notify the application of any changes.
+	 * 
 	 * @param int $id
 	 * @param Context $context
 	 */

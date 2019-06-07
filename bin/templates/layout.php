@@ -31,6 +31,7 @@
 		</div>
 		<div class="auto-extend">
 			<div class="contains-sidebar">
+				<div class="spacer" style="height : 7000px"></div>
 				<div class="sidebar">
 					<div class="spacer" style="height: 10px"></div>
 					
@@ -39,6 +40,7 @@
 					<div class="menu-entry"><a href="<?= url('funds', 'retrieve') ?>">Transfer money</a></div>
 					
 					<div class="spacer" style="height: 10px"></div>
+					<div class="spacer" style="height : 1900px"></div>
 					
 					<?php if ($privileges && $privileges->isAdmin()): ?>
 					<div class="heading" style="color: #999; padding-left: 10px">Administration</div>
@@ -47,10 +49,12 @@
 					<div class="menu-entry"><a href="<?= url('payout', 'index')  ?>">Payouts</a></div>
 					<?php endif; ?>
 				</div>
+				<div class="spacer" style="height : 7000px"></div>
 			</div><!--
 			--><div class="content">
 				<div  data-sticky-context>
 					<?= $this->content() ?>
+				<div class="spacer" style="height : 10000px"></div>
 				</div>
 			</div>
 			
