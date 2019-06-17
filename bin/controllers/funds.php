@@ -248,6 +248,7 @@ class FundsController extends BaseController
 		$context->setSuccessURL(url('funds', 'execute', $fid)->absolute());
 		$context->setFailureURL(url('funds', 'failed', $fid)->absolute());
 		$context->setFormData($_REQUEST);
+		$context->setAdditional($job->additional);
 		
 			
 		/*
@@ -328,6 +329,9 @@ class FundsController extends BaseController
 		 * the url the payment provider directed us.
 		 */
 		if ($flow instanceof Redirection) {
+			$job->additional = $flow->getAdditional();
+			$job->store();
+			
 			$this->response->setBody('Redirecting...')->getHeaders()->redirect($flow->getTarget());
 			return;
 		}

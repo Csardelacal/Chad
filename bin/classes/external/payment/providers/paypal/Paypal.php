@@ -69,6 +69,11 @@ class Paypal implements ProviderInterface
 	public function authorize(Context $context) {
 		
 		if (isset($context->getFormData()['PayerID'])) {
+			
+			if ($context->getAdditional() !== $context->getFormData()['paymentId']) {
+				throw new PublicException('Tampering detected', 500);
+			}
+			
 			return new PaypalPayment($this->config, $context->getFormData()['PayerID'], $context->getFormData()['paymentId']);
 		}
 		
@@ -139,7 +144,7 @@ class Paypal implements ProviderInterface
 			throw new PublicException('Error communicating with paypal.', 500, $ex);
 		}
 		
-		return new Redirection($payment->getApprovalLink());
+		return new Redirection($payment->getApprovalLink(), $payment->getId());
 	}
 
 	public function init(ConfigurationInterface $config) {

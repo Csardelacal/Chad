@@ -1006,10 +1006,11 @@ body {
     text-decoration: none; }
     .sidebar a:hover {
       color: #333; }
+    .sidebar a:active {
+      color: #FFF; }
 
 .sidebar:hover {
-  overflow: auto;
-  background: #F00; }
+  overflow: auto; }
 
 .toggle-button {
   display: inline-block;
@@ -1508,7 +1509,7 @@ Contains the code needed to create a tabbed area to ease filtered navigation.
     transform: rotate(360deg); } }
 .dials {
   border-left: solid 1px #CCC;
-  font-size: .8em; }
+  font-size: .8rem; }
   .dials ul {
     margin: 2px;
     padding-left: 10px;

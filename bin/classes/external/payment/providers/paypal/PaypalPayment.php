@@ -60,7 +60,7 @@ class PaypalPayment implements PaymentInterface
 	}
 
 	public function authorization() {
-		return new \payment\provider\Authorization($this->payerId, null);
+		return null;
 	}
 
 }

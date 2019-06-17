@@ -29,12 +29,26 @@ class Redirection implements FlowInterface
 	
 	private $target;
 	
-	public function __construct($target) {
+	private $additional;
+	
+	public function __construct($target, $additional = null) {
 		$this->target = $target;
+		$this->additional = $additional;
 	}
 	
 	public function getTarget() {
 		return $this->target;
 	}
+	
+	public function getAdditional() {
+		return $this->additional;
+	}
+
+	public function setAdditional($additional) {
+		$this->additional = $additional;
+		return $this;
+	}
+
+
 	
 }
