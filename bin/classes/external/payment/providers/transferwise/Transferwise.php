@@ -1,13 +1,15 @@
 <?php namespace external\payment\providers\transferwise;
 
+use external\payment\providers\bank\BankConfiguration;
 use payment\ConfigurationInterface;
 use payment\Context;
 use payment\flow\Form;
+use payment\flow\form\html\Row;
+use payment\flow\form\html\Span;
 use payment\flow\form\StringField;
+use payment\flow\form\TextBlock;
 use payment\Logo;
 use payment\payout\PayoutInterface;
-use PayPal\Api\Payment;
-use spitfire\exceptions\PrivateException;
 
 /* 
  * The MIT License
@@ -54,9 +56,24 @@ class Transferwise implements PayoutInterface
 		}
 		
 		$form = new Form();
-		$form->add(new StringField('name', 'Your legal name', 'Used to verify your bank account'));
-		$form->add(new StringField('email', 'Your email address', 'Instructions will be sent to this address'));
-		$form->add(new StringField('currency', 'Currency of choice', 'Select your currency'));
+		
+		$form->add(new Row([
+			new Span(new StringField('name', 'Your legal name', 'Used to verify your bank account'), 1, 1, 1),
+			new Span(new TextBlock('All the data is transferred to Transferwise, we do not keep any of your personal data on our servers. Please refer to their documentation for details on data retention.'), 1, 1, 1)
+		]));
+		
+		$form->add(new Row([
+			new Span(new StringField('email', 'Your email address', 'Instructions will be sent to this address'), 3, 1, 1),
+			new Span(new StringField('currency', 'Currency of choice', 'Select your currency'), 1, 1, 1)
+		]));
+		
+		$form->add(new Row([
+			new Span(new TextBlock('Transferwise only supports payment to USD within the US. International accounts cannot receive USD. Still selecting it may result in a delay of your payout.'), 3, 1, 1),
+		]));
+		
+		$form->add(new Row([
+			new Span(new TextBlock('After requesting your payout, Transferwise will send you an email to collect your banking details. Please contact an administrator if this email does not get to you in time. After 2 weeks uncollected, the payment will be refunded and the balance added to your account.'), 3, 1, 1),
+		]));
 		
 		return $form;
 	}

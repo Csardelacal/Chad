@@ -24,26 +24,22 @@
  * THE SOFTWARE.
  */
 
-class StringField implements FieldInterface
+class StringField implements HTMLElementInterface
 {
 	
-	private $name;
-	private $caption;
-	private $placeholder;
-	
+	private $label;
+	private $input;
+
+
 	public function __construct($name, $caption, $placeholder = null) {
-		$this->name = $name;
-		$this->caption = $caption;
-		$this->placeholder = $placeholder;
+		$this->label = new html\Label($name, $caption);
+		$this->input = new html\Input($name, $placeholder);
 	}
 	
 	public function __toString() {
-		return sprintf('<label for="field_%s">%s</label><input type="text" placeholder="%s" name="%s" id="field_%s">', 
-			$this->name,
-			$this->caption, 
-			$this->placeholder, 
-			$this->name,
-			$this->name
+		return sprintf('<div class="frm-group">%s%s</div>', 
+			$this->label,
+			$this->input
 		);
 	}
 

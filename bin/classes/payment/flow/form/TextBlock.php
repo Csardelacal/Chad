@@ -27,7 +27,7 @@ use function __;
  */
 
 
-class TextBlock implements FieldInterface
+class TextBlock implements HTMLElementInterface
 {
 	
 	private $txt;
@@ -37,7 +37,7 @@ class TextBlock implements FieldInterface
 	}
 	
 	public function __toString() {
-		return '<div><p style="white-space: pre-wrap">' . __($this->txt) . '</p></div>';
+		return '<div><p class="secondary" style="white-space: pre-wrap">' . __($this->txt) . '</p></div>';
 	}
 
 }

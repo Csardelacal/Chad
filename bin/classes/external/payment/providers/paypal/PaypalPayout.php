@@ -4,7 +4,10 @@ use payment\ConfigurationInterface;
 use payment\Context;
 use payment\flow\Defer;
 use payment\flow\Form;
+use payment\flow\form\html\Row;
+use payment\flow\form\html\Span;
 use payment\flow\form\StringField;
+use payment\flow\form\TextBlock;
 use payment\Logo;
 use payment\payout\PayoutInterface;
 use PayPal\Api\Payment;
@@ -61,7 +64,14 @@ class PaypalPayout implements PayoutInterface
 		}
 		
 		$form = new Form();
-		$form->add(new StringField('email', 'Email', 'Email address'));
+		
+		$form->add(new Row([
+			new Span(new TextBlock('Paypal payments are being processed manually. Enter your email address, and click continue. You should receive payout in 24 hours.'), 3, 1, 1),
+		]));
+		
+		$form->add(new Row([
+			new Span(new StringField('email', 'Email', 'Your Paypal email address'), 3, 1, 1),
+		]));
 		
 		return $form;
 	}

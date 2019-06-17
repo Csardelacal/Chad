@@ -3,7 +3,11 @@
 <div class="row l1">
 	<div class="span l1">
 		<div class="spacer" style="height: 30px"></div>
-		<?= $form; ?>
+		<div class="material">
+			<div class="spacer" style="height: 30px"></div>
+			<?= $form; ?>
+			<div class="spacer" style="height: 30px"></div>
+		</div>
 		<div class="spacer" style="height: 30px"></div>
 	</div>
 </div>

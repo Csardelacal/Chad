@@ -1,6 +1,4 @@
-<?php namespace payment\flow;
-
-use payment\flow\form\HTMLElementInterface;
+<?php namespace payment\flow\form\html;
 
 /* 
  * The MIT License
@@ -26,17 +24,22 @@ use payment\flow\form\HTMLElementInterface;
  * THE SOFTWARE.
  */
 
-class Form
+class Label implements \payment\flow\form\HTMLElementInterface
 {
 	
-	private $fields = [];
+	private $name;
+	private $caption;
 	
-	public function add(HTMLElementInterface$field) {
-		$this->fields[] = $field;
+	public function __construct($name, $caption = null) {
+		$this->name = $name;
+		$this->caption = $caption;
 	}
 	
 	public function __toString() {
-		return sprintf('<form method="POST" action="" class="regular">%s<div class="form-footer"><input type="submit" value="Continue..."></div></form>', implode(PHP_EOL, $this->fields));
+		return sprintf('<label for="field_%s">%s</label>', 
+			$this->name,
+			$this->caption
+		);
 	}
-	
+
 }

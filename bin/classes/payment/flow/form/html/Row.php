@@ -1,4 +1,4 @@
-<?php namespace payment\flow\form;
+<?php namespace payment\flow\form\html;
 
 /* 
  * The MIT License
@@ -24,9 +24,28 @@
  * THE SOFTWARE.
  */
 
-interface FieldInterface
+class Row implements \payment\flow\form\HTMLElementInterface
 {
 	
-	function __toString();
+	private $spans;
 	
+	public function __construct($spans) {
+		$this->spans = $spans;
+	}
+	
+	private function aggregate($size) {
+		$res = 0;
+		foreach ($this->spans as $span) { $res+= $span->getWeight($size); }
+		return $res;
+	}
+	
+	public function __toString() {
+		return sprintf('<div class="row l%s m%s s%s">%s</div>', 
+			$this->aggregate('l'),
+			$this->aggregate('m'),
+			$this->aggregate('s'),
+			implode(' ', $this->spans)
+		);
+	}
+
 }

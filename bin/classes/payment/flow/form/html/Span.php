@@ -1,6 +1,4 @@
-<?php namespace payment\flow;
-
-use payment\flow\form\HTMLElementInterface;
+<?php namespace payment\flow\form\html;
 
 /* 
  * The MIT License
@@ -26,17 +24,35 @@ use payment\flow\form\HTMLElementInterface;
  * THE SOFTWARE.
  */
 
-class Form
+class Span implements \payment\flow\form\HTMLElementInterface
 {
 	
-	private $fields = [];
+	private $element;
+	private $weights = ['l' => 1, 'm' => 1, 's' => 1];
 	
-	public function add(HTMLElementInterface$field) {
-		$this->fields[] = $field;
+	public function __construct($element, $l = 1, $m = 1, $s = 1) {
+		$this->element = $element;
+		$this->weights['l'] = $l;
+		$this->weights['m'] = $m;
+		$this->weights['s'] = $s;
+	}
+	
+	public function setWeight($class, $val) {
+		$this->weights[$class] = $val;
+		return $this;
+	}
+	
+	public function getWeight($class) {
+		return $this->weights[$class];
 	}
 	
 	public function __toString() {
-		return sprintf('<form method="POST" action="" class="regular">%s<div class="form-footer"><input type="submit" value="Continue..."></div></form>', implode(PHP_EOL, $this->fields));
+		return sprintf('<div class="span l%s m%s s%s">%s</div>', 
+			$this->weights['l'],
+			$this->weights['m'],
+			$this->weights['s'],
+			is_array($this->element)? implode(' ', $this->element) : $this->element
+		);
 	}
-	
+
 }
