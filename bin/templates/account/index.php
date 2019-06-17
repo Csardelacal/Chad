@@ -15,7 +15,7 @@ if (!$authUser) {
 
 <div class="spacer" style="height: 20px"></div>
 
-<?php $payouts = db()->table('payment\provider\externalfunds')->get('type', \payment\provider\ExternalfundsModel::TYPE_PAYOUT)->where('executed', null)->all() ?>
+<?php $payouts = db()->table('payment\provider\externalfunds')->get('type', \payment\provider\ExternalfundsModel::TYPE_PAYOUT)->where('user__id', $authUser->user->id)->where('executed', null)->all() ?>
 <?php if (!$payouts->isEmpty()) : ?>
 
 <div class="row l1">
