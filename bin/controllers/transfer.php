@@ -58,7 +58,6 @@ class TransferController extends BaseController
 		$transfer = db()->table('transfer')->newRecord();
 		
 		$transfer->created     = time();
-		$transfer->due         = null;
 		$transfer->executed    = null;
 		
 		/*
