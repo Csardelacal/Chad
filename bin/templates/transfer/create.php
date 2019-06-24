@@ -58,6 +58,7 @@ if (current_context()->request->isPost() && $transfer) {
 		<div class="row l4 fluid">
 			<div class="span l3">
 				<input type="text" name="amt" placeholder="Amount...">
+				<input type="hidden" name="decimals" value="true">
 			</div>
 			<div class="span l1">
 				<?php $currencies = db()->table('currency')->get('removed', null, 'IS')->fetchAll(); ?>
