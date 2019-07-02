@@ -17,7 +17,7 @@
 		<div class="navbar">
 			<div class="left">
 				<span class="toggle-button dark"></span>
-				<a href="<?= url() ?>">CHAD</a>
+				<a href="<?= url() ?>"></a>
 			</div>
 			
 			<div class="right">
@@ -30,30 +30,38 @@
 			</div>
 		</div>
 		<div class="auto-extend">
-			<div class="contains-sidebar">
-				<div class="sidebar">
-					<div class="spacer" style="height: 10px"></div>
-					
-					<div class="menu-entry"><a href="<?= url('account', 'index')  ?>">My accounts</a></div>
-					<div class="menu-entry"><a href="<?= url('account', 'create') ?>">Create account</a></div>
-					<div class="menu-entry"><a href="<?= url('funds', 'retrieve') ?>">Transfer money</a></div>
-					
-					<div class="spacer" style="height: 10px"></div>
-					
-					<?php if ($privileges && $privileges->isAdmin()): ?>
-					<div class="heading" style="color: #999; padding-left: 10px">Administration</div>
-					<div class="menu-entry"><a href="<?= url('redirection', 'index')  ?>">Redirections</a></div>
-					<div class="menu-entry"><a href="<?= url('provider', 'index')  ?>">Payment providers</a></div>
-					<div class="menu-entry"><a href="<?= url('payout', 'index')  ?>">Payouts</a></div>
-					<?php endif; ?>
-				</div>
-			</div><!--
-			--><div class="content">
-				<div  data-sticky-context>
-					<?= $this->content() ?>
-				</div>
+			<div  data-sticky-context>
+				<?= $this->content() ?>
 			</div>
-			
+		</div>
+		
+		<div class="contains-sidebar">
+			<div class="sidebar">
+				<div class="navbar">
+					<div class="left">
+						<a href="<?= url() ?>">CHAD</a>
+					</div>
+				</div>
+				<div class="spacer" style="height: 10px"></div>
+
+				<div class="menu-entry"><a href="<?= url('account', 'index')  ?>">My accounts</a></div>
+				<div class="menu-entry"><a href="<?= url('account', 'create') ?>">Create account</a></div>
+				<div class="menu-entry"><a href="<?= url('funds', 'retrieve') ?>">Transfer money</a></div>
+
+				<div class="spacer" style="height: 10px"></div>
+
+				<?php if ($privileges && $privileges->isAdmin()): ?>
+				<div class="menu-title">Administration</div>
+				<div class="menu-entry"><a href="<?= url('redirection', 'index')  ?>">Redirections</a></div>
+				<div class="menu-entry"><a href="<?= url('provider', 'index')  ?>">Payment providers</a></div>
+				<div class="menu-entry"><a href="<?= url('payout', 'index')  ?>">Payouts</a></div>
+				<?php endif; ?>
+
+				<div class="spacer" style="height: 10px"></div>
+				
+				<div class="menu-title">Our network</div>
+				<div id="appdrawer"></div>
+			</div>
 		</div>
 		
 		<footer>
@@ -90,8 +98,26 @@
 				dropdown('.app-switcher');
 			});
 			
-			depend(['phpas/app/drawer'], function (drawer) {
-				console.log(drawer);
+			depend(['m3/core/request'], function (Request) {
+				var request = new Request('<?= $sso->getEndpoint() ?>/appdrawer.json');
+				request
+					.then(JSON.parse)
+					.then(function (e) {
+						e.forEach(function (i) {
+							console.log(i)
+							var entry = document.createElement('div');
+							var link  = entry.appendChild(document.createElement('a'));
+							var icon  = link.appendChild(document.createElement('img'));
+							entry.className = 'menu-entry';
+							
+							link.href = i.url;
+							link.appendChild(document.createTextNode(i.name));
+							
+							icon.src = i.icon.m;
+							document.getElementById('appdrawer').appendChild(entry);
+						});
+					})
+					.catch(console.log);
 			});
 			
 			depend(['_scss'], function() {
