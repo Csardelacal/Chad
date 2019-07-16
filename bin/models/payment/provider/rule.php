@@ -1,17 +1,18 @@
 <?php namespace payment\provider;
 
+use BooleanField;
 use EnumField;
 use IntegerField;
+use payment\ProviderModel;
 use Reference;
 use spitfire\Model;
 use spitfire\storage\database\Schema;
 use StringField;
-use TextField;
 
 /* 
  * The MIT License
  *
- * Copyright 2017 César de la Cal Bretschneider <cesar@magic3w.com>.
+ * Copyright 2019 César de la Cal Bretschneider <cesar@magic3w.com>.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,41 +33,20 @@ use TextField;
  * THE SOFTWARE.
  */
 
-class ExternalfundsModel extends Model
+class RuleModel extends Model
 {
-	
-	const TYPE_PAYMENT = 'payment';
-	
-	const TYPE_PAYOUT = 'payout';
 	
 	/**
 	 * 
 	 * @param Schema $schema
+	 * @return Schema
 	 */
 	public function definitions(Schema $schema) {
-		/*
-		 * An external operation can be any of two kinds. If it's a payment, it's 
-		 * a transfer of funds into the system. A payout implies that money has 
-		 * been transfered (or is to be transfered) from Chad to an external source.
-		 */
-		$schema->type     = new EnumField(self::TYPE_PAYMENT, self::TYPE_PAYOUT);
-		$schema->user     = new Reference('user');
-		$schema->source   = new StringField(255); #Classname of the payment provider
-		$schema->auth     = new Reference(AuthorizationModel::class);
-		$schema->amt      = new IntegerField(true);
-		$schema->account  = new Reference('account');  #While these technically form a book
-		$schema->currency = new Reference('currency'); #it's sometimes convenient to separate them
-		$schema->returnto = new StringField(4096);
-		$schema->additional = new TextField();
-		$schema->txn      = new Reference('transfer');
-		$schema->created  = new IntegerField(true);
-		$schema->approved = new IntegerField(true);
-		$schema->executed = new IntegerField(true);
-		$schema->deferred = new IntegerField(true);
-	}
-	
-	public function onbeforesave() {
-		if (!$this->created) { $this->created = time(); }
+		$schema->provider = new Reference(ProviderModel::class);
+		$schema->test = new EnumField('user', 'location');
+		$schema->against = new StringField(255);
+		$schema->priority = new IntegerField();
+		$schema->grants = new BooleanField();
 	}
 
 }

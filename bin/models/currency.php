@@ -42,7 +42,9 @@ class CurrencyModel extends Model
 		$schema->symbol      = new StringField(5);
 		$schema->name        = new StringField(50);
 		$schema->decimals    = new IntegerField(true);
-		$schema->conversion  = new IntegerField(true);
+		
+		$schema->buy         = new FloatField(true);
+		$schema->sell        = new FloatField(true);
 		
 		#Localization based info
 		$schema->collissions  = new TextField();
@@ -64,7 +66,7 @@ class CurrencyModel extends Model
 	}
 	
 	public function convert($amt, $from) {
-		return floor($amt / $from->conversion * $this->conversion);
+		return floor($amt / ($from->sell?: 1) / ($this->buy?: 1));
 	}
 
 }

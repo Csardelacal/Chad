@@ -1,5 +1,10 @@
 <?php
 
+use spitfire\exceptions\HTTPMethodException;
+use spitfire\exceptions\PublicException;
+use spitfire\io\renderers\SimpleFieldRenderer;
+use spitfire\validation\ValidationException;
+
 /* 
  * The MIT License
  *
@@ -27,16 +32,98 @@
 class CurrencyController extends BaseController
 {
 	
-	public function index() {
+	public function _onload() {
+		parent::_onload();
 		
+		if (!$this->privileges->isAdmin()) { 
+			throw new PublicException('Not permitted', 403); 
+		}
 	}
 	
+	public function index() {
+		$currencies = db()->table('currency')->getAll()->all();
+		$this->view->set('currencies', $currencies);
+	}
+	
+	/**
+	 * 
+	 * @validate >> POST#ISO (string required length[1, 5])
+	 * @validate >> POST#symbol (string required length[1, 5])
+	 * @validate >> POST#name (string required length[1, 20])
+	 * @validate >> POST#decimals (number required)
+	 * @validate >> POST#buy (number required)
+	 * @validate >> POST#sell (number required)
+	 * 
+	 * @throws HTTPMethodException
+	 */
 	public function create() {
 		
+		try {
+			
+			if (!$this->request->isPost()) { throw new HTTPMethodException('Not posted'); }
+			
+			if (!$this->validation->isEmpty()) { throw new ValidationException('Validation failed', 1907081220, $this->validation->toArray()); }
+			
+			$record = db()->table('currency')->newRecord();
+			$record->ISO = $_POST['ISO'];
+			$record->symbol = $_POST['symbol'];
+			$record->name = $_POST['name'];
+			$record->decimals = $_POST['decimals'];
+			$record->display  = $_POST['separator'] | $_POST['position'];
+			$record->buy  = $_POST['buy'];
+			$record->sell  = $_POST['sell'];
+			$record->store();
+			
+			$this->response->setBody('Redirect...')->getHeaders()->redirect(url('currency', 'edit', $record->_id));
+		}
+		catch (HTTPMethodException$e) {
+			//It's okay
+		}
+		catch (ValidationException$e) {
+			$this->view->set('errors', $e->getResult());
+		}
+		
 	}
 	
-	public function edit($cid) {
+	/**
+	 * 
+	 * @validate >> POST#ISO (string required length[1, 5])
+	 * @validate >> POST#symbol (string required length[1, 5])
+	 * @validate >> POST#name (string required length[1, 20])
+	 * @validate >> POST#decimals (number required)
+	 * @validate >> POST#buy (number required)
+	 * @validate >> POST#sell (number required)
+	 * 
+	 * @throws HTTPMethodException
+	 */
+	public function edit(CurrencyModel$record) {
 		
+		
+		try {
+			
+			if (!$this->request->isPost()) { throw new HTTPMethodException('Not posted'); }
+			
+			if (!$this->validation->isEmpty()) { throw new ValidationException('Validation failed', 1907081220, $this->validation->toArray()); }
+			
+			$record->ISO = $_POST['ISO'];
+			$record->symbol = $_POST['symbol'];
+			$record->name = $_POST['name'];
+			$record->decimals = $_POST['decimals'];
+			$record->display  = $_POST['separator'] | $_POST['position'];
+			$record->buy  = $_POST['buy'];
+			$record->sell  = $_POST['sell'];
+			$record->store();
+			
+			$this->response->setBody('Redirect...')->getHeaders()->redirect(url('currency', 'edit', $record->_id));
+		}
+		catch (HTTPMethodException$e) {
+			//It's okay
+		}
+		catch (ValidationException$e) {
+			$this->view->set('errors', $e->getResult());
+		}
+		
+		$this->view->set('record', $record);
 	}
 	
 	public function delete($cid) {
