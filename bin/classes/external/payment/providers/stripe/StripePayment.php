@@ -1,4 +1,10 @@
-<?php namespace payment;
+<?php namespace external\payment\providers\stripe;
+
+use payment\flow\PaymentInterface;
+use PayPal\Api\Payment;
+use PayPal\Api\PaymentExecution;
+use PayPal\Auth\OAuthTokenCredential;
+use PayPal\Rest\ApiContext;
 
 /* 
  * The MIT License
@@ -24,52 +30,16 @@
  * THE SOFTWARE.
  */
 
-class Logo
+class StripePayment implements PaymentInterface
 {
 	
-	private $file;
 	
-	private $tempdir = 'app://bin/usr/uploads/';
-	
-	/**
-	 * 
-	 * @param string $file
-	 */
-	public function __construct($file) {
-		$this->file = $file;
+	public function charge() {
+		return true;
 	}
-	
-	/**
-	 * 
-	 * @param type $size
-	 */
-	public function getEncoded($size = 128) {
-		
-		$icon = $this->file;
-		
-		/*
-		 * Define the filename of the target, we store the thumbs for the objects
-		 * inside the same directory they get stored to.
-		 */
-		$dir = storage()->dir(rtrim($this->tempdir, '\/'));
-		
-		if ($dir->contains($size . '_' . basename($icon))) {
-			$file = $dir->open($size . '_' . basename($icon));
-		}
-		else {
-			$file = $dir->make($size . '_' . basename($icon));
-			
-			try {
-				$img = media()->load(storage()->get($icon));
-			}
-			catch (PrivateException$e){
-				return null;
-			}
-			
-			$img->scale($size, \spitfire\io\media\MediaManipulatorInterface::HEIGHT);
-			$img->store($file);
-		}
-		
-		return sprintf('data:%s;base64,%s', $file->mime(), base64_encode($file->read()));
+
+	public function authorization() {
+		return null;
 	}
+
 }

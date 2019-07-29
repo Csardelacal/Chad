@@ -342,6 +342,9 @@ class FundsController extends BaseController
 		 */
 		if ($flow instanceof Form) {
 			$this->view->set('form', $flow);
+			
+			$job->additional = $flow->getAdditional();
+			$job->store();
 			return;
 		}
 		

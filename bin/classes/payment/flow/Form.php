@@ -30,6 +30,7 @@ class Form
 {
 	
 	private $fields = [];
+	private $additional;
 	
 	public function add(HTMLElementInterface$field) {
 		$this->fields[] = $field;
@@ -37,6 +38,15 @@ class Form
 	
 	public function __toString() {
 		return sprintf('<form method="POST" action="" class="regular">%s<div class="form-footer"><input type="submit" value="Continue..."></div></form>', implode(PHP_EOL, $this->fields));
+	}
+	
+	public function getAdditional() {
+		return $this->additional;
+	}
+	
+	public function setAdditional($additional) {
+		$this->additional = $additional;
+		return $this;
 	}
 	
 }

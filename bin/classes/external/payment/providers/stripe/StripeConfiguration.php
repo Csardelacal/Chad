@@ -1,9 +1,12 @@
-<?php namespace payment;
+<?php namespace external\payment\providers\stripe;
+
+use payment\ConfigurationInterface;
+use payment\setting\StringSetting;
 
 /* 
  * The MIT License
  *
- * Copyright 2018 César de la Cal Bretschneider <cesar@magic3w.com>.
+ * Copyright 2017 César de la Cal Bretschneider <cesar@magic3w.com>.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,52 +27,43 @@
  * THE SOFTWARE.
  */
 
-class Logo
+class StripeConfiguration implements ConfigurationInterface
 {
 	
-	private $file;
+	private $public;
+	private $secret;
 	
-	private $tempdir = 'app://bin/usr/uploads/';
-	
-	/**
-	 * 
-	 * @param string $file
-	 */
-	public function __construct($file) {
-		$this->file = $file;
+	public function load($data) {
+		$this->public = $data['client'];
+		$this->secret = $data['secret'];
+	}
+
+	public function save() {
+		return [
+			'client' => $this->public,
+			'secret' => $this->secret,
+			'mode'   => $this->mode
+		];
 	}
 	
-	/**
-	 * 
-	 * @param type $size
-	 */
-	public function getEncoded($size = 128) {
-		
-		$icon = $this->file;
-		
-		/*
-		 * Define the filename of the target, we store the thumbs for the objects
-		 * inside the same directory they get stored to.
-		 */
-		$dir = storage()->dir(rtrim($this->tempdir, '\/'));
-		
-		if ($dir->contains($size . '_' . basename($icon))) {
-			$file = $dir->open($size . '_' . basename($icon));
-		}
-		else {
-			$file = $dir->make($size . '_' . basename($icon));
-			
-			try {
-				$img = media()->load(storage()->get($icon));
-			}
-			catch (PrivateException$e){
-				return null;
-			}
-			
-			$img->scale($size, \spitfire\io\media\MediaManipulatorInterface::HEIGHT);
-			$img->store($file);
-		}
-		
-		return sprintf('data:%s;base64,%s', $file->mime(), base64_encode($file->read()));
+	public function getOptions() {
+		return [
+			new StringSetting('public', 'Public key', '', $this->public),
+			new StringSetting('secret', 'Secret key', '', $this->secret),
+		];
 	}
+
+	public function readOptions($sent) {
+		$this->public = $sent['public'];
+		$this->secret = $sent['secret'];
+	}
+	
+	public function getPublic() {
+		return $this->public;
+	}
+	
+	public function getSecret() {
+		return $this->secret;
+	}
+
 }

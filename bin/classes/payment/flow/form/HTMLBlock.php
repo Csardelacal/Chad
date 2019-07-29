@@ -1,7 +1,6 @@
-<?php
+<?php namespace payment\flow\form;
 
-use payment\provider\ExternalfundsModel;
-use spitfire\exceptions\PublicException;
+use function __;
 
 /* 
  * The MIT License
@@ -27,39 +26,18 @@ use spitfire\exceptions\PublicException;
  * THE SOFTWARE.
  */
 
-class PaymentController extends BaseController
+
+class HTMLBlock implements HTMLElementInterface
 {
 	
-	public function index() {
-		
-		if (!$this->privileges->isAdmin()) {
-			throw new PublicException('Forbidden', 403);
-		}
-		
-		$this->view->set('payouts', db()->table('payment\provider\externalfunds')->get('type', ExternalfundsModel::TYPE_PAYMENT)->where('approved', '<>', null)->where('executed', null)->all());
+	private $txt;
+	
+	public function __construct($txt) {
+		$this->txt = $txt;
 	}
 	
-	public function complete() {
-		
-		if (!$this->privileges->isAdmin()) {
-			throw new PublicException('Forbidden', 403);
-		}
-		
-		if (!is_array($_POST['payment'])) {
-			throw new PublicException('Forbidden', 403);
-		}
-		
-		foreach ($_POST['payment'] as $id => $ign) {
-			$payout = db()->table('payment\provider\externalfunds')->get('type', ExternalfundsModel::TYPE_PAYMENT)->where('_id', $id)->first();
-			$payout->executed = time();
-			$payout->store();
-			
-			$payout->txn->authorized = time();
-			$payout->txn->executed = time();
-			$payout->store();
-		}
-		
-		$this->response->setBody('Redirect...')->getHeaders()->redirect(url('payment'));
-		
+	public function __toString() {
+		return $this->txt;
 	}
+
 }

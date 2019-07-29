@@ -3,11 +3,11 @@
 
 <div class="row l1">
 	<div class="span l1">
-		<form method="POST" action="<?= url('payout', 'complete') ?>" class="regular">
+		<form method="POST" action="<?= url('payment', 'complete') ?>" class="regular">
 			<?php foreach($payouts as $payout): ?>
 			<div class="row l4 fluid">
 				<div class="span l1">
-					<input type="checkbox" name="payout[<?= $payout->_id ?>]">
+					<input type="checkbox" name="payment[<?= $payout->_id ?>]">
 					<?= $sso->getUser($payout->account->owner->_id)->getUsername() ?> 
 				</div><!--
 				--><div class="span l1">
