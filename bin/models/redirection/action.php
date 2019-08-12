@@ -30,8 +30,8 @@ class ActionModel extends Model
 	public function redirect($transfer, $leftover) {
 		$pull   = $this->redirection->account->_id == $transfer->source->account->_id;
 		
-		$source = $pull? $this->target->getBook($transfer->target->currency) : $transfer->target;
-		$target = $pull? $transfer->source : $this->target->getBook($transfer->target->currency);
+		$source = $pull? ($this->target->getBook($transfer->target->currency)?: $this->target->addBook($transfer->target->currency)) : $transfer->target;
+		$target = $pull? $transfer->source : $this->target->getBook($transfer->target->currency)?: $this->target->addBook($transfer->target->currency);
 		
 		$dec    = pow(10, $source->currency->decimals);
 		$amount = floor($this->calculate($leftover / $dec, $source->currency->ISO) * $dec);

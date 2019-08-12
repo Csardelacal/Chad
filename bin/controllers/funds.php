@@ -48,7 +48,7 @@ class FundsController extends BaseController
 		 * Prepare the provider list
 		 */
 		$providers = ProviderPool::payment()->configure(); // Prepares the providers by loading their configuration
-		$currency  = $currencyISO? db()->table('currency')->get('ISO', _def($_POST['currency'], $currencyISO))->fetch() : db()->table('currency')->get('default', true)->fetch();
+		$currency  = db()->table('currency')->get('ISO', _def($_POST['currency'], $currencyISO))->fetch()?: db()->table('currency')->get('default', true)->fetch();
 		$account   = db()->table('account')->get('_id', _def($_POST['account'], $acctid))->fetch();
 		
 		$amt = _def($_POST['amt'], $amtParam);
@@ -131,7 +131,7 @@ class FundsController extends BaseController
 		 * Prepare the provider list
 		 */
 		$providers = ProviderPool::payouts()->configure(); // Prepares the providers by loading their configuration
-		$currency  = $currencyISO? db()->table('currency')->get('ISO', _def($_POST['currency'], $currencyISO))->fetch() : db()->table('currency')->get('default', true)->fetch();
+		$currency  = db()->table('currency')->get('ISO', _def($_POST['currency'], $currencyISO))->fetch()?: db()->table('currency')->get('default', true)->fetch();
 		$account   = db()->table('account')->get('_id', _def($_POST['account'], $acctid))->fetch();
 		
 		try {
@@ -211,8 +211,7 @@ class FundsController extends BaseController
 		 * Get the appropriate book to add / remove the funds to. This is always the
 		 * user's account.
 		 */
-		try                  { $usrbook = $usraccount->getBook($currency); }
-		catch (\Exception$e) { $usrbook = $usraccount->addBook($currency); }
+		$usrbook = $usraccount->getBook($currency)?: $usraccount->addBook($currency);
 		
 		/*
 		 * Check the user's permissions to even retrieve funds in the first place.
@@ -277,7 +276,7 @@ class FundsController extends BaseController
 		 * Get the appropriate book from the payment provider's system account to
 		 * move the funds to the user.
 		 */
-		$srcbook = $srcaccount->getBook($usrbook->currency)? : $srcaccount->addBook($usrbook->currency);
+		$srcbook = $srcaccount->getBook($usrbook->currency)?: $srcaccount->addBook($usrbook->currency);
 			
 		/*
 		 * This is the last safeguard before the charge gets executed, if the 
