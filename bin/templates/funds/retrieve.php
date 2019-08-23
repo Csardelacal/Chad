@@ -103,7 +103,9 @@
 	var decimals = 0;
 	
 	document.getElementById('form').addEventListener('submit', function (e) {
-		if (document.getElementById('amt').value * Math.pow(10, decimals) < maximum) {
+		var amt = document.getElementById('amt').value * Math.pow(10, decimals);
+		
+		if (amt > 0 && amt <= maximum) {
 			//Do nothing, it's perfectly fine
 		}
 		else {

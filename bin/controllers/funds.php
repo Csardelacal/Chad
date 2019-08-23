@@ -169,7 +169,7 @@ class FundsController extends BaseController
 			$record->type     = ExternalfundsModel::TYPE_PAYOUT;
 			$record->user     = db()->table('user')->get('_id', $this->user->user->id)->first();
 			$record->source   = get_class($provider);
-			$record->amt      = $amt;
+			$record->amt      = (int)$amt;
 			$record->account  = $account;
 			$record->currency = $currency;
 			$record->returnto = _def($_GET['returnto'], strval(url('account')->absolute()));
@@ -448,6 +448,88 @@ class FundsController extends BaseController
 		$this->response->setBody('Redirecting...')->getHeaders()->redirect($job->returnto);
 		return;
 		
+	}
+	
+	/**
+	 * Receives a webhook from a payment provider. The payment provider's listen() 
+	 * method is invoked that is REQUIRED to authenticate the payment provider
+	 * before returning any success.
+	 * 
+	 * @todo Properly test this code. Currently no payment provider needs this, making it virtually impossible to test
+	 * @todo Retest when GoCardless gets attached
+	 * 
+	 * @param int $fid
+	 */
+	public function external($fid) {
+		/*
+		 * Retrieve the job from the database. The job should contain all the relevant
+		 * information to properly create a transaction to move the funds from / to
+		 * an external payment provider.
+		 */
+		$job = db()->table('payment\provider\externalfunds')->get('_id', $fid)->fetch();
+		$amt = $job->amt;
+		$currency = $job->currency;
+		
+		/*
+		 * Prepare the provider list
+		 */
+		$providers = $job->type == ExternalfundsModel::TYPE_PAYMENT? ProviderPool::payment()->configure() : ProviderPool::payouts()->configure();  // Prepares the providers by loading their configuration
+		
+		/*
+		 * Retrieve the appropriate provider to manage the transaction.
+		 */
+		/* @var $provider ProviderInterface */
+		$provider = $providers->filter(function ($e) use ($job) {
+			return !!($job->source === get_class($e));
+		})->rewind();
+		
+		/*
+		 * Create the context to manage the payment authorization.
+		 */
+		$context = new Context();
+		$context->setId($fid);
+		$context->setAmt($amt);
+		$context->setCurrency($currency);
+		$context->setSuccessURL(url('funds', 'execute', $fid)->absolute());
+		$context->setFailureURL(url('funds', 'failed', $fid)->absolute());
+		$context->setFormData($_REQUEST);
+		$context->setAdditional($job->additional);
+		
+		$flow = $provider->listen($fid, $context);
+		
+		/*
+		 * I'm not entirely liking the idea of having this duplicated here and in
+		 * the director's code. Maybe I should look into refactoring this out of here
+		 * and the director, but a different location currently seems unsensible.
+		 */
+		if ($flow instanceof PaymentInterface) {
+			$flow->charge();
+				
+			$job->executed = time();
+			$job->txn->executed = time();
+
+			$job->store();
+			$job->txn->store();
+
+			if ($flow->authorization() && !$job->auth) {
+				$authorization = db()->table('payment\provider\authorization')->newRecord();
+				$authorization->status   = \payment\provider\AuthorizationModel::AVAILABLE;
+				$authorization->user     = $job->user;
+				$authorization->provider = $job->source;
+				$authorization->human    = $flow->authorization()->getAuthorization();
+				$authorization->expires  = $flow->authorization()->getExpires();
+				$authorization->data     = $flow->authorization()->getAuthorization();
+				$authorization->store();
+			}
+		}
+		
+		if ($flow instanceof \payment\payout\PayoutInterface) {
+			$flow->write();
+				
+			$job->executed = time();
+			$job->store();
+
+		}
 	}
 	
 }
