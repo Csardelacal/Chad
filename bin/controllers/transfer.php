@@ -391,7 +391,6 @@ class TransferController extends BaseController
 		if ($transfer->source && $transfer->target && !$transfer->cancelled && $transfer->authorized) {
 			$transfer->executed = time();
 			$transfer->store();
-			$transfer->notify();
 			
 			$this->view->set('transfer', $transfer);
 		}

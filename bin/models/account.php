@@ -1,7 +1,6 @@
 <?php
 
 use db\TagField;
-use redirection\RedirectionModel;
 use rights\AppModel;
 use rights\UserModel;
 use spitfire\exceptions\PrivateException;
@@ -22,8 +21,6 @@ use spitfire\storage\database\Schema;
  * @property string        $tags     Tags do allow application and group permissions to target big amounts of accounts at once
  * @property BookModel[]   $books    The books this account manages
  * 
- * @property RedirectionModel $redirects A collection of redirects for this account.
- * 
  * @author César de la Cal Bretschneider <cesar@magic3w.com>
  */
 class AccountModel extends Model
@@ -41,7 +38,6 @@ class AccountModel extends Model
 		$schema->tags      = new TagField();
 		
 		$schema->books     = new ChildrenField(BookModel::class, 'account');
-		$schema->redirects = new ChildrenField(RedirectionModel::class, 'account');
 		
 		#For the permissions system
 		$schema->ugrants   = new ChildrenField(UserModel::class, 'account');
@@ -114,19 +110,6 @@ class AccountModel extends Model
 		}
 		
 		return $balance;
-	}
-	
-	public function notify($transfer) {
-		
-		/*
-		 * Redirections listen here. Once the data has been stored, we can trigger
-		 * a redirection and make things happen.
-		 */
-		RedirectionModel::get($this)->reduce(function ($carry, $e) use($transfer) {
-			if (!$carry && $e->test($transfer)) { $e->redirect($transfer); return true; }
-			else                                { return false; }
-		}, false);
-		
 	}
 
 }

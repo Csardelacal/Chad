@@ -52,7 +52,6 @@
 
 				<?php if ($privileges && $privileges->isAdmin()): ?>
 				<div class="menu-title">Administration</div>
-				<div class="menu-entry"><a href="<?= url('redirection', 'index')  ?>">Redirections</a></div>
 				<div class="menu-entry"><a href="<?= url('provider', 'index')  ?>">Payment providers</a></div>
 				<div class="menu-entry"><a href="<?= url('payout', 'index')  ?>">Payouts</a></div>
 				<div class="menu-entry"><a href="<?= url('currency', 'index')  ?>">Currency</a></div>

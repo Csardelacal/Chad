@@ -393,7 +393,6 @@ class FundsController extends BaseController
 			if ($job->type == ExternalfundsModel::TYPE_PAYOUT) {
 				$job->txn->executed = time();
 				$job->txn->store();
-				$job->txn->notify();
 			}
 			
 			$this->view->set('defer', $flow);
@@ -422,7 +421,6 @@ class FundsController extends BaseController
 			$job->txn->executed = time();
 			$job->txn->authorized = time();
 			$job->txn->store();
-			$job->txn->notify();
 			
 			/*
 			 * Sometimes the payment provider can return an authorization to inform
@@ -459,7 +457,6 @@ class FundsController extends BaseController
 			
 			$job->txn->executed = time();
 			$job->txn->store();
-			$job->txn->notify();
 		}
 		
 		$this->response->setBody('Redirecting...')->getHeaders()->redirect($job->returnto);
