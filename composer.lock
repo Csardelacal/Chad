@@ -1,0 +1,148 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "a13e7368cc7508db127ab00c4bba629c",
+    "packages": [
+        {
+            "name": "magic3w/permission-php-sdk",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://phabricator.magic3w.com/source/permission-PHP-SDK.git",
+                "reference": "b457f030ac81e8b613b8275f23efc3475f440471"
+            },
+            "require": {
+                "magic3w/url-reflection": "dev-master",
+                "spitfire/request": "dev-master"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "magic3w\\permission\\sdk\\": "/src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "César de la Cal Bretschneider",
+                    "email": "cesar@magic3w.com"
+                }
+            ],
+            "description": "Allows your application to communicate with a permission server through a simple API",
+            "time": "2020-12-17T09:06:38+00:00"
+        },
+        {
+            "name": "magic3w/url-reflection",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://phabricator.magic3w.com/source/url-reflection.git",
+                "reference": "341d1ede12d28159101b77c8ae12b544dba15a8c"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^9.3"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "magic3w\\http\\url\\reflection\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "César de la Cal Bretschneider",
+                    "email": "cesar@magic3w.com"
+                }
+            ],
+            "description": "Allows applications to have a URL parsed and retrieve information about it's components",
+            "time": "2021-02-11T13:17:34+00:00"
+        },
+        {
+            "name": "spitfire/defer",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://phabricator.magic3w.com/source/spitfire-defer.git",
+                "reference": "f005ec23a818129e813b543a51ab8d8cdc44cb9c"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "spitfire\\defer\\": "./src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "César de la Cal Bretschneider",
+                    "email": "cesar@magic3w.com"
+                }
+            ],
+            "description": "Allozs spitfire apps to defer tasks to be executed at a later point",
+            "time": "2020-12-09T09:50:10+00:00"
+        },
+        {
+            "name": "spitfire/request",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://phabricator.magic3w.com/source/spitfire-request.git",
+                "reference": "cc2a34540bf114d97d269b9c61f37ee983dcc9a5"
+            },
+            "require": {
+                "ext-curl": "*",
+                "magic3w/url-reflection": "dev-master"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^9.4"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "spitfire\\io\\request\\": "./src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "César de la Cal Bretschneider",
+                    "email": "cesar@magic3w.com"
+                }
+            ],
+            "description": "Spitfire request mechanism",
+            "time": "2020-12-28T15:14:13+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "dev",
+    "stability-flags": {
+        "magic3w/permission-php-sdk": 20,
+        "spitfire/defer": 20
+    },
+    "prefer-stable": true,
+    "prefer-lowest": false,
+    "platform": [],
+    "platform-dev": [],
+    "plugin-api-version": "2.0.0"
+}
