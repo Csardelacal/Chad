@@ -1,0 +1,11 @@
+parameters:
+	scanDirectories:
+		- spitfire/
+
+	excludePaths:
+		analyse:
+			- bin/classes/PayPal
+			- bin/classes/Stripe
+			- bin/templates
+includes:
+	- phpstan-baseline.neon

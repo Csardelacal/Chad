@@ -1,0 +1,1272 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Property BaseController\\:\\:\\$sso \\(auth\\\\SSO\\) does not accept auth\\\\SSOCache\\.$#"
+			count: 1
+			path: bin/classes/BaseController.php
+
+		-
+			message: "#^Call to an undefined method auth\\\\SSOCache\\:\\:authApp\\(\\)\\.$#"
+			count: 1
+			path: bin/classes/BaseController.php
+
+		-
+			message: "#^Call to an undefined method auth\\\\SSOCache\\:\\:getAppId\\(\\)\\.$#"
+			count: 1
+			path: bin/classes/BaseController.php
+
+		-
+			message: "#^Access to an undefined property BaseController\\:\\:\\$privileges\\.$#"
+			count: 1
+			path: bin/classes/BaseController.php
+
+		-
+			message: "#^Variable \\$signatures might not be defined\\.$#"
+			count: 1
+			path: bin/classes/auth/AppAuthentication.php
+
+		-
+			message: "#^Call to method getPath\\(\\) on an unknown class auth\\\\Settings\\.$#"
+			count: 1
+			path: bin/classes/auth/SSO.php
+
+		-
+			message: "#^Call to method getPort\\(\\) on an unknown class auth\\\\Settings\\.$#"
+			count: 1
+			path: bin/classes/auth/SSO.php
+
+		-
+			message: "#^Call to method getProtocol\\(\\) on an unknown class auth\\\\Settings\\.$#"
+			count: 1
+			path: bin/classes/auth/SSO.php
+
+		-
+			message: "#^Call to method getServer\\(\\) on an unknown class auth\\\\Settings\\.$#"
+			count: 1
+			path: bin/classes/auth/SSO.php
+
+		-
+			message: "#^Call to method getUser\\(\\) on an unknown class auth\\\\Settings\\.$#"
+			count: 1
+			path: bin/classes/auth/SSO.php
+
+		-
+			message: "#^Call to method getPassword\\(\\) on an unknown class auth\\\\Settings\\.$#"
+			count: 1
+			path: bin/classes/auth/SSO.php
+
+		-
+			message: "#^Instanceof between string\\|null and auth\\\\Token will always evaluate to false\\.$#"
+			count: 1
+			path: bin/classes/auth/SSO.php
+
+		-
+			message: "#^Variable \\$http_response_header in isset\\(\\) always exists and is not nullable\\.$#"
+			count: 1
+			path: bin/classes/auth/Token.php
+
+		-
+			message: "#^Parameter \\$url of method auth\\\\URLReflection\\:\\:fromURL\\(\\) has invalid typehint type auth\\\\Settings\\.$#"
+			count: 1
+			path: bin/classes/auth/URLReflection.php
+
+		-
+			message: "#^Return typehint of method auth\\\\URLReflection\\:\\:fromURL\\(\\) has invalid type auth\\\\Settings\\.$#"
+			count: 1
+			path: bin/classes/auth/URLReflection.php
+
+		-
+			message: "#^Class auth\\\\URLReflection constructor invoked with 8 parameters, 7 required\\.$#"
+			count: 1
+			path: bin/classes/auth/URLReflection.php
+
+		-
+			message: "#^Return typehint of method external\\\\payment\\\\providers\\\\bank\\\\Bank\\:\\:authorize\\(\\) has invalid type UI\\\\Controls\\\\Form\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/bank/Bank.php
+
+		-
+			message: "#^Return typehint of method external\\\\payment\\\\providers\\\\bank\\\\Bank\\:\\:authorize\\(\\) has invalid type payment\\\\provider\\\\PaymentAuthorization\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/bank/Bank.php
+
+		-
+			message: "#^Method external\\\\payment\\\\providers\\\\bank\\\\Bank\\:\\:authorize\\(\\) should return int\\|payment\\\\provider\\\\PaymentAuthorization\\|spitfire\\\\core\\\\router\\\\Redirection\\|UI\\\\Controls\\\\Form but returns payment\\\\flow\\\\Defer\\.$#"
+			count: 2
+			path: bin/classes/external/payment/providers/bank/Bank.php
+
+		-
+			message: "#^Method external\\\\payment\\\\providers\\\\bank\\\\Bank\\:\\:authorize\\(\\) should return int\\|payment\\\\provider\\\\PaymentAuthorization\\|spitfire\\\\core\\\\router\\\\Redirection\\|UI\\\\Controls\\\\Form but returns payment\\\\flow\\\\Form\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/bank/Bank.php
+
+		-
+			message: "#^Property external\\\\payment\\\\providers\\\\bank\\\\Bank\\:\\:\\$config \\(external\\\\payment\\\\providers\\\\bank\\\\BankConfiguration\\) does not accept payment\\\\ConfigurationInterface\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/bank/Bank.php
+
+		-
+			message: "#^Method external\\\\payment\\\\providers\\\\bank\\\\Bank\\:\\:getLogo\\(\\) should return string but returns payment\\\\Logo\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/bank/Bank.php
+
+		-
+			message: "#^Cannot access property \\$additional on int\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/bank/Bank.php
+
+		-
+			message: "#^Return typehint of method external\\\\payment\\\\providers\\\\bank\\\\BankConfiguration\\:\\:getOptions\\(\\) has invalid type payment\\\\Setting\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/bank/BankConfiguration.php
+
+		-
+			message: "#^Method external\\\\payment\\\\providers\\\\bank\\\\BankConfiguration\\:\\:getOptions\\(\\) should return array\\<payment\\\\Setting\\> but returns array\\<int, payment\\\\setting\\\\TextSetting\\>\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/bank/BankConfiguration.php
+
+		-
+			message: "#^Access to an undefined property external\\\\payment\\\\providers\\\\bank\\\\BankPayment\\:\\:\\$IBAN\\.$#"
+			count: 2
+			path: bin/classes/external/payment/providers/bank/BankPayment.php
+
+		-
+			message: "#^Parameter \\$config of method external\\\\payment\\\\providers\\\\bank\\\\BankPayout\\:\\:init\\(\\) has invalid typehint type payment\\\\provider\\\\ConfigurationInterface\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/bank/BankPayout.php
+
+		-
+			message: "#^Property external\\\\payment\\\\providers\\\\bank\\\\BankPayout\\:\\:\\$config \\(external\\\\payment\\\\providers\\\\bank\\\\BankConfiguration\\) does not accept payment\\\\ConfigurationInterface\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/bank/BankPayout.php
+
+		-
+			message: "#^Method external\\\\payment\\\\providers\\\\bank\\\\BankPayout\\:\\:getLogo\\(\\) should return string but returns payment\\\\Logo\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/bank/BankPayout.php
+
+		-
+			message: "#^Parameter \\$jobs of method external\\\\payment\\\\providers\\\\bank\\\\BankPayout\\:\\:run\\(\\) has invalid typehint type payment\\\\payout\\\\type\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/bank/BankPayout.php
+
+		-
+			message: "#^Return typehint of method external\\\\payment\\\\providers\\\\paypal\\\\Paypal\\:\\:authorize\\(\\) has invalid type UI\\\\Controls\\\\Form\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/paypal/Paypal.php
+
+		-
+			message: "#^Return typehint of method external\\\\payment\\\\providers\\\\paypal\\\\Paypal\\:\\:authorize\\(\\) has invalid type payment\\\\provider\\\\PaymentAuthorization\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/paypal/Paypal.php
+
+		-
+			message: "#^Method external\\\\payment\\\\providers\\\\paypal\\\\Paypal\\:\\:authorize\\(\\) should return int\\|payment\\\\provider\\\\PaymentAuthorization\\|spitfire\\\\core\\\\router\\\\Redirection\\|UI\\\\Controls\\\\Form but returns external\\\\payment\\\\providers\\\\paypal\\\\PaypalPayment\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/paypal/Paypal.php
+
+		-
+			message: "#^Parameter \\#1 \\$quantity of method PayPal\\\\Api\\\\Item\\:\\:setQuantity\\(\\) expects string, int given\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/paypal/Paypal.php
+
+		-
+			message: "#^Method external\\\\payment\\\\providers\\\\paypal\\\\Paypal\\:\\:authorize\\(\\) should return int\\|payment\\\\provider\\\\PaymentAuthorization\\|spitfire\\\\core\\\\router\\\\Redirection\\|UI\\\\Controls\\\\Form but returns payment\\\\flow\\\\Redirection\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/paypal/Paypal.php
+
+		-
+			message: "#^Property external\\\\payment\\\\providers\\\\paypal\\\\Paypal\\:\\:\\$config \\(external\\\\payment\\\\providers\\\\paypal\\\\PaypalConfiguration\\) does not accept payment\\\\ConfigurationInterface\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/paypal/Paypal.php
+
+		-
+			message: "#^Method external\\\\payment\\\\providers\\\\paypal\\\\Paypal\\:\\:getLogo\\(\\) should return string but returns payment\\\\Logo\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/paypal/Paypal.php
+
+		-
+			message: "#^Return typehint of method external\\\\payment\\\\providers\\\\paypal\\\\PaypalConfiguration\\:\\:getOptions\\(\\) has invalid type payment\\\\Setting\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/paypal/PaypalConfiguration.php
+
+		-
+			message: "#^Method external\\\\payment\\\\providers\\\\paypal\\\\PaypalConfiguration\\:\\:getOptions\\(\\) should return array\\<payment\\\\Setting\\> but returns array\\<int, payment\\\\setting\\\\StringSetting\\>\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/paypal/PaypalConfiguration.php
+
+		-
+			message: "#^Parameter \\$config of method external\\\\payment\\\\providers\\\\paypal\\\\PaypalPayout\\:\\:init\\(\\) has invalid typehint type payment\\\\provider\\\\ConfigurationInterface\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/paypal/PaypalPayout.php
+
+		-
+			message: "#^Property external\\\\payment\\\\providers\\\\paypal\\\\PaypalPayout\\:\\:\\$config \\(external\\\\payment\\\\providers\\\\paypal\\\\PaypalConfiguration\\) does not accept payment\\\\ConfigurationInterface\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/paypal/PaypalPayout.php
+
+		-
+			message: "#^Method external\\\\payment\\\\providers\\\\paypal\\\\PaypalPayout\\:\\:getLogo\\(\\) should return string but returns payment\\\\Logo\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/paypal/PaypalPayout.php
+
+		-
+			message: "#^Parameter \\$job of method external\\\\payment\\\\providers\\\\paypal\\\\PaypalPayout\\:\\:run\\(\\) has invalid typehint type payment\\\\payout\\\\type\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/paypal/PaypalPayout.php
+
+		-
+			message: "#^Property external\\\\payment\\\\providers\\\\stripe\\\\Stripe\\:\\:\\$config has unknown class external\\\\payment\\\\providers\\\\stripe\\\\PaypalConfiguration as its type\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/stripe/Stripe.php
+
+		-
+			message: "#^Return typehint of method external\\\\payment\\\\providers\\\\stripe\\\\Stripe\\:\\:authorize\\(\\) has invalid type UI\\\\Controls\\\\Form\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/stripe/Stripe.php
+
+		-
+			message: "#^Return typehint of method external\\\\payment\\\\providers\\\\stripe\\\\Stripe\\:\\:authorize\\(\\) has invalid type payment\\\\provider\\\\PaymentAuthorization\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/stripe/Stripe.php
+
+		-
+			message: "#^Call to method getSecret\\(\\) on an unknown class external\\\\payment\\\\providers\\\\stripe\\\\PaypalConfiguration\\.$#"
+			count: 2
+			path: bin/classes/external/payment/providers/stripe/Stripe.php
+
+		-
+			message: "#^Method external\\\\payment\\\\providers\\\\stripe\\\\Stripe\\:\\:authorize\\(\\) should return int\\|payment\\\\provider\\\\PaymentAuthorization\\|spitfire\\\\core\\\\router\\\\Redirection\\|UI\\\\Controls\\\\Form but returns payment\\\\flow\\\\Defer\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/stripe/Stripe.php
+
+		-
+			message: "#^Call to method getPublic\\(\\) on an unknown class external\\\\payment\\\\providers\\\\stripe\\\\PaypalConfiguration\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/stripe/Stripe.php
+
+		-
+			message: "#^Method external\\\\payment\\\\providers\\\\stripe\\\\Stripe\\:\\:authorize\\(\\) should return int\\|payment\\\\provider\\\\PaymentAuthorization\\|spitfire\\\\core\\\\router\\\\Redirection\\|UI\\\\Controls\\\\Form but returns payment\\\\flow\\\\Form\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/stripe/Stripe.php
+
+		-
+			message: "#^Property external\\\\payment\\\\providers\\\\stripe\\\\Stripe\\:\\:\\$config \\(external\\\\payment\\\\providers\\\\stripe\\\\PaypalConfiguration\\) does not accept payment\\\\ConfigurationInterface\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/stripe/Stripe.php
+
+		-
+			message: "#^Method external\\\\payment\\\\providers\\\\stripe\\\\Stripe\\:\\:getLogo\\(\\) should return string but returns payment\\\\Logo\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/stripe/Stripe.php
+
+		-
+			message: "#^Cannot access property \\$additional on int\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/stripe/Stripe.php
+
+		-
+			message: "#^Access to an undefined property external\\\\payment\\\\providers\\\\stripe\\\\StripeConfiguration\\:\\:\\$mode\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/stripe/StripeConfiguration.php
+
+		-
+			message: "#^Return typehint of method external\\\\payment\\\\providers\\\\stripe\\\\StripeConfiguration\\:\\:getOptions\\(\\) has invalid type payment\\\\Setting\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/stripe/StripeConfiguration.php
+
+		-
+			message: "#^Method external\\\\payment\\\\providers\\\\stripe\\\\StripeConfiguration\\:\\:getOptions\\(\\) should return array\\<payment\\\\Setting\\> but returns array\\<int, payment\\\\setting\\\\StringSetting\\>\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/stripe/StripeConfiguration.php
+
+		-
+			message: "#^Return typehint of method external\\\\payment\\\\providers\\\\transferwise\\\\Configuration\\:\\:getOptions\\(\\) has invalid type payment\\\\Setting\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/transferwise/Configuration.php
+
+		-
+			message: "#^Method external\\\\payment\\\\providers\\\\transferwise\\\\Configuration\\:\\:getOptions\\(\\) should return array\\<payment\\\\Setting\\> but returns array\\<int, payment\\\\setting\\\\StringSetting\\>\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/transferwise/Configuration.php
+
+		-
+			message: "#^PHPDoc tag @throws with type external\\\\payment\\\\providers\\\\transferwise\\\\PrivateException is not subtype of Throwable$#"
+			count: 1
+			path: bin/classes/external/payment/providers/transferwise/Payout.php
+
+		-
+			message: "#^Instantiated class external\\\\payment\\\\providers\\\\transferwise\\\\PrivateException not found\\.$#"
+			count: 5
+			path: bin/classes/external/payment/providers/transferwise/Payout.php
+
+		-
+			message: "#^Throwing object of an unknown class external\\\\payment\\\\providers\\\\transferwise\\\\PrivateException\\.$#"
+			count: 5
+			path: bin/classes/external/payment/providers/transferwise/Payout.php
+
+		-
+			message: "#^Call to an undefined method external\\\\payment\\\\providers\\\\bank\\\\BankConfiguration\\:\\:token\\(\\)\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/transferwise/Transferwise.php
+
+		-
+			message: "#^Parameter \\$config of method external\\\\payment\\\\providers\\\\transferwise\\\\Transferwise\\:\\:init\\(\\) has invalid typehint type payment\\\\provider\\\\ConfigurationInterface\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/transferwise/Transferwise.php
+
+		-
+			message: "#^Property external\\\\payment\\\\providers\\\\transferwise\\\\Transferwise\\:\\:\\$config \\(external\\\\payment\\\\providers\\\\bank\\\\BankConfiguration\\) does not accept payment\\\\ConfigurationInterface\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/transferwise/Transferwise.php
+
+		-
+			message: "#^Method external\\\\payment\\\\providers\\\\transferwise\\\\Transferwise\\:\\:getLogo\\(\\) should return string but returns payment\\\\Logo\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/transferwise/Transferwise.php
+
+		-
+			message: "#^Parameter \\$jobs of method external\\\\payment\\\\providers\\\\transferwise\\\\Transferwise\\:\\:run\\(\\) has invalid typehint type payment\\\\payout\\\\type\\.$#"
+			count: 1
+			path: bin/classes/external/payment/providers/transferwise/Transferwise.php
+
+		-
+			message: "#^Return typehint of method payment\\\\ConfigurationInterface\\:\\:getOptions\\(\\) has invalid type payment\\\\Setting\\.$#"
+			count: 1
+			path: bin/classes/payment/ConfigurationInterface.php
+
+		-
+			message: "#^Default value of the parameter \\#1 \\$size \\(int\\) of method payment\\\\Logo\\:\\:getEncoded\\(\\) is incompatible with type payment\\\\type\\.$#"
+			count: 1
+			path: bin/classes/payment/Logo.php
+
+		-
+			message: "#^Parameter \\$size of method payment\\\\Logo\\:\\:getEncoded\\(\\) has invalid typehint type payment\\\\type\\.$#"
+			count: 1
+			path: bin/classes/payment/Logo.php
+
+		-
+			message: "#^Call to method dir\\(\\) on an unknown class spitfire\\\\SpitFire\\\\storage\\\\objectStorage\\\\NodeInterface\\.$#"
+			count: 1
+			path: bin/classes/payment/Logo.php
+
+		-
+			message: "#^Call to an undefined method spitfire\\\\storage\\\\objectStorage\\\\NodeInterface\\:\\:contains\\(\\)\\.$#"
+			count: 1
+			path: bin/classes/payment/Logo.php
+
+		-
+			message: "#^Call to an undefined method spitfire\\\\storage\\\\objectStorage\\\\NodeInterface\\:\\:open\\(\\)\\.$#"
+			count: 1
+			path: bin/classes/payment/Logo.php
+
+		-
+			message: "#^Call to an undefined method spitfire\\\\storage\\\\objectStorage\\\\NodeInterface\\:\\:make\\(\\)\\.$#"
+			count: 1
+			path: bin/classes/payment/Logo.php
+
+		-
+			message: "#^Call to method get\\(\\) on an unknown class spitfire\\\\SpitFire\\\\storage\\\\objectStorage\\\\NodeInterface\\.$#"
+			count: 1
+			path: bin/classes/payment/Logo.php
+
+		-
+			message: "#^Caught class payment\\\\PrivateException not found\\.$#"
+			count: 1
+			path: bin/classes/payment/Logo.php
+
+		-
+			message: "#^PHPDoc tag @param for parameter \\$config with type payment\\\\provider\\\\ConfigurationInterface is not subtype of native type payment\\\\ConfigurationInterface\\.$#"
+			count: 1
+			path: bin/classes/payment/payout/PayoutInterface.php
+
+		-
+			message: "#^Parameter \\$config of method payment\\\\payout\\\\PayoutInterface\\:\\:init\\(\\) has invalid typehint type payment\\\\provider\\\\ConfigurationInterface\\.$#"
+			count: 1
+			path: bin/classes/payment/payout/PayoutInterface.php
+
+		-
+			message: "#^Parameter \\$job of method payment\\\\payout\\\\PayoutInterface\\:\\:run\\(\\) has invalid typehint type payment\\\\payout\\\\type\\.$#"
+			count: 1
+			path: bin/classes/payment/payout/PayoutInterface.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$size$#"
+			count: 1
+			path: bin/classes/payment/payout/PayoutInterface.php
+
+		-
+			message: "#^Return typehint of method payment\\\\provider\\\\ProviderInterface\\:\\:authorize\\(\\) has invalid type UI\\\\Controls\\\\Form\\.$#"
+			count: 1
+			path: bin/classes/payment/provider/ProviderInterface.php
+
+		-
+			message: "#^Return typehint of method payment\\\\provider\\\\ProviderInterface\\:\\:authorize\\(\\) has invalid type payment\\\\provider\\\\PaymentAuthorization\\.$#"
+			count: 1
+			path: bin/classes/payment/provider/ProviderInterface.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$size$#"
+			count: 1
+			path: bin/classes/payment/provider/ProviderInterface.php
+
+		-
+			message: "#^Access to an undefined property UserModel\\:\\:\\$_id\\.$#"
+			count: 1
+			path: bin/classes/rights/AccountLock.php
+
+		-
+			message: "#^Negated boolean expression is always true\\.$#"
+			count: 1
+			path: bin/classes/signature/Signature.php
+
+		-
+			message: "#^Result of \\|\\| is always true\\.$#"
+			count: 1
+			path: bin/classes/signature/Signature.php
+
+		-
+			message: "#^Parameter \\#5 \\$context of class signature\\\\Signature constructor expects string, array\\<int, string\\> given\\.$#"
+			count: 1
+			path: bin/classes/signature/Signature.php
+
+		-
+			message: "#^Parameter \\#7 \\$salt of class signature\\\\Signature constructor expects string\\|null, signature\\\\Checksum given\\.$#"
+			count: 1
+			path: bin/classes/signature/Signature.php
+
+		-
+			message: "#^Variable \\$accounts might not be defined\\.$#"
+			count: 1
+			path: bin/controllers/account.php
+
+		-
+			message: "#^Parameter \\#2 \\$token of method auth\\\\SSO\\:\\:authApp\\(\\) expects string\\|null, auth\\\\Token given\\.$#"
+			count: 1
+			path: bin/controllers/account.php
+
+		-
+			message: "#^Parameter \\#3 \\$context of method auth\\\\SSO\\:\\:authApp\\(\\) expects string\\|null, array\\<int, string\\> given\\.$#"
+			count: 1
+			path: bin/controllers/account.php
+
+		-
+			message: "#^Access to an undefined property CurrencyController\\:\\:\\$privileges\\.$#"
+			count: 1
+			path: bin/controllers/currency.php
+
+		-
+			message: "#^Access to an undefined property CurrencyController\\:\\:\\$validation\\.$#"
+			count: 4
+			path: bin/controllers/currency.php
+
+		-
+			message: "#^Access to an undefined property CurrencyModel\\:\\:\\$buy\\.$#"
+			count: 1
+			path: bin/controllers/currency.php
+
+		-
+			message: "#^Access to an undefined property CurrencyModel\\:\\:\\$sell\\.$#"
+			count: 1
+			path: bin/controllers/currency.php
+
+		-
+			message: "#^Access to an undefined property CurrencyModel\\:\\:\\$_id\\.$#"
+			count: 1
+			path: bin/controllers/currency.php
+
+		-
+			message: "#^Class spitfire\\\\validation\\\\ValidationException constructor invoked with 2 parameters, 3 required\\.$#"
+			count: 2
+			path: bin/controllers/funds.php
+
+		-
+			message: "#^Variable \\$amt might not be defined\\.$#"
+			count: 1
+			path: bin/controllers/funds.php
+
+		-
+			message: "#^Call to an undefined method payment\\\\provider\\\\Authorization\\:\\:setRecorded\\(\\)\\.$#"
+			count: 1
+			path: bin/controllers/funds.php
+
+		-
+			message: "#^Call to an undefined method payment\\\\payout\\\\PayoutInterface\\:\\:write\\(\\)\\.$#"
+			count: 1
+			path: bin/controllers/funds.php
+
+		-
+			message: "#^Access to an undefined property PaymentController\\:\\:\\$privileges\\.$#"
+			count: 2
+			path: bin/controllers/payment.php
+
+		-
+			message: "#^Access to an undefined property PayoutController\\:\\:\\$privileges\\.$#"
+			count: 2
+			path: bin/controllers/payout.php
+
+		-
+			message: "#^Access to an undefined property RedirectionController\\:\\:\\$privileges\\.$#"
+			count: 1
+			path: bin/controllers/redirection.php
+
+		-
+			message: "#^Parameter \\#2 \\$token of method auth\\\\SSO\\:\\:authApp\\(\\) expects string\\|null, auth\\\\Token given\\.$#"
+			count: 1
+			path: bin/controllers/transfer.php
+
+		-
+			message: "#^Parameter \\#3 \\$context of method auth\\\\SSO\\:\\:authApp\\(\\) expects string\\|null, array\\<int, string\\> given\\.$#"
+			count: 1
+			path: bin/controllers/transfer.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$txn$#"
+			count: 1
+			path: bin/controllers/transfer.php
+
+		-
+			message: "#^Access to an undefined property TransferModel\\:\\:\\$source\\.$#"
+			count: 3
+			path: bin/controllers/transfer.php
+
+		-
+			message: "#^Access to an undefined property TransferModel\\:\\:\\$amount\\.$#"
+			count: 1
+			path: bin/controllers/transfer.php
+
+		-
+			message: "#^Access to an undefined property TransferModel\\:\\:\\$received\\.$#"
+			count: 1
+			path: bin/controllers/transfer.php
+
+		-
+			message: "#^Access to an undefined property TransferModel\\:\\:\\$target\\.$#"
+			count: 2
+			path: bin/controllers/transfer.php
+
+		-
+			message: "#^Access to an undefined property TransferModel\\:\\:\\$_id\\.$#"
+			count: 3
+			path: bin/controllers/transfer.php
+
+		-
+			message: "#^Access to an undefined property TransferModel\\:\\:\\$authorized\\.$#"
+			count: 3
+			path: bin/controllers/transfer.php
+
+		-
+			message: "#^Variable \\$code might not be defined\\.$#"
+			count: 2
+			path: bin/error_pages/default.json.php
+
+		-
+			message: "#^Variable \\$exception might not be defined\\.$#"
+			count: 1
+			path: bin/error_pages/default.json.php
+
+		-
+			message: "#^Variable \\$message might not be defined\\.$#"
+			count: 2
+			path: bin/error_pages/default.json.php
+
+		-
+			message: "#^Variable \\$code might not be defined\\.$#"
+			count: 1
+			path: bin/error_pages/default.php
+
+		-
+			message: "#^Variable \\$message might not be defined\\.$#"
+			count: 2
+			path: bin/error_pages/default.php
+
+		-
+			message: "#^Parameter \\#2 \\$newvalue of function ini_set expects string, true given\\.$#"
+			count: 1
+			path: bin/error_pages/default.php
+
+		-
+			message: "#^Variable \\$exception might not be defined\\.$#"
+			count: 1
+			path: bin/error_pages/default.php
+
+		-
+			message: "#^Property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$_id \\(IntegerField\\) does not accept StringField\\.$#"
+			count: 1
+			path: bin/models/account.php
+
+		-
+			message: "#^Access to private property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$name\\.$#"
+			count: 1
+			path: bin/models/account.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$owner\\.$#"
+			count: 1
+			path: bin/models/account.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$taxID\\.$#"
+			count: 1
+			path: bin/models/account.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$tags\\.$#"
+			count: 1
+			path: bin/models/account.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$books\\.$#"
+			count: 1
+			path: bin/models/account.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$redirects\\.$#"
+			count: 1
+			path: bin/models/account.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$ugrants\\.$#"
+			count: 1
+			path: bin/models/account.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$agrants\\.$#"
+			count: 1
+			path: bin/models/account.php
+
+		-
+			message: "#^Method AccountModel\\:\\:definitions\\(\\) should return spitfire\\\\storage\\\\database\\\\Schema but return statement is missing\\.$#"
+			count: 1
+			path: bin/models/account.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$book\\.$#"
+			count: 1
+			path: bin/models/balance.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$amount\\.$#"
+			count: 1
+			path: bin/models/balance.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$timestamp\\.$#"
+			count: 1
+			path: bin/models/balance.php
+
+		-
+			message: "#^Method BalanceModel\\:\\:definitions\\(\\) should return spitfire\\\\storage\\\\database\\\\Schema but return statement is missing\\.$#"
+			count: 1
+			path: bin/models/balance.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$account\\.$#"
+			count: 1
+			path: bin/models/book.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$currency\\.$#"
+			count: 1
+			path: bin/models/book.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$minimum\\.$#"
+			count: 1
+			path: bin/models/book.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$balanced\\.$#"
+			count: 1
+			path: bin/models/book.php
+
+		-
+			message: "#^Method BookModel\\:\\:definitions\\(\\) should return spitfire\\\\storage\\\\database\\\\Schema but return statement is missing\\.$#"
+			count: 1
+			path: bin/models/book.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$ISO\\.$#"
+			count: 1
+			path: bin/models/currency.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$symbol\\.$#"
+			count: 1
+			path: bin/models/currency.php
+
+		-
+			message: "#^Access to private property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$name\\.$#"
+			count: 1
+			path: bin/models/currency.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$decimals\\.$#"
+			count: 1
+			path: bin/models/currency.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$buy\\.$#"
+			count: 1
+			path: bin/models/currency.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$sell\\.$#"
+			count: 1
+			path: bin/models/currency.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$collissions\\.$#"
+			count: 1
+			path: bin/models/currency.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$display\\.$#"
+			count: 1
+			path: bin/models/currency.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$default\\.$#"
+			count: 1
+			path: bin/models/currency.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$removed\\.$#"
+			count: 1
+			path: bin/models/currency.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$deprecatedBy\\.$#"
+			count: 1
+			path: bin/models/currency.php
+
+		-
+			message: "#^Method CurrencyModel\\:\\:definitions\\(\\) should return spitfire\\\\storage\\\\database\\\\Schema but return statement is missing\\.$#"
+			count: 1
+			path: bin/models/currency.php
+
+		-
+			message: "#^Access to an undefined property CurrencyModel\\:\\:\\$buy\\.$#"
+			count: 1
+			path: bin/models/currency.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$enabled\\.$#"
+			count: 1
+			path: bin/models/payment/provider.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$default\\.$#"
+			count: 1
+			path: bin/models/payment/provider.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$provider\\.$#"
+			count: 1
+			path: bin/models/payment/provider.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$accepts\\.$#"
+			count: 1
+			path: bin/models/payment/provider.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$rules\\.$#"
+			count: 1
+			path: bin/models/payment/provider.php
+
+		-
+			message: "#^Method payment\\\\ProviderModel\\:\\:definitions\\(\\) should return spitfire\\\\storage\\\\database\\\\Schema but return statement is missing\\.$#"
+			count: 1
+			path: bin/models/payment/provider.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$user\\.$#"
+			count: 1
+			path: bin/models/payment/provider/authorization.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$provider\\.$#"
+			count: 1
+			path: bin/models/payment/provider/authorization.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$data\\.$#"
+			count: 1
+			path: bin/models/payment/provider/authorization.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$human\\.$#"
+			count: 1
+			path: bin/models/payment/provider/authorization.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$status\\.$#"
+			count: 1
+			path: bin/models/payment/provider/authorization.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$expires\\.$#"
+			count: 1
+			path: bin/models/payment/provider/authorization.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$created\\.$#"
+			count: 1
+			path: bin/models/payment/provider/authorization.php
+
+		-
+			message: "#^Method payment\\\\provider\\\\AuthorizationModel\\:\\:definitions\\(\\) should return spitfire\\\\storage\\\\database\\\\Schema but return statement is missing\\.$#"
+			count: 1
+			path: bin/models/payment/provider/authorization.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$provider\\.$#"
+			count: 1
+			path: bin/models/payment/provider/configuration.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$setting\\.$#"
+			count: 1
+			path: bin/models/payment/provider/configuration.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$value\\.$#"
+			count: 1
+			path: bin/models/payment/provider/configuration.php
+
+		-
+			message: "#^Method payment\\\\provider\\\\ConfigurationModel\\:\\:definitions\\(\\) should return spitfire\\\\storage\\\\database\\\\Schema but return statement is missing\\.$#"
+			count: 1
+			path: bin/models/payment/provider/configuration.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$type\\.$#"
+			count: 1
+			path: bin/models/payment/provider/externalfunds.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$user\\.$#"
+			count: 1
+			path: bin/models/payment/provider/externalfunds.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$source\\.$#"
+			count: 1
+			path: bin/models/payment/provider/externalfunds.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$auth\\.$#"
+			count: 1
+			path: bin/models/payment/provider/externalfunds.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$amt\\.$#"
+			count: 1
+			path: bin/models/payment/provider/externalfunds.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$account\\.$#"
+			count: 1
+			path: bin/models/payment/provider/externalfunds.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$currency\\.$#"
+			count: 1
+			path: bin/models/payment/provider/externalfunds.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$returnto\\.$#"
+			count: 1
+			path: bin/models/payment/provider/externalfunds.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$additional\\.$#"
+			count: 1
+			path: bin/models/payment/provider/externalfunds.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$txn\\.$#"
+			count: 1
+			path: bin/models/payment/provider/externalfunds.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$created\\.$#"
+			count: 1
+			path: bin/models/payment/provider/externalfunds.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$approved\\.$#"
+			count: 1
+			path: bin/models/payment/provider/externalfunds.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$executed\\.$#"
+			count: 1
+			path: bin/models/payment/provider/externalfunds.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$deferred\\.$#"
+			count: 1
+			path: bin/models/payment/provider/externalfunds.php
+
+		-
+			message: "#^Method payment\\\\provider\\\\ExternalfundsModel\\:\\:definitions\\(\\) should return spitfire\\\\storage\\\\database\\\\Schema but return statement is missing\\.$#"
+			count: 1
+			path: bin/models/payment/provider/externalfunds.php
+
+		-
+			message: "#^Access to an undefined property payment\\\\provider\\\\ExternalfundsModel\\:\\:\\$created\\.$#"
+			count: 1
+			path: bin/models/payment/provider/externalfunds.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$provider\\.$#"
+			count: 1
+			path: bin/models/payment/provider/rule.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$test\\.$#"
+			count: 1
+			path: bin/models/payment/provider/rule.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$against\\.$#"
+			count: 1
+			path: bin/models/payment/provider/rule.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$priority\\.$#"
+			count: 1
+			path: bin/models/payment/provider/rule.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$grants\\.$#"
+			count: 1
+			path: bin/models/payment/provider/rule.php
+
+		-
+			message: "#^Method payment\\\\provider\\\\RuleModel\\:\\:definitions\\(\\) should return spitfire\\\\storage\\\\database\\\\Schema but return statement is missing\\.$#"
+			count: 1
+			path: bin/models/payment/provider/rule.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$provider\\.$#"
+			count: 1
+			path: bin/models/payment/provider/source.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$account\\.$#"
+			count: 1
+			path: bin/models/payment/provider/source.php
+
+		-
+			message: "#^Method payment\\\\provider\\\\SourceModel\\:\\:definitions\\(\\) should return spitfire\\\\storage\\\\database\\\\Schema but return statement is missing\\.$#"
+			count: 1
+			path: bin/models/payment/provider/source.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$redirection\\.$#"
+			count: 1
+			path: bin/models/redirection/action.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$target\\.$#"
+			count: 1
+			path: bin/models/redirection/action.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$amt\\.$#"
+			count: 1
+			path: bin/models/redirection/action.php
+
+		-
+			message: "#^Method redirection\\\\ActionModel\\:\\:definitions\\(\\) should return spitfire\\\\storage\\\\database\\\\Schema but return statement is missing\\.$#"
+			count: 1
+			path: bin/models/redirection/action.php
+
+		-
+			message: "#^Access to property \\$_id on an unknown class redirection\\\\AccountModel\\.$#"
+			count: 1
+			path: bin/models/redirection/action.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$account\\.$#"
+			count: 1
+			path: bin/models/redirection/redirection.php
+
+		-
+			message: "#^Access to private property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$name\\.$#"
+			count: 1
+			path: bin/models/redirection/redirection.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$description\\.$#"
+			count: 1
+			path: bin/models/redirection/redirection.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$rules\\.$#"
+			count: 1
+			path: bin/models/redirection/redirection.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$actions\\.$#"
+			count: 1
+			path: bin/models/redirection/redirection.php
+
+		-
+			message: "#^Method redirection\\\\RedirectionModel\\:\\:definitions\\(\\) should return spitfire\\\\storage\\\\database\\\\Schema but return statement is missing\\.$#"
+			count: 1
+			path: bin/models/redirection/redirection.php
+
+		-
+			message: "#^Call to method toArray\\(\\) on an unknown class redirection\\\\redirection\\\\RuleModel\\.$#"
+			count: 1
+			path: bin/models/redirection/redirection.php
+
+		-
+			message: "#^Call to an undefined method redirection\\\\ActionModel\\:\\:toArray\\(\\)\\.$#"
+			count: 1
+			path: bin/models/redirection/redirection.php
+
+		-
+			message: "#^Access to property \\$_id on an unknown class redirection\\\\AccountModel\\.$#"
+			count: 1
+			path: bin/models/redirection/redirection.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$redirection\\.$#"
+			count: 1
+			path: bin/models/redirection/rule.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$type\\.$#"
+			count: 1
+			path: bin/models/redirection/rule.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$parameters\\.$#"
+			count: 1
+			path: bin/models/redirection/rule.php
+
+		-
+			message: "#^Method redirection\\\\RuleModel\\:\\:definitions\\(\\) should return spitfire\\\\storage\\\\database\\\\Schema but return statement is missing\\.$#"
+			count: 1
+			path: bin/models/redirection/rule.php
+
+		-
+			message: "#^Access to an undefined property redirection\\\\RuleModel\\:\\:\\$type\\.$#"
+			count: 1
+			path: bin/models/redirection/rule.php
+
+		-
+			message: "#^Access to an undefined property redirection\\\\RuleModel\\:\\:\\$parameters\\.$#"
+			count: 1
+			path: bin/models/redirection/rule.php
+
+		-
+			message: "#^Call to an undefined method ReflectionClass\\<chad\\\\redirection\\\\RedirectionRule\\>\\:\\:load\\(\\)\\.$#"
+			count: 1
+			path: bin/models/redirection/rule.php
+
+		-
+			message: "#^Call to an undefined method ReflectionClass\\<chad\\\\redirection\\\\RedirectionRule\\>\\:\\:test\\(\\)\\.$#"
+			count: 1
+			path: bin/models/redirection/rule.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$app\\.$#"
+			count: 1
+			path: bin/models/rights/app.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$tag\\.$#"
+			count: 1
+			path: bin/models/rights/app.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$account\\.$#"
+			count: 1
+			path: bin/models/rights/app.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$write\\.$#"
+			count: 1
+			path: bin/models/rights/app.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$created\\.$#"
+			count: 1
+			path: bin/models/rights/app.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$blame\\.$#"
+			count: 1
+			path: bin/models/rights/app.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$revoked\\.$#"
+			count: 1
+			path: bin/models/rights/app.php
+
+		-
+			message: "#^Method rights\\\\AppModel\\:\\:definitions\\(\\) should return spitfire\\\\storage\\\\database\\\\Schema but return statement is missing\\.$#"
+			count: 1
+			path: bin/models/rights/app.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$type\\.$#"
+			count: 1
+			path: bin/models/rights/bureaucrat.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$uid\\.$#"
+			count: 1
+			path: bin/models/rights/bureaucrat.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$admin\\.$#"
+			count: 1
+			path: bin/models/rights/bureaucrat.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$grant\\.$#"
+			count: 1
+			path: bin/models/rights/bureaucrat.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$revoked\\.$#"
+			count: 1
+			path: bin/models/rights/bureaucrat.php
+
+		-
+			message: "#^Method rights\\\\BureaucratModel\\:\\:definitions\\(\\) should return spitfire\\\\storage\\\\database\\\\Schema but return statement is missing\\.$#"
+			count: 1
+			path: bin/models/rights/bureaucrat.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$user\\.$#"
+			count: 1
+			path: bin/models/rights/user.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$account\\.$#"
+			count: 1
+			path: bin/models/rights/user.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$write\\.$#"
+			count: 1
+			path: bin/models/rights/user.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$listed\\.$#"
+			count: 1
+			path: bin/models/rights/user.php
+
+		-
+			message: "#^Method rights\\\\UserModel\\:\\:definitions\\(\\) should return spitfire\\\\storage\\\\database\\\\Schema but return statement is missing\\.$#"
+			count: 1
+			path: bin/models/rights/user.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$source\\.$#"
+			count: 1
+			path: bin/models/transfer.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$target\\.$#"
+			count: 1
+			path: bin/models/transfer.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$amount\\.$#"
+			count: 1
+			path: bin/models/transfer.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$received\\.$#"
+			count: 1
+			path: bin/models/transfer.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$description\\.$#"
+			count: 1
+			path: bin/models/transfer.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$tags\\.$#"
+			count: 1
+			path: bin/models/transfer.php
+
+		-
+			message: "#^Class db\\\\TagField does not have a constructor and must be instantiated without any parameters\\.$#"
+			count: 1
+			path: bin/models/transfer.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$created\\.$#"
+			count: 1
+			path: bin/models/transfer.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$authorized\\.$#"
+			count: 1
+			path: bin/models/transfer.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$executed\\.$#"
+			count: 1
+			path: bin/models/transfer.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$cancelled\\.$#"
+			count: 1
+			path: bin/models/transfer.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$previous\\.$#"
+			count: 1
+			path: bin/models/transfer.php
+
+		-
+			message: "#^Method TransferModel\\:\\:definitions\\(\\) should return spitfire\\\\storage\\\\database\\\\Schema but return statement is missing\\.$#"
+			count: 1
+			path: bin/models/transfer.php
+
+		-
+			message: "#^Access to an undefined property TransferModel\\:\\:\\$target\\.$#"
+			count: 1
+			path: bin/models/transfer.php
+
+		-
+			message: "#^Access to an undefined property TransferModel\\:\\:\\$source\\.$#"
+			count: 1
+			path: bin/models/transfer.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$currency\\.$#"
+			count: 1
+			path: bin/models/user.php
+
+		-
+			message: "#^Access to an undefined property spitfire\\\\storage\\\\database\\\\Schema\\:\\:\\$display\\.$#"
+			count: 1
+			path: bin/models/user.php
+
+		-
+			message: "#^Method UserModel\\:\\:definitions\\(\\) should return spitfire\\\\storage\\\\database\\\\Schema but return statement is missing\\.$#"
+			count: 1
+			path: bin/models/user.php
+
+		-
+			message: "#^Parameter \\#3 \\$symbolPosition of class spitfire\\\\locale\\\\CurrencyLocalizer constructor expects string, int given\\.$#"
+			count: 1
+			path: bin/models/user.php
+
+		-
+			message: "#^Parameter \\#2 \\$value of method spitfire\\\\core\\\\Environment\\:\\:set\\(\\) expects string, int given\\.$#"
+			count: 1
+			path: bin/settings/environments.php
+

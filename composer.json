@@ -11,8 +11,16 @@
     ],
     "minimum-stability": "dev",
 	"prefer-stable": true,
+	"scripts": {
+		"test" : [
+			"./vendor/bin/phpstan analyse bin/ --level 5"
+		]
+	},
     "require": {
         "magic3w/permission-php-sdk": "dev-master",
         "spitfire/defer": "dev-master"
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^0.12.82"
     }
 }
