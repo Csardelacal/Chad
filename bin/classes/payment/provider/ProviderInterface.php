@@ -90,6 +90,30 @@ interface ProviderInterface
 	function await($id);
 	
 	/**
+	 * If a refund reaches a payment provider, the system will invoke this method.
+	 * This allows to perform a refund of the payment with the given id.
+	 * 
+	 * For this, the payment provider has several options:
+	 * 
+	 * 1. Use API calls to refund the payment as a refund of the original payment
+	 *    this is vendor specific behavior, but it's usually the most cost effective
+	 *    and the safest (payment protection on Paypal)
+	 * 
+	 * 2. Generate a payout through a known channel. This can be something like a
+	 *    bank transfer that cannot be refunded but can be sent out through a payout
+	 *    provider.
+	 * 
+	 * 3. Issue a request for a manual action. This will require an operator to
+	 *    log into the system and review the refund before then manually sending
+	 *    it and closing it.
+	 * 
+	 * @param int $id
+	 * @param int $amt The amount of currency to send back (please note that all refunds
+	 * are processed in the same currency the original payment was sent)
+	 */
+	function refund($id, $amt);
+	
+	/**
 	 * 
 	 * @return ConfigurationInterface
 	 */

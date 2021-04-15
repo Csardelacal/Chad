@@ -234,7 +234,64 @@ class AccountController extends BaseController
 		$this->view->set('account', $account);
 	}
 	
-	public function close() {
+	
+	/**
+	 * 
+	 * @param AccountModel $acctid
+	 * @param string $confirm
+	 */
+	public function close(AccountModel $account, $confirm = null) {
 		
+		if (!$this->user && !$this->authapp) {
+			throw new PublicException('Unauthorized', 401);
+		}
+		
+		/*
+		 * Check if the user has been granted access to the account at all. This 
+		 * is critical for determining whether the user should be able to list the
+		 * transactions.
+		 * 
+		 * TODO: Replace with permission server and policies
+		 */
+		if ($this->user) {
+			$ugrants = db()->table('rights\user')->get('user', db()->table('user')->get('_id', $this->user->user->id));
+			$account = db()->table('account')->get('ugrants', $ugrants)->addRestriction('_id', $account->_id)->fetch();
+
+			if (!$account) { throw new PublicException('User has no access to the account', 403); }
+		}
+		else {
+			$agrants = db()->table('rights\app')->get('app', $this->authapp);
+			$account = db()->table('account')->get('agrants', $agrants)->addRestriction('_id', $account->_id)->fetch();
+			
+			if (!$account) { throw new PublicException('App has no access to the account', 403); }
+		}
+		
+		$books = db()->table('book')->get('account', $account)->all();
+		$books->each(function (BookModel $book) {
+			if ($book->balance() != 0) { throw new PublicException('This account has non-zero balance in currency ' . $book->currency->ISO, 400); }
+		});
+		
+		$xsrf = new \spitfire\io\XSSToken();
+		
+		if ($confirm && $xsrf->verify($confirm)) {
+			/*
+			 * Flag the account as deleted. The system must no longer accept transfers
+			 * to or from this account and should incinerate this as soon as the data
+			 * retention period expires.
+			 */
+			$account->deleted = time();
+			$account->store();
+			
+			/*
+			 * Queue a task to incinerate the account. After this point in time, the
+			 * data will be permanently lost.
+			 */
+			defer(10 * 365 * 86400, new \defer\AccountIncinerateTask($account->_id));
+			
+			$this->view->set('deleted', true);
+		}
+		
+		$this->view->set('account', $account);
+		$this->view->set('token', $xsrf);
 	}
 }

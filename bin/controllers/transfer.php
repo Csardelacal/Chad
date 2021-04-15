@@ -247,7 +247,7 @@ class TransferController extends BaseController
 					$transfer->source = BookModel::getById($_POST['source']);
 				}
 
-				if (!$transfer->source) { 
+				if (!$transfer->source || $transfer->source->deleted) { 
 					throw new PublicException('Invalid source defined', 400); 
 				}
 
@@ -321,7 +321,8 @@ class TransferController extends BaseController
 			}
 			else {
 				$rtt = strval(url('transfer', 'authorize', $transfer->_id, ['returnto' => $_GET['returnto']])->absolute());
-				return $this->response->setBody('Redirecting...')->getHeaders()->redirect(url('user', 'login', ['returnto' => $rtt]));
+				return $this->response->setBody('Redirecting...')->getHeaders()->redirect(url('transfer', 'guest', $transfer->_id, ['returnto' => $_GET['returnto']]));
+				//return $this->response->setBody('Redirecting...')->getHeaders()->redirect(url('user', 'login', ['returnto' => $rtt]));
 			}
 
 		} 
@@ -361,6 +362,11 @@ class TransferController extends BaseController
 		
 		$this->view->set('transfer', $transfer);
 		$this->view->set('recipient', $this->sso->getUser($transfer->target->account->owner->_id));
+	}
+	
+	public function guest(TransferModel$transfer) {
+		$this->view->set('recipient', $this->sso->getUser($transfer->target->account->owner->_id));
+		$this->view->set('transfer',  $transfer);
 	}
 	
 	/**
@@ -409,4 +415,98 @@ class TransferController extends BaseController
 		$this->view->set('transfer', $transfer);
 	}
 	
+	/**
+	 * Creates a transaction that effectively reverts the previous transaction.
+	 * 
+	 * @param TransferModel $txn
+	 */
+	public function refund(TransferModel $txn) 
+	{
+		
+		if ($this->user && !$this->authapp) {
+			/*
+				* Check the permissions on the account. Whether the user can write.
+				*/
+			$lock = new AccountLock($txn->target->account);
+			
+			if (!$lock->unlock($this->user->user->id, null)) {
+				throw new NoAccountAuthorizedException('Not authorized on the given account');
+			}
+
+		}
+
+		elseif ($this->authapp && !$this->user) {
+
+			$lock = new AccountLock($txn->target->account);
+
+			/*
+				* At this point Chad needs to determine whether the user has enough 
+				* balance on their account to grant the payment and whether they have
+				* assigned an account that the application can automatically bill.
+				* 
+				* If the user has granted permissions on one of his accounts to the 
+				* application, it will be able to access them. Then the create() method
+				* will be preauthorized and instruct the application to directly call
+				* execute()
+				*/
+			
+			if (!$lock->unlock(null, $this->authapp)) {
+				throw new NoAccountAuthorizedException('Not authorized on the given account');
+			}
+		}
+		else {
+			throw new PublicException('Unauthorized', 403);
+		}
+		
+		try {
+			if (!$this->request->isPost()) { throw new HTTPMethodException('Not posted'); }
+			
+			#TODO: Let the user make a partial refund
+			#TODO: Introduce relationship table so a payment can be connected as part of a relationship
+			
+			/*
+			 * If the account has no balance to support the transaction, we need to 
+			 * fail the refund and let user react to this issue appropriately.
+			 */
+			if ($txn->target->balance() < $txn->amount) {
+				throw new PublicException('Not enough funds for a refund', 400);
+			}
+			
+			$refund = db()->table('transfer')->newRecord();
+			$refund->source = $txn->target;
+			$refund->target = $txn->source;
+			$refund->amount = $txn->received;
+			$refund->received = $txn->amount;
+			$refund->description = sprintf('Refund of #%s', $txn->_id);
+			$refund->created = time();
+			$refund->authorized = time();
+			$refund->executed = time();
+			$refund->cancelled = time();
+			$refund->store();
+			
+			/*
+			 * Check if the account the refund is sent to is a payment-provider's source.
+			 * 
+			 * If that's the case, the software must look up the provider and invoke it's
+			 * refund method so the external refund can be initiated.
+			 */
+			$source = db()->table('payment\provider\source')->get('account', $refund->target)->first();
+			$providers = \payment\ProviderPool::payment()->configure();
+			
+			if ($source) {
+				#TODO: This could be a lot nicer written than it is right now
+				$provider = $providers->filter(function ($e) use ($source) { return $source->provider === get_class($e); })->rewind();
+				$external = db()->table('payment\provider\externalfunds')->get('txn', $txn)->first();
+				
+				$provider->refund($external->_id, $refund->amount);
+			}
+			
+			$this->response->setBody("Redirect")->getHeaders()->redirect(url('account', 'balance', $refund->source->_id));
+			return;
+		} 
+		catch (HTTPMethodException $ex) {
+			//Continue to the form
+		}
+		
+	}
 }

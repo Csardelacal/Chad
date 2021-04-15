@@ -105,6 +105,11 @@ class Stripe implements ProviderInterface
 	public function listen($id, Context $context) {
 		return false; //TODO: Implement
 	}
+	
+	public function refund($id, $amt) {
+		#TODO: Implement
+		throw new Exception('Not yet implemented');
+	}
 
 	public function getLogo() {
 		return new Logo('file://' . rtrim(dirname(__FILE__), '\/') . '/logo.jpeg');

@@ -51,7 +51,13 @@ class FundsController extends BaseController
 		$currency  = db()->table('currency')->get('ISO', _def($_POST['currency'], $currencyISO))->fetch()?: db()->table('currency')->get('default', true)->fetch();
 		$account   = db()->table('account')->get('_id', _def($_POST['account'], $acctid))->fetch();
 		
-		$amt = _def($_POST['amt'], $amtParam);
+		/*
+		 * If the user is a guest funding an account from another user, we will fetch
+		 * the transaction, this is the only way that guests can fund accounts.
+		 */
+		$transfer = isset($_GET['trx'])? db()->table('transfer')->get('_id', $_GET['trx'])->first() : null;
+		
+		$amt = $transfer? $transfer->received : _def($_POST['amt'], $amtParam);
 
 		if (isset($_POST['decimals']) && $_POST['decimals'] === 'natural') {
 			$amt = $amt * pow(10, $currency->decimals);
@@ -84,7 +90,7 @@ class FundsController extends BaseController
 			}
 			
 			
-			$granted  = db()->table('rights\user')->get('user', db()->table('user')->get('_id', $this->user->user->id))->where('account', $account)->first();
+			$granted  = ($transfer && !$transfer->executed) || db()->table('rights\user')->get('user', db()->table('user')->get('_id', $this->user->user->id))->where('account', $account)->first();
 
 			if (!$granted) {
 				throw new PublicException('Not permitted', 403);
@@ -104,6 +110,7 @@ class FundsController extends BaseController
 			$record->account  = $account;
 			$record->currency = $currency;
 			$record->returnto = _def($_GET['returnto'], strval(url('account')->absolute()));
+			$record->txn      = $transfer;
 			$record->store();
 			
 			$this->response->setBody('Redirecting...')->getHeaders()->redirect(url('funds', 'execute', $record->_id));
@@ -117,6 +124,8 @@ class FundsController extends BaseController
 		
 		$authorizations = db()->table('payment\provider\authorization')->get('user', db()->table('user')->get('_id', $this->user->user->id))->where('status', \payment\provider\AuthorizationModel::AVAILABLE)->all();
 		
+		
+		$this->view->set('transfer', $transfer);
 		$this->view->set('amt', $amt);
 		$this->view->set('account', $account);
 		$this->view->set('currency', $currency);
@@ -217,7 +226,8 @@ class FundsController extends BaseController
 		 * Check the user's permissions to even retrieve funds in the first place.
 		 * The user needs proper access permissions to retrieve funds from an account.
 		 */
-		$granted  = db()->table('rights\user')->get('user', db()->table('user')->get('_id', $this->user->user->id))->where('account', $job->account)->first();
+		$granted  = (ExternalfundsModel::TYPE_PAYMENT && $job->txn && !$job->txn->executed) || 
+			db()->table('rights\user')->get('user', db()->table('user')->get('_id', $this->user->user->id))->where('account', $job->account)->first();
 		
 		if (!$granted) {
 			throw new PublicException('Not permitted', 403);
@@ -305,6 +315,12 @@ class FundsController extends BaseController
 			
 			$job->txn = $transfer;
 			$job->store();
+		}
+		else {
+			$job->txn->source = $job->type == ExternalfundsModel::TYPE_PAYMENT? $srcbook : $usrbook;
+			$job->txn->amount = $amt;
+			$job->txn->store();
+			
 		}
 			
 		/*
@@ -404,6 +420,7 @@ class FundsController extends BaseController
 			$job->store();
 			
 			$job->txn->executed = time();
+			$job->txn->authorized = time();
 			$job->txn->store();
 			$job->txn->notify();
 			

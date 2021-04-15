@@ -138,6 +138,7 @@ class BaseController extends Controller
 		else {
 			$this->view->set('currency', $c);
 			$this->view->set('privileges', null);
+			$this->view->set('currencyLocalizer', new spitfire\locale\CurrencyLocalizer('.', ',', spitfire\locale\CurrencyLocalizer::SYMBOL_BEFORE));
 		}
 		
 		$this->view->set('authUser', $this->user);

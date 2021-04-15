@@ -154,6 +154,11 @@ class Paypal implements ProviderInterface
 	public function listen($id, Context $context) {
 		return false; //TODO: Implement
 	}
+	
+	public function refund($id, $amt) {
+		#TODO: Implement
+		throw new Exception('Not yet implemented');
+	}
 
 	public function getLogo() {
 		return new Logo(rtrim(dirname(__FILE__), '\/') . '/paypal-logo.jpg');

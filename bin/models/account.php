@@ -18,6 +18,7 @@ use spitfire\storage\database\Schema;
  * @property string        $taxID    Allows to name an account with a code pertaining to tax information
  * @property int           $resets   Indicates an account that automatically balances itself to 0 at a given point
  * @property int           $balanced In order for the system to regularly balance an account, we need it to know when it was last balanced.
+ * @property int|null      $deleted  Whether and when this account was flagged as deleted
  * @property string        $tags     Tags do allow application and group permissions to target big amounts of accounts at once
  * @property BookModel[]   $books    The books this account manages
  * 
@@ -45,6 +46,9 @@ class AccountModel extends Model
 		#For the permissions system
 		$schema->ugrants   = new ChildrenField(UserModel::class, 'account');
 		$schema->agrants   = new ChildrenField(AppModel::class, 'account');
+		
+		#Accounts can be flagged as deleted
+		$schema->deleted   = new IntegerField(true);
 		
 		#Set the id and currency as primary, this is deprecated, but needs to be done for now
 		$schema->_id->setPrimary(true);

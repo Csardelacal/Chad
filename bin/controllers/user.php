@@ -32,18 +32,49 @@ class UserController extends BaseController
 	 * PHPAuthServer instance backing this software.
 	 */
 	public function login() {
-		$session = $this->session;
-		$sso     = $this->sso;
-		$rtt     = $_GET['returnto']?? strval(url('account'));
+		$session  = $this->session;
+		$sso      = $this->sso;
+		$returnto = $_GET['returnto']?? strval(url('account'));
 		
-		if ($this->token->isAuthenticated()) {
-			return $this->response->setBody('Redirecting...')->getHeaders()->redirect($rtt);
+		
+		if (isset($_GET['code'])) {
+			
+			if ($_GET['state'] !== $session->get('state')) {
+				throw new PublicException('OAuth error: State did not match', 403);
+			}
+			
+			$request = request('http://localhost/Auth/token/create.json');
+			$request->post('code', $_GET['code']);
+			$request->post('type', 'code');
+			$request->post('client', $this->sso->getAppId());
+			$request->post('secret', $this->sso->getSecret());
+			$request->post('verifier', $session->get('verifier'));
+			$response = $request->send()->expect(200)->json();
+			
+			$token = $this->sso->makeToken($response->tokens->access->token);
+			$session->lock($token);
+			
+			$this->response->setBody('Redirect')->getHeaders()->redirect(url());
+			return;
+			
 		}
 		
-		$token   = $sso->createToken();
-		$session->lock($token);
+		$state = base64_encode(random_bytes(10));
+		$verifier = base64_encode(random_bytes(20));
 		
-		$this->response->setBody('Redirecting...')->getHeaders()->redirect($token->getRedirect(url('user', 'login', ['returnto' => $rtt])->absolute()));
+		$session->set('state', $state);
+		$session->set('verifier', $verifier);
+		
+		$url = sprintf('http://localhost/Auth/auth/oauth/?%s', http_build_query([
+			'response_type' => 'code',
+			'client' => $this->sso->getAppId(),
+			'state'  => $state,
+			'redirect' => strval(url('account', 'login')->absolute()),
+			'challenge' => sprintf('%s:%s', 'sha256', hash('sha256', $verifier))
+		]));
+		
+		header('location: ' . $url);
+		die();
 	}
 	
 	

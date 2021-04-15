@@ -75,6 +75,11 @@ class Bank implements ProviderInterface
 	public function getName() {
 		return 'SEPA charge';
 	}
+	
+	public function refund($id, $amt) {
+		#TODO: Implement
+		throw new Exception('Not yet implemented');
+	}
 
 	public function makeConfiguration() {
 		return new BankConfiguration();

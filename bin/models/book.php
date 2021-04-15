@@ -120,7 +120,17 @@ class BookModel extends Model
 		list($acct, $ISO) = explode(':', $bookid);
 		
 		$currency = db()->table('currency')->get('ISO', $ISO);
-		$_return  = db()->table('book')->get('account__id', $acct)->where('currency', $currency)->fetch();
+		$account = db()->table('account')->get('_id', $acct);
+		
+		/*
+		 * If the account was deleted, the book can no longer be retrieved. This prevents
+		 * handling accounts that would threaten data consistency on the system.
+		 */
+		if ($account->deleted) {
+			return null;
+		}
+		
+		$_return  = db()->table('book')->get('account', $account)->where('currency', $currency)->fetch();
 		
 		return $_return;
 	}
